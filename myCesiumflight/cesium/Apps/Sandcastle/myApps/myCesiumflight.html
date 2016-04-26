@@ -92,6 +92,106 @@ var apikey='&key=AIzaSyAH372ZH8QSQgRHsqdtqNxkLVpcp_XUUkE';
 </script>
 <script src="https://maps.googleapis.com/maps/api/js?v=3" type="text/javascript" ></script>
 <script src="http://chungkn1400.github.io/myCesiumflight/myCesiumflight/cesium/Apps/Sandcastle/myApps/bousspng.js"></script>
+<script src="http://chungkn1400.github.io/mywebglflight/mywebglflight/base64binary.js"></script>
+<script src="http://chungkn1400.github.io/mywebglflight/mywebglflight/avion2mp3.js"></script>
+<script src="http://chungkn1400.github.io/mywebglflight/mywebglflight/pneump3.js"></script>
+<script id="webaudio" >
+var twebaudio=1;
+try{
+var audioctx = new (window.AudioContext || window.webkitAudioContext)();
+var songlength;
+function loadsound(source,url){
+source.request = new XMLHttpRequest();
+source.request.open('GET', url, true);
+source.request.responseType = 'arraybuffer';
+source.request.onload = function() {
+var audioData = source.request.response;
+audioctx.decodeAudioData(audioData, function(buffer) {
+//myBuffer = buffer;
+songlength = buffer.duration;
+source.buffer = buffer;
+source.playbackRate.value = 1.0;
+//source.connect(audioctx.destination);
+source.loopStart=0.5;
+source.loopEnd=songlength-0.5;
+source.gainNode = audioctx.createGain();
+source.connect(source.gainNode);
+source.gainNode.connect(audioctx.destination);
+source.gainNode.gain.value = 1.0;
+if(source.onload){source.onload();}
+},
+function(e){alert("Error with decoding audio data" + e.err);});
+}
+source.request.send();
+}
+function loadsound64(source,data){
+var audioData = Base64Binary.decodeArrayBuffer(data.split(",")[1]);
+audioctx.decodeAudioData(audioData, function(buffer) {
+//myBuffer = buffer;
+songlength = buffer.duration;
+source.buffer = buffer;
+source.playbackRate.value = 1.0;
+//source.connect(audioctx.destination);
+source.loopStart=0.5;
+source.loopEnd=songlength-0.5;
+source.gainNode = audioctx.createGain();
+source.connect(source.gainNode);
+source.gainNode.connect(audioctx.destination);
+source.gainNode.gain.value = 1.0;
+if(source.onload){source.onload();}
+audioData=null;
+},
+function(e){alert("Error with decoding audio data" + e.err);});
+}
+function setvol(source,vol){
+  if(source.gainNode){source.gainNode.gain.value = vol;}
+}
+function setspeed(source,speed){
+  if(source.playbackRate){source.playbackRate.value=speed;}
+}
+function playloop(source){source.loop=true;source.start(0);}
+function playsound(source) {if(!source.gainNode){return;}
+  var sourcex = audioctx.createBufferSource(); // creates a sound source
+  sourcex.buffer = source.buffer;  // tell the source which sound to play
+  sourcex.loop=false;
+  if(source.playbackRate){
+     if(sourcex.playbackRate){sourcex.playbackRate.value=source.playbackRate.value;}
+  }	 
+  sourcex.connect(source.gainNode);       // connect the source to the audioctx's destination (the speakers)
+  sourcex.start(0);                           // play the source now                                           // note: on older systems, may have to use deprecated noteOn(time);
+}
+//var wav="mp3",browser="";
+//if(navigator.userAgent.toLowerCase().indexOf('firefox') > -1){wav="ogg";browser="firefox";};
+//if(navigator.userAgent.toLowerCase().indexOf('chrome') > -1){wav="wav";};
+//alert(navigator.userAgent+" "+wav);
+var audiosrc="";
+var myaudio = audioctx.createBufferSource();
+myaudio.volume=0;
+loadsound64(myaudio,avion2mp3);
+myaudio.onload=function(){
+ setTimeout("playloop(myaudio);",300);
+ setTimeout("setvol(myaudio,0.3);",300);
+ setTimeout("setspeed(myaudio,1.0);",300);
+ }
+var myaudiopneu = audioctx.createBufferSource();
+//audiosrc=folder+"pneu."+wav;
+myaudiopneu.volume=0;
+loadsound64(myaudiopneu,pneump3);
+myaudiopneu.onload=function(){
+ setTimeout("playsound(myaudiopneu);",500);
+ setTimeout("setvol(myaudiopneu,0.4);",500);
+ setTimeout("setspeed(myaudiopneu,1.0);",500);
+ }
+var tpneu=0,tsoundpneu=0;
+function soundpneu(){
+ if(tframe>tsoundpneu+1000){
+   tsoundpneu=tframe;auxvar+=1;
+   playsound(myaudiopneu);
+   }
+}
+}catch(e){twebaudio=0;};
+//if(twebaudio==1){alert(tpneu);soundpneu();}
+</script>   
 <script id="cesium_sandcastle_script">
 var cssscale=2,cssscaley=1.4,windx=1000,windy=700;
 var prefix="myCesiumflight_";
@@ -392,7 +492,8 @@ tmsg=tframe;
 document.getElementById('fps').innerHTML="fps "+parseInt(avgfps);
 var msg="x="+parseInt(x*100000)/100000+" y="+parseInt(y*100000)/100000+" z="+parseInt(z);
 document.getElementById('msg').innerHTML=msg;
-var msg2="v="+parseInt(v*20)/10+" o1="+parseInt(o1)+" o2="+parseInt(o2)+" o3="+parseInt(o3);
+var msg2="v="+parseInt(v*20)/10+" prop="+parseInt(vrun*100);
+msg2+=" o1="+parseInt(o1)+" o2="+parseInt(o2)+" o3="+parseInt(o3);
 msg3="";
 if(tourelle==1){msg3+="tourelle";}
 if(auxvar){msg3+=" aux="+auxvar;}
@@ -401,6 +502,7 @@ if(auxvar3){msg3+=" aux3="+auxvar3;}
 document.getElementById('msg2').innerHTML=msg2;
 document.getElementById('msg3').innerHTML=msg3;
 if(bouss){updatebouss();}
+if(twebaudio==1){setvolume();}
 }
 var d10=0.010*dtime;
 if(keys[vk_h]){
@@ -429,6 +531,7 @@ if(keys[vk_m] || (keys[vk_space] && tmap==1)){
 if(keys[vk_t]){tourelle=(tourelle+1)%2;resetkeys();} 
 if(keys[vk_3]){subcssscale();resetkeys();} 
 if(keys[vk_g] && keys[vk_shift]){geolocate();resetkeys();}
+o10=o1;o20=o2;o30=o3;
 if(tourelle==0){
  if(keys[vk_left]){o3+=d10*1.3;}
  if(keys[vk_right]){o3-=d10*1.3;}
@@ -440,19 +543,26 @@ if(tourelle==0){
  if(keys[vk_up]){to2+=d10*2;}
  if(keys[vk_down]){to2-=d10*2;}
 }
+/*
 if(keys[vk_page_up]){v+=dtime*0.00001;}
 if(keys[vk_page_down]){v-=dtime*0.00001;}
+*/
 if(tmap==1){scrollTo(0,4000);}
 else{scrollTo(0,0);}
-cos1=Math.cos(degtorad(o1));sin1=Math.sin(degtorad(o1));
-cos2=Math.cos(degtorad(o2));sin2=Math.sin(degtorad(o2));
-cos3=Math.cos(degtorad(o3));sin3=Math.sin(degtorad(o3));
-if(o1>180){o1-=360;}
+var positionxyz= myviewer.camera.positionCartographic;
+//x=positionxyz.longitude;
+//y=positionxyz.latitude;
+z=positionxyz.height;
+moveplane();
+//cos1=Math.cos(degtorad(o1));sin1=Math.sin(degtorad(o1));
+//cos2=Math.cos(degtorad(o2));sin2=Math.sin(degtorad(o2));
+//cos3=Math.cos(degtorad(o3));sin3=Math.sin(degtorad(o3));
+/*if(o1>180){o1-=360;}
 if(o1<-180){o1+=360;}
 if(o2>180){o2-=360;}
 if(o2<-180){o2+=360;}
 if(o3>180){o3-=360;}
-if(o3<-180){o3+=360;}
+if(o3<-180){o3+=360;}*/
 if(to1>180){to1-=360;}
 if(to1<-180){to1+=360;}
 if(to2>80){to2=79;}
@@ -462,20 +572,101 @@ if(to2<-80){to2=-79;}
 //y=camera.position.y;
 //z=camera.position.z;
 //var positionxyz= myellipsoid.cartesianToCartographic(myviewer.camera.position);
-var positionxyz= myviewer.camera.positionCartographic;
+////var positionxyz= myviewer.camera.positionCartographic;
 //x=positionxyz.longitude;
 //y=positionxyz.latitude;
-z=positionxyz.height;
+////z=positionxyz.height;
 if(itime%20==1){setklon();}
 //if(z<1){o2=Math.max(-6,o2);o3=0;}
-if(Math.abs(o3)>20){o1+=(sin3-sign(sin3)*0.1)*dtime*0.007;}
-if(keys[vk_n]){v=Math.min(200,v+dtime*0.025);}//x+=v*cos1*cos2/klon;y+=v*sin1*cos2;z+=v*sin2*500;}
-if(keys[vk_b]){v=Math.max(-20,v-dtime*0.025);}//x-=v*cos1*cos2/klon;y-=v*sin1*cos2;z-=v*sin2*500;}
+//if(Math.abs(o3)>20){o1+=(sin3-sign(sin3)*0.1)*dtime*0.007;}
+////if(keys[vk_n]){v=Math.min(200,v+dtime*0.025);}//x+=v*cos1*cos2/klon;y+=v*sin1*cos2;z+=v*sin2*500;}
+////if(keys[vk_b]){v=Math.max(-20,v-dtime*0.025);}//x-=v*cos1*cos2/klon;y-=v*sin1*cos2;z-=v*sin2*500;}
+v=200*vplane/2;//vplane:-0.5 .. 4.5 -100..900km/h
 movexyz=v*dtime*0.0005;
 if(okinit>=1){okinit=2;myview();moveaircraft();}
 }
 function subtest(){//addaircraft();return;
 moveaircraft();
+}
+var button=[];for(var i=0;i<16;i++){button[i]=0;};
+var vplane=0.5,vrun=1,vrunmax=1.7,tgaz=0,vplanez=0;
+var do1=0,do2=0,do3=0,plane="c150",landing=0,tpiste=0;
+function moveplane(){
+    var dt=dtime;
+	tgaz=0;
+	if (keys[vk_page_up] || keys[vk_n] || button[1]) {vrun+=dt*0.0003;tgaz=1;};
+    if (keys[vk_page_down] || keys[vk_b] || button[2]) {vrun-=dt*0.0003;if(vrun<0){vrun=0;};};
+	if(tgaz==0){if(vrun>vrunmax){vrun=vrunmax;};
+	}else{if(vrun>vrunmax+0.3){vrun=vrunmax+0.3;}}
+	//var air=(5000-z)/(5000+z);if(air<0){air=0;};
+	var air=(10000-z)/(10000+z);if(air<0){air=0;};
+	//vplane+=0.4*((vrun-vplane)*0.0013*0.8*air*dt-dt*(air*0.0003*vplane+sin2*0.004));
+	var kair=vrunmax/1.3;
+	var vrun2=1;
+	if(vrunmax<2.01){
+	   vrun2=vrun*((3-1.4*vplane/kair)/2)*3*air*air/(2+air*air);
+	}else{
+	   vrun2=vrun*((3-1.4*vplane/kair)/2)*3*air*air*((2+kair)/3)/(2+air*air*kair);
+	}	
+	//vplane+=0.8*((vrun2)*0.0003*air*dt-dt*(air*0.0003*vplane+(sin2+0.03)*0.0024));
+	vplane+=0.8*((vrun2)*0.0003*air*dt-dt*(air*0.0005*vplane+(sin2+0.01)*0.0007));
+	if(vplane>4.5){vplane=4.5;}//max vv=900
+	if(vplane<-0.5){vplane=-0.5;}//min vv=-100
+    vcruise=0.75;
+	if(plane=="spitfire"){vcruise=0.85;}
+	else if(plane=="zero"){vcruise=0.84;}
+	else if(plane=="corsair"){vcruise=0.84;}
+	else if(plane=="alphajet"){vcruise=1.5;}
+    if(Math.abs(o3)>10){o1+=(sin3-sign(sin3)*0.1)*dtime*0.007;}
+	//o1+=sin3*dt*0.010;
+	o2-=Math.abs(Math.sin(degtorad(0.7*o3)))*dt*0.0015;
+	var landing0=landing;
+	if(z<zsol+1.82){landing=1;}else{landing=0;}
+	if(landing==0){
+	 if(cos3>0){o2+=(vplane*air-vcruise)*air*cos2*cos3*dt*0.004;}
+	      else{o2+=(vplane*air+vcruise)*air*cos2*cos3*dt*0.004;}
+	}
+	if(o3>0.1){o3-=dt*0.001;}
+	else if(o3<-0.1){o3+=dt*0.001;}
+	//else if(landing==1){o3=0;}
+	var dt1=(dt*0.002);
+	if(dt1>0.8){dt1=0.8;}
+	do3+=(o3-o30)-dt1*do3;
+	do2+=(o2-o20)-dt1*do2;
+	do1+=(o1-o10)-dt1*do1;
+	if(landing==1){
+	  if(landing0==0){if(twebaudio==1){soundpneu();};}
+	  if(o2<-0.02){o2=-0.01;do2=0;sin2=0;};
+	  if(tpiste==1 && vplane<0.07){o2=0;do2=0;sin2=0;}
+	  if(o2>0.1 && vplane<0.05){do2-=dt*0.050;};
+	  if(keys[34]){vplane-=0.000145*dt*vplane;};
+	  vplane-=0.00003*dt*vplane;o3=0;if(vplane<0.003){vplane=0.000001;};}
+	var dt2=dt*0.5;
+	o1+=do1*dt2*0.001;
+	o2+=do2*dt2*0.0025;
+	o3+=do3*dt2*0.0025;
+	if(Math.abs(o3)<1){o3+=Math.cos(timer()*0.0015)*0.2*(1-Math.abs(o3));};
+	//var vdt=dt*0.013*vplane;
+	//x+=vdt*cos1*cos2*klon/scale;
+	//y+=vdt*sin1*cos2/scale;
+	//z+=vdt*sin2;
+	vplanez=vplane*sin2;
+	if(Math.abs(vplane)<0.2 && landing==0 && z>zsol+0.6){z-=(0.2-Math.abs(vplane))*dt*0.013/3;vplanez-=(0.2-vplane)/3;
+	                                       o2-=dt*0.004*cos2};
+	if(o2>35){if(cos3>0){o1-=90*sin3*dt*0.004*sin2;o3-=90*sin3*dt*0.004*sin2;}else{
+	                     o1+=90*sin3*dt*0.004*sin2;o3+=90*sin3*dt*0.004*sin2;};}
+	if(o2<-35){if(cos3>0){o1-=90*sin3*dt*0.004*sin2;o3+=90*sin3*dt*0.004*sin2;}else{
+	                     o1+=90*sin3*dt*0.004*sin2;o3-=90*sin3*dt*0.004*sin2;};}
+    //if(o2>85){o2=84;o1=180+o1;o3=o3+180;};
+    if(o2>85){o2=84;o1=180+o1-o3;o3=180;};
+    if(o2<-85){o2=-84;o1=180+o1+o3;o3=0;};
+	while(o1>180){o1-=360;} 
+	while(o1<-180){o1+=360;}
+	while(o3>180){o3-=360;}
+	while(o3<-180){o3+=360;}
+    cos1=Math.cos(degtorad(o1));sin1=Math.sin(degtorad(o1));
+    cos2=Math.cos(degtorad(o2));sin2=Math.sin(degtorad(o2));
+    cos3=Math.cos(degtorad(o3));sin3=Math.sin(degtorad(o3));
 }
 var positionheight=0,positionheight0=0;
 function getterrainheight(lngx,latx){
@@ -506,6 +697,7 @@ bouss.style.width = parseInt(100/cssscale)+'px';
 bouss.style.top =  topOffset + 'px';
 bouss.style.left = leftOffset + 'px';
 var rotation=parseInt(o1-90) + 'deg';
+if(tourelle==1){rotation=parseInt(o1+to1-90) + 'deg';}
 bouss.style['-ms-transform'] = 'rotate(' + rotation + ')'; /* IE 9 */
 bouss.style['-webkit-transform'] = 'rotate(' + rotation + ')'; /* Chrome, Safari, Opera */
 bouss.style.transform = 'rotate(' + rotation + ')';
@@ -556,22 +748,22 @@ function myview(){//return;
 
 //if(Math.abs(x0-x)+Math.abs(y0-y)+Math.abs((z0-z)/500)>0.000001){
 zsol=getterrainheight(x,y);
-if(z<zsol-20){z=zsol+300.0;}	
+if(z<zsol-20){z=zsol+300.0;if(twebaudio==1){soundpneu();};}	
 if(Math.abs(movexyz)>0.0001){
     //if(tourelle==1){movexyz=-movexyz;}
     //camera.moveForward(movexyz);
 	movexyz/=scale;
 	x+=movexyz*klon*cos1*cos2;y+=movexyz*sin1*cos2;z+=movexyz*scale*sin2;
     //z=camera.positionCartographic.height;
-	if(z>2+zsol){}//camera.moveUp(movexyz*0.105);}
-	else{o2=Math.max(0,o2);o3=0;
-	     z=3+zsol;movexyz=-movexyz;
-	     x+=movexyz*klon*cos1*cos2;y+=movexyz*sin1*cos2;z+=movexyz*scale*sin2;
+	if(z<1.8+zsol){//camera.moveUp(movexyz*0.105);}
+	     o2=Math.max(0,o2);o3=0;if(twebaudio==1){soundpneu();};//landing=1;
+	     z=1.81+zsol;movexyz=-movexyz;
+	     x+=movexyz*klon*cos1*cos2;y+=movexyz*sin1*cos2;//z+=movexyz*scale*sin2;
 	     //camera.moveUp(4-z+movexyz);
 		 //camera.moveBackward(movexyz);
 		 }
 	movexyz=0;
-	x0=x;y0=y;z0=z;
+	//x0=x;y0=y;z0=z;
 }
 if(1 || Math.abs(o10-o1)+Math.abs(o20-o2)+Math.abs(o30-o3)>0.01){
 	//var lookFactor = 0.005;
@@ -587,7 +779,6 @@ if(1 || Math.abs(o10-o1)+Math.abs(o20-o2)+Math.abs(o30-o3)>0.01){
             pitch : degtorad(o22-6),
             roll : degtorad(-o33)
         }});
-	o10=o1;o20=o2;o30=o3;
 	}
 }
 var icombo=3,combotext="deauville marinas";
@@ -813,6 +1004,23 @@ google.maps.event.trigger(map, 'resize');
 function quitmsgmap(){
 document.getElementById('mapdiv').blur();
 scrollTo(0,0);tmap=0;//alert('ok');
+}
+var tvolume=0,tspeed=0,tgaz=0;
+function setvolume(){
+    var volume=(0.09+(Math.max(0,vplane)*0.4047+vrun*0.4033)*0.9);
+	if(tgaz==1){volume+=0.27;}
+	if(volume>1){volume=1;};
+    var speed=(0.14+(Math.max(0,vplane)*0.7+vrun*0.1)*0.9);
+	if(tgaz==1){speed+=0.27;}
+	if(speed>1){speed=1;};
+	if(Math.abs(tvolume-volume)<0.005 && Math.abs(tspeed-speed)<0.005){return;}
+	tvolume=volume;tspeed=speed;
+	var volume0=0.45*volume,volume1=0.32*volume;
+	//var volume0=0.35*volume,volume1=0.85*volume;
+if(twebaudio==1){
+	setvol(myaudio,volume*0.5);
+	setspeed(myaudio,speed+0.54);
+  }  
 }
 
 initgooglemap();
