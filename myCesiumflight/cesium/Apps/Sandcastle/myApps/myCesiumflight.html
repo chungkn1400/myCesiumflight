@@ -474,7 +474,7 @@ viewer.clock.onTick.addEventListener(function(clock) {
 }
 var quit=0,crlf=String.fromCharCode(10),auxvar=null,auxvar2=null,auxvar3=null;
 var tframe=0,tframe0=0,tfps=30,fps=10,dtime=1,tmsg=0,tskip=0,itime=0,avgfps=10;
-var cos1=1,sin1=0,cos2=1,sin2=0,cos3=1,sin3=0,v=120/2,klon=1,movexyz=0,tourelle=0;
+var cos1=1,sin1=0,cos2=1,sin2=0,cos3=1,sin3=0,v=120/2,klon=1,movexyz=0,tourelle=0,iview=1;
 function mytestkey(){
         if(quit==1){return;}
 		itime+=1;if(itime>10000){itime=0;}
@@ -515,12 +515,14 @@ msg+="3 => cssscale (lowerres/faster)"+crlf;
 msg+="M => map+click"+crlf;
 msg+="shift+G => flyto geocoding"+crlf;
 msg+="combobox => presets locations"+crlf;
+msg+="V => view"+crlf;
 msg+=""+crlf;
 alert(msg);
 resetkeys();
 }
 if(keys[vk_escape]){quit=1;subquit();}
 if(keys[vk_9]){subtest();resetkeys();}
+if(keys[vk_v]){iview+=1;if(iview>1){iview=0;};resetkeys();}
 if(keys[vk_m] || (keys[vk_space] && tmap==1)){
           if(tmap==0){tmap=1;showmap();subcentermap();}//map.setCenter(new google.maps.LatLng(latx,lngx));updatemarker();}
           else{tmap=0;}
@@ -779,7 +781,27 @@ if(1 || Math.abs(o10-o1)+Math.abs(o20-o2)+Math.abs(o30-o3)>0.01){
             pitch : degtorad(o22-6),
             roll : degtorad(-o33)
         }});
-	}
+}
+if(iview==0){myentity2.show=false;}
+else{myentity2.show=true;
+    var dr=50/scale,o11=o1-sin3*3;
+	var co1=Math.cos(degtorad(o11));
+	var si1=Math.sin(degtorad(o11));
+	aircraft2x=x+klon*dr*co1*cos2;
+	aircraft2y=y+dr*si1*cos2;
+	aircraft2z=z+scale*dr*sin2-3*cos3;
+	aircraft2o1=-o11-sin3*12;
+	aircraft2o2=o2+10+sin2*20;
+	aircraft2o3=o3;
+    var position = myCesium.Cartesian3.fromDegrees(aircraft2x,aircraft2y,aircraft2z);
+    //var position = myCesium.Cartesian3.fromDegrees(x,y,z-1);
+    var heading = degtorad(aircraft2o1);
+    var pitch = degtorad(aircraft2o2);
+    var roll = degtorad(-aircraft2o3);
+    var orientation = myCesium.Transforms.headingPitchRollQuaternion(position, heading, pitch, roll);
+    myentity2.orientation=orientation;
+    myentity2.position=position;
+}
 }
 var icombo=3,combotext="deauville marinas";
 var lat=48.8261252,lng=2.35705595;
@@ -874,12 +896,13 @@ if (geolocation.length>0){
 }
 subfocus();
 }
-var myentity,scale=40000.0*1000/360;
+var myentity,myentity2,scale=40000.0*1000/360;
 var aircraftx=0,aircrafty=0,aircraftz=0,aircrafto1=0,aircrafto2=0,aircrafto3=0;
+var aircraft2x=0,aircraft2y=0,aircraft2z=0,aircraft2o1=0,aircraft2o2=0,aircraft2o3=0;
 function createModel(url, height) {
     myviewer.entities.removeAll();
 
-    var dr=150/scale;
+    var dr=200/scale;
 	aircraftx=x+dr*cos1*cos2;
 	aircrafty=y+klon*dr*sin1*cos2;
 	aircraftz=z+scale*dr*sin2;
@@ -903,13 +926,28 @@ function createModel(url, height) {
     });
     //myviewer.trackedEntity = entity;
 	myentity=entity;
+
+    //var position2 = myCesium.Cartesian3.fromDegrees(x,y,z-1);
+    var entity2 = myviewer.entities.add({
+        name : url,
+        position : position,
+        orientation : orientation,
+        model : {
+            uri : url,
+            minimumPixelSize : 200,
+            maximumScale : 200000
+        }
+    });
+    //myviewer.trackedEntity = entity2;
+	myentity2=entity2;
 }
 function addaircraft(){
    createModel('../../SampleData/models/CesiumAir/Cesium_Air.glb', 300);
+   //createModel('../../Apps/Sandcastle/myApps/c150.glb', 300);
 }
 function moveaircraft(){
 //alert(myviewer.trackedEntity);
-if(myviewer.trackedEntity){myviewer.trackedEntity=null;alert(myviewer.trackedEntity);}
+//if(myviewer.trackedEntity){myviewer.trackedEntity=null;alert(myviewer.trackedEntity);}
 //else{myviewer.trackedEntity = myentity;}
 //var dr=10.0/scale;
 //var zz=Math.max(10,z+scale*dr*sin2);auxvar=zz;
