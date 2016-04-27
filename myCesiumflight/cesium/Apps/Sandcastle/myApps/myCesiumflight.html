@@ -96,6 +96,9 @@ var apikey='&key=AIzaSyAH372ZH8QSQgRHsqdtqNxkLVpcp_XUUkE';
 <script src="http://chungkn1400.github.io/mywebglflight/mywebglflight/base64binary.js"></script>
 <script src="http://chungkn1400.github.io/mywebglflight/mywebglflight/avion2mp3.js"></script>
 <script src="http://chungkn1400.github.io/mywebglflight/mywebglflight/pneump3.js"></script>
+<script src="http://chungkn1400.github.io/myCesiumflight/myCesiumflight/cesium/Apps/Sandcastle/myApps/cockpit1png.js"></script>
+<script src="http://chungkn1400.github.io/myCesiumflight/myCesiumflight/cesium/Apps/Sandcastle/myApps/compaspng.js"></script>
+<script src="http://chungkn1400.github.io/myCesiumflight/myCesiumflight/cesium/Apps/Sandcastle/myApps/compas2png.js"></script>
 <script id="webaudio" >
 var twebaudio=1;
 try{
@@ -225,6 +228,7 @@ windx=parseInt(window.innerWidth/cssscale);
 windy=parseInt(window.innerHeight/cssscaley);
 document.getElementById("cesiumContainer").setAttribute("style",
   "border: none;top:0px;left:0px;width:"+wx+";height:"+wy+";-ms-transform: scale("+cssscale1+","+cssscaley1+"); /* IE 9 */-webkit-transform: scale("+cssscale+","+cssscaley+"); /* Chrome, Safari, Opera */transform: scale("+cssscale+","+cssscaley+");-ms-transform-origin: 0 0;-webkit-transform-origin: 0 0;transform-origin: 0 0;");
+if(cockpit){updatecockpit();}
 }
 sizescreen();
 function subcssscale(){ 
@@ -463,6 +467,7 @@ viewer.clock.onTick.addEventListener(function(clock) {
     cos3=Math.cos(degtorad(o3));sin3=Math.sin(degtorad(o3));
 	addaircraft();
 	addbouss();
+	addcockpit();
 	/*var center = target;//Cesium.Cartesian3.fromDegrees(-72.0, 40.0);
     var heading = Cesium.Math.toRadians(0.0);
     var pitch = Cesium.Math.toRadians(-20.0);   
@@ -475,7 +480,7 @@ viewer.clock.onTick.addEventListener(function(clock) {
 }
 var quit=0,crlf=String.fromCharCode(10),auxvar=null,auxvar2=null,auxvar3=null;
 var tframe=0,tframe0=0,tfps=30,fps=10,dtime=1,tmsg=0,tskip=0,itime=0,avgfps=10;
-var cos1=1,sin1=0,cos2=1,sin2=0,cos3=1,sin3=0,v=120/2,klon=1,movexyz=0,tourelle=0,iview=1;
+var cos1=1,sin1=0,cos2=1,sin2=0,cos3=1,sin3=0,v=120/2,klon=1,movexyz=0,tourelle=0,iview=2;
 var flaps=0;
 function mytestkey(){
         if(quit==1){return;}
@@ -526,7 +531,7 @@ resetkeys();
 }
 if(keys[vk_escape]){quit=1;subquit();}
 if(keys[vk_9]){subtest();resetkeys();}
-if(keys[vk_v]){iview+=1;if(iview>1){iview=0;};resetkeys();}
+if(keys[vk_v]){iview+=1;if(iview>2){iview=0;};resetkeys();}
 if(keys[vk_m] || (keys[vk_space] && tmap==1)){
           if(tmap==0){tmap=1;showmap();subcentermap();}//map.setCenter(new google.maps.LatLng(latx,lngx));updatemarker();}
           else{tmap=0;}
@@ -685,13 +690,15 @@ if(dz>-99998){positionheight0=positionheight;}else{return positionheight0;}
 positionheight=-99999;
 var positions = [
     myCesium.Cartographic.fromDegrees(lngx,latx),
-    myCesium.Cartographic.fromDegrees(aircraftx,aircrafty)
+    myCesium.Cartographic.fromDegrees(aircraftx,aircrafty),
+    myCesium.Cartographic.fromDegrees(aircraft2x,aircraft2y)
 ];
 var promise = myCesium.sampleTerrain(myviewer.terrainProvider, 11, positions);
 myCesium.when(promise, function(updatedPositions) {
     positionheight=positions[0].height;// and positions[1].height have been updated.
     positionheight0=positionheight;
     aircraftzsol=positions[1].height;
+    aircraft2zsol=positions[2].height;
 	// updatedPositions is just a reference to positions.
 });
 return positionheight0;
@@ -739,7 +746,7 @@ klon=Math.sqrt((dx2*dx2+dy2*dy2+dz2*dz2)/Math.max(0.00001,dx1*dx1+dy1*dy1+dz1*dz
 }
 var o1=30,o2=-14,o3=0,o10=0,o20=0,o30=0,x=0,y=0,z=0,x0=0,y0=0,z0=0;
 var to1=170,to2=-20;
-var zsol=0,aircraftzsol=0;
+var zsol=0,aircraftzsol=0,aircraft2zsol=0;
 function myview(){//return;
 //o1=-45;o2=30;o3=45;
     var camera=myviewer.camera;
@@ -787,14 +794,17 @@ if(1 || Math.abs(o10-o1)+Math.abs(o20-o2)+Math.abs(o30-o3)>0.01){
             roll : degtorad(-o33)
         }});
 }
-if(iview==0){myentity2.show=false;}
-else{myentity2.show=true;
+if(iview==0){myentity2.show=false;cockpit.style.top='8000px';
+             compas.style.top='8000px';compas2.style.top='8000px';}
+else if(iview==1){myentity2.show=false;cockpit.style.top='0px';updatecompas();}
+else{myentity2.show=true;cockpit.style.top='8000px';
+    compas.style.top='8000px';compas2.style.top='8000px';
     var dr=51/scale,o11=o1-sin3*3;
 	var co1=Math.cos(degtorad(o11));
 	var si1=Math.sin(degtorad(o11));
 	aircraft2x=x+klon*dr*co1*cos2;
 	aircraft2y=y+dr*si1*cos2;
-	aircraft2z=z+scale*dr*sin2-3*cos3;
+	aircraft2z=Math.max(z+scale*dr*sin2-3*cos3,aircraft2zsol+1.5);
 	aircraft2o1=-o11-sin3*12;
 	aircraft2o2=o2+10+sin2*20;
 	aircraft2o3=o3;
@@ -1000,6 +1010,96 @@ function addbouss() {
             bouss.style['-ms-transform'] = 'rotate(' + rotation + ')'; /* IE 9 */
             bouss.style['-webkit-transform'] = 'rotate(' + rotation + ')'; /* Chrome, Safari, Opera */
             bouss.style.transform = 'rotate(' + rotation + ')';
+}
+var cockpit;
+function addcockpit() {
+            //Add overlay by creating an HTML element
+            cockpit = document.createElement('img');
+            cockpit.src = cockpit1png;//'cockpit1.png';
+            myviewer.container.appendChild(cockpit);
+            updatecockpit();
+			addcompas();
+			updatecompas();
+}
+function updatecockpit(){
+            if(!cockpit){return;}
+			var rotation = parseInt(0) + 'deg';
+            var topOffset = 0;
+            var leftOffset = 0;
+            var cssscale1=0.99/cssscale,cssscaley1=0.99/cssscaley;
+            //Position overlay with CSS styling
+            cockpit.style.width = parseInt(windx)+'px';
+            //cockpit.style.height = '60px';
+            cockpit.style.position = 'absolute';
+            cockpit.style.top = 'calc('+topOffset + 'px)';
+            cockpit.style.left = 'calc('+leftOffset + 'px)';
+            cockpit.style['pointer-events'] = 'none';
+            cockpit.style['-ms-transform'] =  "scale("+1+","+(cssscale1/cssscaley1)+")"; /* IE 9 */
+            cockpit.style['-webkit-transform'] = "scale("+1+","+(cssscale/cssscaley)+")"; /* Chrome, Safari, Opera */
+            cockpit.style.transform = "scale("+1+","+(cssscale/cssscaley)+")";
+            cockpit.style['-ms-transform-origin'] =  "0 0"; /* IE 9 */
+            cockpit.style['-webkit-transform-origin'] = "0 0"; /* Chrome, Safari, Opera */
+            cockpit.style['transform-origin'] = "0 0";
+            //cockpit.setAttribute("style",
+  //"border: none;top:0px;left:0px;width:"+wx+";height:"+wy+";-ms-transform: scale("+cssscale1+","+cssscaley1+"); /* IE 9 */-webkit-transform: scale("+cssscale+","+cssscaley+"); /* Chrome, Safari, Opera */transform: scale("+cssscale+","+cssscaley+");-ms-transform-origin: 0 0;-webkit-transform-origin: 0 0;transform-origin: 0 0;");
+// scale("+cssscale1+","+cssscaley1+"); /* IE 9 */-webkit-transform: scale("+cssscale+","+cssscaley+"); /* Chrome, Safari, Opera */transform: scale("+cssscale+","+cssscaley+");-ms-transform-origin: 0 0;-webkit-transform-origin: 0 0;transform-origin: 0 0;");
+}
+var compas;
+function addcompas() {
+            //Add overlay by creating an HTML element
+            compas = document.createElement('img');
+            compas.src = compaspng;//'compas.png';
+            myviewer.container.appendChild(compas);
+            updatecompas();
+			addcompas2();
+}
+function updatecompas(){
+            if(!compas){return;}
+			var rotation = parseInt(o3) + 'deg';
+            var topOffset = windy-150/cssscaley;
+            var leftOffset = windx*0.28;
+            var cssscale1=0.99/cssscale,cssscaley1=0.99/cssscaley;
+            var wx=parseInt(145/cssscale)+"%";
+            //var wy=parseInt(100/cssscaley)+"%";
+            //Position overlay with CSS styling
+            compas.style.width = parseInt(wx)+'px';
+            //compas.style.height = '60px';
+            compas.style.position = 'absolute';
+            compas.style.top = 'calc('+topOffset + 'px)';
+            compas.style.left = 'calc('+leftOffset + 'px)';
+            compas.style['pointer-events'] = 'none';
+            compas.style['-ms-transform'] =  "scale("+1+","+(cssscale1/cssscaley1)+") rotate("+rotation+")"; /* IE 9 */
+            compas.style['-webkit-transform'] = "scale("+1+","+(cssscale/cssscaley)+") rotate("+rotation+")"; /* Chrome, Safari, Opera */
+            compas.style.transform = "scale("+1+","+(cssscale/cssscaley)+") rotate("+rotation+")";
+updatecompas2();
+}
+var compas2;
+function addcompas2() {
+            //Add overlay by creating an HTML element
+            compas2 = document.createElement('img');
+            compas2.src = compas2png;//'compas2.png';
+            myviewer.container.appendChild(compas2);
+            updatecompas2();
+}
+function updatecompas2(){
+            if(!compas2){return;}
+			var rotation = parseInt(o3) + 'deg';
+            var topOffset = windy-150/cssscaley;
+            var leftOffset = windx*0.28;
+            var cssscale1=0.99/cssscale,cssscaley1=0.99/cssscaley;
+            var wx=parseInt(145/cssscale)+"%";
+			var co2=cos2*Math.abs(cos2)*0.95;
+            //var wy=parseInt(100/cssscaley)+"%";
+            //Position overlay with CSS styling
+            compas2.style.width = parseInt(wx)+'px';
+            //compas2.style.height = '60px';
+            compas2.style.position = 'absolute';
+            compas2.style.top = 'calc('+topOffset + 'px)';
+            compas2.style.left = 'calc('+leftOffset + 'px)';
+            compas2.style['pointer-events'] = 'none';
+            compas2.style['-ms-transform'] =  "scale("+1+","+(cssscale1/cssscaley1)+") rotate("+rotation+") scale(1,"+co2+")"; /* IE 9 */
+            compas2.style['-webkit-transform'] = "scale("+1+","+(cssscale/cssscaley)+") rotate("+rotation+") scale(1,"+co2+")"; /* Chrome, Safari, Opera */
+            compas2.style.transform = "scale("+1+","+(cssscale/cssscaley)+") rotate("+rotation+") scale(1,"+co2+")";
 }
 var map,marker,maplatlng,tmap=0;
 function initgooglemap(){
