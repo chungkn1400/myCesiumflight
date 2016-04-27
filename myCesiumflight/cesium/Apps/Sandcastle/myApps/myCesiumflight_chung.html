@@ -648,8 +648,8 @@ function moveplane(){
 	o1+=do1*dt2*0.001;
 	o2+=do2*dt2*0.0025;
 	o3+=do3*dt2*0.0025;
-	if(Math.abs(o3)<1){o3+=Math.cos(timer()*0.0015)*0.2*(1-Math.abs(o3));};
-	if(Math.abs(o2)<20 && z>zsol+4){o2+=Math.cos(timer()*0.0004)*0.02*Math.max(2,8-Math.abs(o2));};
+	if(Math.abs(o3)<1){o3+=Math.cos(tframe*0.0015)*0.2*(1-Math.abs(o3));};
+	if(Math.abs(o2)<20 && z>zsol+4){o2+=Math.cos(tframe*0.0004)*0.02*Math.max(2,8-Math.abs(o2));};
 	//var vdt=dt*0.013*vplane;
 	//x+=vdt*cos1*cos2*klon/scale;
 	//y+=vdt*sin1*cos2/scale;
