@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<base href="https://cesiumjs.org/Cesium/Apps/Sandcastle/gallery/"
+  >
 <!--script>
 var myurl=document.location.href;//autolaunch as localhost:8080 if in local mode
 //http://localhost:8080/  file:///D:/cesium/Apps/Sandcastle/gallery/Camera_.html
@@ -11,8 +13,6 @@ if(myurl.indexOf("localhost:8080")<0 && myurl.indexOf("file:")>=0){
 }
 </script-->
 <script src="http://chungkn1400.github.io/myCesiumflight/myCesiumflight/cesium/Apps/Sandcastle/myApps/myCesiumheader.js"></script>
-    <base href="https://cesiumjs.org/Cesium/Apps/Sandcastle/gallery/"
-	>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
@@ -186,7 +186,7 @@ myaudiopneu.onload=function(){
 var tpneu=0,tsoundpneu=0;
 function soundpneu(){
  if(tframe>tsoundpneu+1000){
-   tsoundpneu=tframe;auxvar+=1;
+   tsoundpneu=tframe;
    playsound(myaudiopneu);
    }
 }
@@ -476,6 +476,7 @@ viewer.clock.onTick.addEventListener(function(clock) {
 var quit=0,crlf=String.fromCharCode(10),auxvar=null,auxvar2=null,auxvar3=null;
 var tframe=0,tframe0=0,tfps=30,fps=10,dtime=1,tmsg=0,tskip=0,itime=0,avgfps=10;
 var cos1=1,sin1=0,cos2=1,sin2=0,cos3=1,sin3=0,v=120/2,klon=1,movexyz=0,tourelle=0,iview=1;
+var flaps=0;
 function mytestkey(){
         if(quit==1){return;}
 		itime+=1;if(itime>10000){itime=0;}
@@ -496,7 +497,8 @@ document.getElementById('msg').innerHTML=msg;
 var msg2="v="+parseInt(v*20)/10+" prop="+parseInt(vrun*100);
 msg2+=" o1="+parseInt(o1)+" o2="+parseInt(o2)+" o3="+parseInt(o3);
 msg3="";
-if(tourelle==1){msg3+="tourelle";}
+if(flaps>0){msg3+="flaps+"+flaps+" ";}
+if(tourelle==1){msg3+="tourelle ";}
 if(auxvar){msg3+=" aux="+auxvar;}
 if(auxvar2){msg3+=" aux2="+auxvar2;}
 if(auxvar3){msg3+=" aux3="+auxvar3;}
@@ -511,6 +513,7 @@ var msg="H => help"+crlf;
 msg+="escape => save + quit"+crlf;
 msg+="B,N => motor -/+"+crlf;
 msg+="arrows => turn"+crlf;
+msg+="F,G => flaps +/-"+crlf;
 msg+="T => tourelle view"+crlf;
 msg+="3 => cssscale (lowerres/faster)"+crlf;
 msg+="M => map+click"+crlf;
@@ -546,10 +549,9 @@ if(tourelle==0){
  if(keys[vk_up]){to2+=d10*2;}
  if(keys[vk_down]){to2-=d10*2;}
 }
-/*
-if(keys[vk_page_up]){v+=dtime*0.00001;}
-if(keys[vk_page_down]){v-=dtime*0.00001;}
-*/
+if(keys[vk_f] && keys[vk_shift]==0 && flaps<20){flaps+=1;resetkeys();}
+if(keys[vk_g] && keys[vk_shift]==0 && flaps>0){flaps-=1;resetkeys();}
+
 if(tmap==1){scrollTo(0,4000);}
 else{scrollTo(0,0);}
 var positionxyz= myviewer.camera.positionCartographic;
@@ -620,6 +622,7 @@ function moveplane(){
 	else if(plane=="zero"){vcruise=0.84;}
 	else if(plane=="corsair"){vcruise=0.84;}
 	else if(plane=="alphajet"){vcruise=1.5;}
+	vcruise*=20/(20+flaps);
     if(Math.abs(o3)>10){o1+=(sin3-sign(sin3)*0.1)*dtime*0.007;}
 	//o1+=sin3*dt*0.010;
 	o2-=Math.abs(Math.sin(degtorad(0.7*o3)))*dt*0.0015;
