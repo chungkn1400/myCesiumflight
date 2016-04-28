@@ -464,6 +464,7 @@ viewer.clock.onTick.addEventListener(function(clock) {
 	loadstorage('z','z');
 	loadstorage('o1','o1');
 	loadstorage('o2','o2');
+    loadstorage('flaps','flaps');
     lng=x;lat=y;
     cos1=Math.cos(degtorad(o1));sin1=Math.sin(degtorad(o1));
     cos2=Math.cos(degtorad(o2));sin2=Math.sin(degtorad(o2));
@@ -733,6 +734,7 @@ function subquit(){
   savestorage('z',z);
   savestorage('o1',o1);
   savestorage('o2',o2);
+  savestorage('flaps',flaps);
   sleep(300);//alert("bye !");
   document.location.href="http://chung.blogvie.com/links/";
 }
