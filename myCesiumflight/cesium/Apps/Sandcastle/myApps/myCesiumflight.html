@@ -99,6 +99,7 @@ var apikey='&key=AIzaSyAH372ZH8QSQgRHsqdtqNxkLVpcp_XUUkE';
 <script src="http://chungkn1400.github.io/myCesiumflight/myCesiumflight/cesium/Apps/Sandcastle/myApps/cockpit1png.js"></script>
 <script src="http://chungkn1400.github.io/myCesiumflight/myCesiumflight/cesium/Apps/Sandcastle/myApps/compaspng.js"></script>
 <script src="http://chungkn1400.github.io/myCesiumflight/myCesiumflight/cesium/Apps/Sandcastle/myApps/compas2png.js"></script>
+<script src="http://chungkn1400.github.io/myCesiumflight/myCesiumflight/cesium/Apps/Sandcastle/myApps/skydomejpg.js" ></script>
 <script id="webaudio" >
 var twebaudio=1;
 try{
@@ -468,6 +469,7 @@ viewer.clock.onTick.addEventListener(function(clock) {
 	addaircraft();
 	addbouss();
 	addcockpit();
+	addsky();
 	/*var center = target;//Cesium.Cartesian3.fromDegrees(-72.0, 40.0);
     var heading = Cesium.Math.toRadians(0.0);
     var pitch = Cesium.Math.toRadians(-20.0);   
@@ -817,6 +819,7 @@ else{myentity2.show=true;cockpit.style.top='8000px';
     myentity2.orientation=orientation;
     myentity2.position=position;
 }
+if(sky){updatesky();}
 }
 var icombo=3,combotext="deauville marinas";
 var lat=48.8261252,lng=2.35705595;
@@ -918,8 +921,8 @@ function createModel(url, height) {
     myviewer.entities.removeAll();
 
     var dr=200/scale;
-	aircraftx=x+dr*cos1*cos2;
-	aircrafty=y+klon*dr*sin1*cos2;
+	aircraftx=x+klon*dr*cos1*cos2;
+	aircrafty=y+dr*sin1*cos2;
 	aircraftz=z+scale*dr*sin2;
 	aircrafto1=0;
     var position = myCesium.Cartesian3.fromDegrees(aircraftx,aircrafty,aircraftz);
@@ -1101,6 +1104,68 @@ function updatecompas2(){
             compas2.style['-webkit-transform'] = "scale("+1+","+(cssscale/cssscaley)+") rotate("+rotation+") scale(1,"+co2+")"; /* Chrome, Safari, Opera */
             compas2.style.transform = "scale("+1+","+(cssscale/cssscaley)+") rotate("+rotation+") scale(1,"+co2+")";
 }
+var cloud=[],ncloud=5;
+function addcloud(){
+for(var i=0;i<ncloud;i++){
+  var xx=x+(Math.random()-0.5)*1000*klon/scale;
+  var yy=y+(Math.random()-0.5)*1000/scale;
+  var zz=z+(Math.random()-0.5)*100;
+  cloud[i]=myviewer.entities.add({
+        position : myCesium.Cartesian3.fromDegrees(xx,yy,zz),
+        billboard :{
+            image : '../images/Cesium_Logo_overlay.png'
+        }
+    });}
+}
+var sky;
+function addsky(){
+  var dr=90000/scale;
+  var xx=x+klon*dr*cos1;
+  var yy=y+dr*sin1;
+  var zz=0;
+  sky=myviewer.entities.add({
+        position : myCesium.Cartesian3.fromDegrees(xx,yy,zz),
+        billboard :{
+            image : skydomejpg ,
+                position : myCesium.Cartesian3.fromDegrees(xx,yy),
+                show : true, // default
+                //pixelOffset : new myCesium.Cartesian2(400, 400), // default: (0, 0)
+                //eyeOffset : new myCesium.Cartesian3(0.0, 0.0, 0.0), // default
+                //horizontalOrigin : myCesium.HorizontalOrigin.LEFT,//CENTER, // default
+                //verticalOrigin : myCesium.VerticalOrigin.BOTTOM, // default: CENTER
+                scale : 2.2, // default: 1.0
+                //imageIndex : 0, // default: -1
+                //color : myCesium.Color.LIME, // default: WHITE
+                //rotation : 45, // default: 0.0
+                //alignedAxis : myCesium.Cartesian3.ZERO, // default
+                width : windx*2, // default: undefined
+                height :windy*2 // default: undefined
+        }
+    });
+}
+function updatesky(){
+if(tourelle==0){
+  var dr=90000/scale,dr2=-2*dr*o1/180;
+  var xx=x+klon*dr*cos1-klon*dr2*sin1;
+  var yy=y+dr*sin1+dr2*cos1;
+  //var zz=0;if(sin2>0){zz=dr*sin2*sin2;}
+  sky.position= myCesium.Cartesian3.fromDegrees(xx,yy);
+  sky.billboard.position= myCesium.Cartesian3.fromDegrees(xx,yy);
+  sky.billboard.rotation=degtorad(-o3);
+}else{
+  var dr=90000/scale,dr2=-2*dr*(o1+to1)/180;
+  var co1=Math.cos(degtorad(o1+to1)),si1=Math.sin(degtorad(o1+to1));
+  var xx=x+klon*dr*co1-klon*dr2*si1;
+  var yy=y+dr*si1+dr2*co1;
+  //var zz=0;if(sin2>0){zz=dr*sin2*sin2;}
+  sky.position= myCesium.Cartesian3.fromDegrees(xx,yy);
+  sky.billboard.position= myCesium.Cartesian3.fromDegrees(xx,yy);
+  sky.billboard.rotation=degtorad(0);
+}
+sky.billboard.width=windx*2;
+sky.billboard.height=windy*2;
+}
+
 var map,marker,maplatlng,tmap=0;
 function initgooglemap(){
     map=new google.maps.Map(document.getElementById('mapdiv'), {
