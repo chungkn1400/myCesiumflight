@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<base href="http://cesiumjs.org/Cesium/Build/Apps/CesiumViewer/" >
+    <!-- Use correct character set. -->
+    <meta charset="utf-8">
+    <!-- Tell IE to use the latest, best version. -->
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <!-- Make the application on mobile take up the full browser screen and disable user scaling. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+    <title>Cesium Viewer</title>
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
+    <link rel="stylesheet" href="CesiumViewer.css" media="screen">
+    <script data-main="CesiumViewerStartup" src="./require.js"></script>
+    <!--script type="text/javascript">
+    if (window.location.host === "cesiumjs.org") {
+        var _gaq = _gaq || [];
+        _gaq.push(['_setAccount', 'UA-30040272-1']);
+        _gaq.push(['_trackPageview']);
+        (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+        })();
+    }
+</script-->
+</head>
+<body style="background: #000;">
+    <div id="cesiumContainer" class="fullWindow"></div>
+    <div id="loadingIndicator" class="loadingIndicator"></div>
+</body>
+</html>
