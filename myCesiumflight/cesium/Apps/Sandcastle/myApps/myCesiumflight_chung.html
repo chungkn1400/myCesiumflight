@@ -100,6 +100,8 @@ var apikey='&key=AIzaSyAH372ZH8QSQgRHsqdtqNxkLVpcp_XUUkE';
 <script src="http://chungkn1400.github.io/myCesiumflight/myCesiumflight/cesium/Apps/Sandcastle/myApps/compaspng.js"></script>
 <script src="http://chungkn1400.github.io/myCesiumflight/myCesiumflight/cesium/Apps/Sandcastle/myApps/compas2png.js"></script>
 <script src="http://chungkn1400.github.io/myCesiumflight/myCesiumflight/cesium/Apps/Sandcastle/myApps/skydomejpg.js" ></script>
+<script src="http://chungkn1400.github.io/myCesiumflight/myCesiumflight/cesium/Apps/Sandcastle/myApps/radar2png.js" ></script>
+<script src="http://chungkn1400.github.io/myCesiumflight/myCesiumflight/cesium/Apps/Sandcastle/myApps/whitepng.js" ></script>
 <script id="webaudio" >
 var twebaudio=1;
 try{
@@ -796,11 +798,14 @@ if(1 || Math.abs(o10-o1)+Math.abs(o20-o2)+Math.abs(o30-o3)>0.01){
             roll : degtorad(-o33)
         }});
 }
-if(iview==0){myentity2.show=false;cockpit.style.top='8000px';
-             compas.style.top='8000px';compas2.style.top='8000px';}
-else if(iview==1){myentity2.show=false;cockpit.style.top='0px';updatecompas();}
-else{myentity2.show=true;cockpit.style.top='8000px';
-    compas.style.top='8000px';compas2.style.top='8000px';
+if(iview!=1 || tourelle==1){
+             cockpit.style.top='8000px';
+             compas.style.top='8000px';compas2.style.top='8000px';
+			 radar.style.top='8000px';spot.style.top='8000px';}
+else{cockpit.style.top='0px';updatecompas();updateradar();}
+if(iview==0){myentity2.show=false;}
+else if(iview==1){myentity2.show=false;}
+else{myentity2.show=true;
     var dr=51/scale,o11=o1-sin3*3;
 	var co1=Math.cos(degtorad(o11));
 	var si1=Math.sin(degtorad(o11));
@@ -938,7 +943,7 @@ function createModel(url, height) {
         orientation : orientation,
         model : {
             uri : url,
-            minimumPixelSize : 30,
+            minimumPixelSize : 27,
             maximumScale : 200000
         }
     });
@@ -1023,6 +1028,8 @@ function addcockpit() {
             updatecockpit();
 			addcompas();
 			updatecompas();
+			addradar();
+			updateradar();
 }
 function updatecockpit(){
             if(!cockpit){return;}
@@ -1091,7 +1098,7 @@ function updatecompas2(){
             var leftOffset = windx*0.28;
             var cssscale1=0.99/cssscale,cssscaley1=0.99/cssscaley;
             var wx=parseInt(145/cssscale)+"%";
-			var co2=cos2*Math.abs(cos2)*0.95;
+			var co2=cos2*(1-Math.abs(sin2))*0.95;
             //var wy=parseInt(100/cssscaley)+"%";
             //Position overlay with CSS styling
             compas2.style.width = parseInt(wx)+'px';
@@ -1103,6 +1110,68 @@ function updatecompas2(){
             compas2.style['-ms-transform'] =  "scale("+1+","+(cssscale1/cssscaley1)+") rotate("+rotation+") scale(1,"+co2+")"; /* IE 9 */
             compas2.style['-webkit-transform'] = "scale("+1+","+(cssscale/cssscaley)+") rotate("+rotation+") scale(1,"+co2+")"; /* Chrome, Safari, Opera */
             compas2.style.transform = "scale("+1+","+(cssscale/cssscaley)+") rotate("+rotation+") scale(1,"+co2+")";
+}
+var radar,spot;
+function addradar() {
+            //Add overlay by creating an HTML element
+            radar = document.createElement('img');
+            radar.src = radar2png;//'radar2.png';
+            myviewer.container.appendChild(radar);
+            spot = document.createElement('img');
+            spot.src = whitepng;//'white.png';
+            myviewer.container.appendChild(spot);
+            updateradar();
+}
+var o1radar=0;
+function updateradar(){
+            if(!radar){return;}
+			o1radar+=30*dtime*0.002;if(o1radar>3600){o1radar-=3600;}
+			var rotation = parseInt(-o1radar) + 'deg';
+            var topOffset = windy-150/cssscaley;
+            var leftOffset = windx*(0.59);
+            var cssscale1=0.99/cssscale,cssscaley1=0.99/cssscaley;
+            var wx=parseInt(145/cssscale)+"%";
+            //var wy=parseInt(100/cssscaley)+"%";
+            //Position overlay with CSS styling
+            radar.style.width = parseInt(wx)+'px';
+            //radar.style.height = '60px';
+            radar.style.position = 'absolute';
+            radar.style.top = 'calc('+topOffset + 'px)';
+            radar.style.left = 'calc('+leftOffset + 'px)';
+            radar.style['pointer-events'] = 'none';
+            radar.style['-ms-transform'] =  "scale("+1+","+(cssscale1/cssscaley1)+") rotate("+rotation+")"; /* IE 9 */
+            radar.style['-webkit-transform'] = "scale("+1+","+(cssscale/cssscaley)+") rotate("+rotation+")"; /* Chrome, Safari, Opera */
+            radar.style.transform = "scale("+1+","+(cssscale/cssscaley)+") rotate("+rotation+")";
+        
+		updatespot();
+}
+function updatespot(){
+            if(!spot){return;}
+			var dx=cos1,dy=cos1;
+			var dxx=(aircraftx-x)*scale/klon;
+			var dyy=(aircrafty-y)*scale;
+			var dmax=1000,dxy=Math.sqrt(dxx*dxx+dyy*dyy);
+			dxx=dxx/(dmax+dxy);
+			dyy=dyy/(dmax+dxy);auxvar=dxy;
+			dx=dxx*sin1-dyy*cos1;
+			dy=dxx*cos1+dyy*sin1;
+            var wx0=parseInt(145/cssscale);
+			var rotation = parseInt(0) + 'deg';
+            var topOffset = windy-150/cssscaley+wx0*(0.5-dy*0.5*cssscale/cssscaley);
+            var leftOffset = windx*(0.59)+wx0*(0.5+dx*0.5);
+            var cssscale1=0.99/cssscale,cssscaley1=0.99/cssscaley;
+            var wx=parseInt(5/cssscale)+"%";
+            //var wy=parseInt(100/cssscaley)+"%";
+            //Position overlay with CSS styling
+            spot.style.width = parseInt(wx)+'px';
+            //spot.style.height = '60px';
+            spot.style.position = 'absolute';
+            spot.style.top = 'calc('+topOffset + 'px)';
+            spot.style.left = 'calc('+leftOffset + 'px)';
+            spot.style['pointer-events'] = 'none';
+            spot.style['-ms-transform'] =  "scale("+1+","+(cssscale1/cssscaley1)+") rotate("+rotation+")"; /* IE 9 */
+            spot.style['-webkit-transform'] = "scale("+1+","+(cssscale/cssscaley)+") rotate("+rotation+")"; /* Chrome, Safari, Opera */
+            spot.style.transform = "scale("+1+","+(cssscale/cssscaley)+") rotate("+rotation+")";
 }
 var cloud=[],ncloud=5;
 function addcloud(){
