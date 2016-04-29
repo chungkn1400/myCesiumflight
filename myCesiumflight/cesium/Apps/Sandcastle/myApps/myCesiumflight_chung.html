@@ -464,12 +464,20 @@ viewer.clock.onTick.addEventListener(function(clock) {
 	loadstorage('z','z');
 	loadstorage('o1','o1');
 	loadstorage('o2','o2');
-    loadstorage('flaps','flaps');
+	loadstorage('flaps','flaps');
+    loadstorage('vrun','vrun');
+    loadstorage('vplane','vplane');
     lng=x;lat=y;
     cos1=Math.cos(degtorad(o1));sin1=Math.sin(degtorad(o1));
     cos2=Math.cos(degtorad(o2));sin2=Math.sin(degtorad(o2));
     cos3=Math.cos(degtorad(o3));sin3=Math.sin(degtorad(o3));
 	addaircraft();
+    loadstorage('aircraftx','aircraftx');
+    loadstorage('aircrafty','aircrafty');
+    loadstorage('aircraftz','aircraftz');
+    loadstorage('aircraftzsol','aircraftzsol');
+    loadstorage('aircrafto1','aircrafto1');
+	moveaircraft();
 	addbouss();
 	addcockpit();
 	addsky();
@@ -564,10 +572,12 @@ if(keys[vk_g] && keys[vk_shift]==0 && flaps>0){flaps-=1;resetkeys();}
 
 if(tmap==1){scrollTo(0,4000);}
 else{scrollTo(0,0);}
-var positionxyz= myviewer.camera.positionCartographic;
-//x=positionxyz.longitude;
-//y=positionxyz.latitude;
-z=positionxyz.height;
+if(okinit>1){
+ var positionxyz= myviewer.camera.positionCartographic;
+ //x=positionxyz.longitude;
+ //y=positionxyz.latitude;
+ z=positionxyz.height;
+}
 moveplane();
 //cos1=Math.cos(degtorad(o1));sin1=Math.sin(degtorad(o1));
 //cos2=Math.cos(degtorad(o2));sin2=Math.sin(degtorad(o2));
@@ -735,6 +745,13 @@ function subquit(){
   savestorage('o1',o1);
   savestorage('o2',o2);
   savestorage('flaps',flaps);
+  savestorage('vrun',vrun);
+  savestorage('vplane',vplane);
+  savestorage('aircraftx',aircraftx);
+  savestorage('aircrafty',aircrafty);
+  savestorage('aircraftz',aircraftz);
+  savestorage('aircraftzsol',aircraftzsol);
+  savestorage('aircrafto1',aircrafto1);
   sleep(300);//alert("bye !");
   document.location.href="http://chung.blogvie.com/links/";
 }
@@ -952,10 +969,11 @@ function createModel(url, height) {
     //myviewer.trackedEntity = entity;
 	myentity=entity;
 
-    //var position2 = myCesium.Cartesian3.fromDegrees(x,y,z-1);
+    var position2 = myCesium.Cartesian3.fromDegrees(x,y,z);
+    orientation = myCesium.Transforms.headingPitchRollQuaternion(position2, heading, pitch, roll);
     var entity2 = myviewer.entities.add({
         name : url,
-        position : position,
+        position : position2,
         orientation : orientation,
         model : {
             uri : url,
