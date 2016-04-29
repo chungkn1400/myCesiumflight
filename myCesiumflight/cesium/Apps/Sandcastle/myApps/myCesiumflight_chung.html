@@ -26,7 +26,7 @@ if(myurl.indexOf("localhost:8080")<0 && myurl.indexOf("file:")>=0){
     });
     </script>
 </head>
-<body class="sandcastle-loading" data-sandcastle-bucket="bucket-requirejs.html" onunload="quit=1;" >
+<body class="sandcastle-loading" data-sandcastle-bucket="bucket-requirejs.html" onunload="subunload();" >
 <!--style>
 <-->
 <style>
@@ -102,6 +102,9 @@ var apikey='&key=AIzaSyAH372ZH8QSQgRHsqdtqNxkLVpcp_XUUkE';
 <script src="http://chungkn1400.github.io/myCesiumflight/myCesiumflight/cesium/Apps/Sandcastle/myApps/skydomejpg.js" ></script>
 <script src="http://chungkn1400.github.io/myCesiumflight/myCesiumflight/cesium/Apps/Sandcastle/myApps/radar2png.js" ></script>
 <script src="http://chungkn1400.github.io/myCesiumflight/myCesiumflight/cesium/Apps/Sandcastle/myApps/whitepng.js" ></script>
+<script src="http://chungkn1400.github.io/mywebglflight/mywebglflight/alphajetobjtxt.js"></script>
+<script src="http://chungkn1400.github.io/mywebglflight/mywebglflight/alphajetjpg.js"></script>
+<script src="http://chungkn1400.github.io/mywebglflight/mywebglflight/jet4mp3.js"></script>
 <script id="webaudio" >
 var twebaudio=1;
 try{
@@ -180,6 +183,14 @@ myaudio.onload=function(){
  setTimeout("setvol(myaudio,0.3);",300);
  setTimeout("setspeed(myaudio,1.0);",300);
  }
+var myaudiojet = audioctx.createBufferSource();
+myaudiojet.volume=0;
+loadsound64(myaudiojet,jet4mp3);
+myaudiojet.onload=function(){
+ setTimeout("playloop(myaudiojet);",320);
+ setTimeout("setvol(myaudiojet,0.003);",320);
+ setTimeout("setspeed(myaudiojet,1.0);",320);
+ }
 var myaudiopneu = audioctx.createBufferSource();
 //audiosrc=folder+"pneu."+wav;
 myaudiopneu.volume=0;
@@ -195,6 +206,11 @@ function soundpneu(){
    tsoundpneu=tframe;
    playsound(myaudiopneu);
    }
+}
+function closewebaudio(){
+  myaudio.buffer=null;
+  myaudiojet.buffer=null;
+  myaudiopneu.buffer=null;
 }
 }catch(e){twebaudio=0;};
 //if(twebaudio==1){alert(tpneu);soundpneu();}
@@ -465,6 +481,7 @@ viewer.clock.onTick.addEventListener(function(clock) {
 	loadstorage('o1','o1');
 	loadstorage('o2','o2');
 	loadstorage('flaps','flaps');
+    loadstorage('iplane','iplane');iplane-=1;subplane();
     loadstorage('vrun','vrun');
     loadstorage('vplane','vplane');
     lng=x;lat=y;
@@ -544,6 +561,7 @@ resetkeys();
 }
 if(keys[vk_escape]){quit=1;subquit();}
 if(keys[vk_9]){subtest();resetkeys();}
+if(keys[vk_k]){subplane();resetkeys();}
 if(keys[vk_v]){iview+=1;if(iview>2){iview=0;};resetkeys();}
 if(keys[vk_m] || (keys[vk_space] && tmap==1)){
           if(tmap==0){tmap=1;showmap();subcentermap();}//map.setCenter(new google.maps.LatLng(latx,lngx));updatemarker();}
@@ -615,7 +633,13 @@ moveaircraft();
 }
 var button=[];for(var i=0;i<16;i++){button[i]=0;};
 var vplane=0.5,vrun=1.3,vrunmax=1.7,tgaz=0,vplanez=0;
-var do1=0,do2=0,do3=0,plane="c150",landing=0,tpiste=0;
+var do1=0,do2=0,do3=0,plane="c150",landing=0,tpiste=0,iplane=0;
+function subplane(){
+iplane+=1;if(iplane>1){iplane=0;}
+var vrunmax0=vrunmax;
+if(iplane==0){plane="c150";vrunmax=1.7;vplane*=vrunmax/vrunmax0;vrun*=vrunmax/vrunmax0;}
+if(iplane==1){plane="alphajet";vrunmax=3;vplane*=vrunmax/vrunmax0;vrun*=vrunmax/vrunmax0;}
+}
 function moveplane(){
     var dt=dtime;
 	tgaz=0;
@@ -745,6 +769,7 @@ function subquit(){
   savestorage('o1',o1);
   savestorage('o2',o2);
   savestorage('flaps',flaps);
+  savestorage('iplane',iplane);
   savestorage('vrun',vrun);
   savestorage('vplane',vplane);
   savestorage('aircraftx',aircraftx);
@@ -754,6 +779,10 @@ function subquit(){
   savestorage('aircrafto1',aircrafto1);
   sleep(300);//alert("bye !");
   document.location.href="http://chung.blogvie.com/links/";
+}
+function subunload(){
+  quit=1;
+  if(twebaudio==1){try{closewebaudio();}catch(e){};}
 }
 function sleep(ms){
 var t=timer()+Math.min(10000,ms);
@@ -822,8 +851,8 @@ if(iview!=1 || tourelle==1){
              compas.style.top='8000px';compas2.style.top='8000px';
 			 radar.style.top='8000px';spot.style.top='8000px';}
 else{cockpit.style.top='0px';updatecompas();updateradar();}
-if(iview==0){myentity2.show=false;}
-else if(iview==1){myentity2.show=false;}
+if(iview==0){myentity2.show=false;jetmesh.show=false;}
+else if(iview==1){myentity2.show=false;jetmesh.show=false;}
 else{myentity2.show=true;
     var dr=51/scale,o11=o1-sin3*3;
 	var co1=Math.cos(degtorad(o11));
@@ -839,9 +868,18 @@ else{myentity2.show=true;
     var heading = degtorad(aircraft2o1);
     var pitch = degtorad(aircraft2o2);
     var roll = degtorad(-aircraft2o3);
-    var orientation = myCesium.Transforms.headingPitchRollQuaternion(position, heading, pitch, roll);
-    myentity2.orientation=orientation;
-    myentity2.position=position;
+    if(plane=="alphajet"){
+	   myentity2.show=false;
+	   jetmesh.show=true;
+	   var mymatrix=new myCesium.Transforms.headingPitchRollToFixedFrame(position, heading, pitch, roll);//myCesium.Matrix3.fromRotationY(degtorad(30));
+       jetmesh.modelMatrix = mymatrix;
+	}else{
+	   myentity2.show=true;
+	   jetmesh.show=false;
+       var orientation = myCesium.Transforms.headingPitchRollQuaternion(position, heading, pitch, roll);
+	   myentity2.orientation=orientation;
+       myentity2.position=position;
+	   }
 }
 if(sky){updatesky();}
 }
@@ -941,8 +979,108 @@ subfocus();
 var myentity,myentity2,scale=40000.0*1000/360;
 var aircraftx=0,aircrafty=0,aircraftz=0,aircrafto1=0,aircrafto2=0,aircrafto3=0;
 var aircraft2x=0,aircraft2y=0,aircraft2z=0,aircraft2o1=0,aircraft2o2=0,aircraft2o3=0;
+var mymesh,mygeometry;
+var positions = new Float64Array([
+  100.0, 0.0, 0.0,
+  75.0, 0.0, 100.0,
+  0.0, 75.0, 0.0
+]);
+var textcoords = new Float32Array([
+  0.0, 0.0,
+  0.0, 1.0,
+  1.0, 0.0
+]);
+var vertexCount = 0;
+var vertexPositions = [];
+var vertexTextureCoords = [];
+function loadmygeometry(myobjtxt,scale){
+handleLoadedWorld(myobjtxt,scale);
+return addmygeometry(vertexPositions,vertexTextureCoords);
+}
+function handleLoadedWorld(data,scale){//,vertexposbuff,vertextextbuff) { 
+    var lines = data.split("\n");
+    vertexCount = 0;
+    vertexPositions = [];
+    vertexTextureCoords = [];
+    for (var i in lines) {
+      var vals = lines[i].replace(/^\s+/, "").split(/\s+/);
+      if (vals.length == 5 && vals[0] != "//") {
+        // It is a line describing a vertex; get X, Y and Z first
+        vertexPositions.push(parseFloat(vals[0])*scale);
+        vertexPositions.push(parseFloat(vals[1])*scale);
+        vertexPositions.push(parseFloat(vals[2])*scale);
+
+        // And then the texture coords
+        vertexTextureCoords.push(parseFloat(vals[3]));
+        vertexTextureCoords.push(parseFloat(vals[4]));
+
+        vertexCount += 1;
+      }
+    }
+}
+function addmygeometry(positions,textcoords){
+var mygeometry = new myCesium.Geometry({
+  attributes : {
+    position : new myCesium.GeometryAttribute({
+      componentDatatype : myCesium.ComponentDatatype.DOUBLE,
+	  componentsPerAttribute : 3,
+	  values : positions
+    }),
+    st : new myCesium.GeometryAttribute({
+      componentDatatype : myCesium.ComponentDatatype.FLOAT,
+	  componentsPerAttribute : 2,
+	  values : textcoords
+    })
+  },
+  primitiveType : myCesium.PrimitiveType.TRIANGLES,
+  boundingSphere : myCesium.BoundingSphere.fromVertices(positions)
+});
+return mygeometry;
+}
+function addmymesh(mygeometry,imageurl){
+//var modelMatrix = myCesium.Transforms.eastNorthUpToFixedFrame(
+//    myCesium.Cartesian3.fromDegrees(x,y,z));
+var mymesh=new myCesium.Primitive({
+        geometryInstances : new myCesium.GeometryInstance({
+            geometry : mygeometry
+            }),
+        //modelMatrix : modelMatrix,
+		//debugShowBoundingVolume : true,
+        asynchronous: false,
+		cull : false,
+		show : true,
+		appearance : new myCesium.MaterialAppearance({
+		   //translucent : false,
+		   material : new myCesium.Material({
+		       fabric : {
+                   type : 'Image',
+                   uniforms : {
+		              image : imageurl//bousspng
+                   }
+			   }
+			  })
+			})
+    });
+return mymesh;
+}
+var jetgeometry,jetmesh;	
+function createmymesh(){
+var scale=0.1;
+jetgeometry=loadmygeometry(alphajetobjtxt,scale);//addmygeometry(positions,textcoords);
+jetmesh=addmymesh(jetgeometry,alphajetjpg);
+myviewer.scene.primitives.add(jetmesh);
+
+var position = myCesium.Cartesian3.fromDegrees(x,y,z+10);
+var heading = degtorad(aircrafto1);
+var pitch = degtorad(aircrafto2);
+var roll = degtorad(-aircrafto3);
+var mymatrix=new myCesium.Transforms.headingPitchRollToFixedFrame(position, heading, pitch, roll);//myCesium.Matrix3.fromRotationY(degtorad(30));
+jetmesh.modelMatrix = mymatrix;
+}
 function createModel(url, height) {
     myviewer.entities.removeAll();
+	
+	createmymesh();
 
     var dr=200/scale;
 	aircraftx=x+klon*dr*cos1*cos2;
@@ -1317,8 +1455,15 @@ function setvolume(){
 	var volume0=0.45*volume,volume1=0.32*volume;
 	//var volume0=0.35*volume,volume1=0.85*volume;
 if(twebaudio==1){
+  if(plane=="alphajet"){
+	setvol(myaudio,0.002);
+	setvol(myaudiojet,volume*0.5);
+	setspeed(myaudiojet,speed+0.54);
+  }else{
 	setvol(myaudio,volume*0.5);
+	setvol(myaudiojet,0.002);
 	setspeed(myaudio,speed+0.54);
+  }
   }  
 }
 
