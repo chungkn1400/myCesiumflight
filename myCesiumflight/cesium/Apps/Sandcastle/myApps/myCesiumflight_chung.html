@@ -105,6 +105,8 @@ var apikey='&key=AIzaSyAH372ZH8QSQgRHsqdtqNxkLVpcp_XUUkE';
 <script src="http://chungkn1400.github.io/mywebglflight/mywebglflight/alphajetobjtxt.js"></script>
 <script src="http://chungkn1400.github.io/mywebglflight/mywebglflight/alphajetjpg.js"></script>
 <script src="http://chungkn1400.github.io/mywebglflight/mywebglflight/jet4mp3.js"></script>
+<script src="http://chungkn1400.github.io/myCesiumflight/myCesiumflight/cesium/Apps/Sandcastle/myApps/models/f14objtxt.js" ></script>
+<script src="http://chungkn1400.github.io/myCesiumflight/myCesiumflight/cesium/Apps/Sandcastle/myApps/models/f14jpg.js" ></script>
 <script id="webaudio" >
 var twebaudio=1;
 try{
@@ -636,10 +638,11 @@ var button=[];for(var i=0;i<16;i++){button[i]=0;};
 var vplane=0.5,vrun=1.3,vrunmax=1.7,tgaz=0,vplanez=0;
 var do1=0,do2=0,do3=0,plane="c150",landing=0,tpiste=0,iplane=0;
 function subplane(){
-iplane+=1;if(iplane>1){iplane=0;}
+iplane+=1;if(iplane>2){iplane=0;}
 var vrunmax0=vrunmax;
 if(iplane==0){plane="c150";vrunmax=1.7;vplane*=vrunmax/vrunmax0;vrun*=vrunmax/vrunmax0;}
 if(iplane==1){plane="alphajet";vrunmax=3;vplane*=vrunmax/vrunmax0;vrun*=vrunmax/vrunmax0;}
+if(iplane==2){plane="f14";vrunmax=6;vplane*=vrunmax/vrunmax0;vrun*=vrunmax/vrunmax0;}
 }
 function moveplane(){
     var dt=dtime;
@@ -667,6 +670,7 @@ function moveplane(){
 	else if(plane=="zero"){vcruise=0.84;}
 	else if(plane=="corsair"){vcruise=0.84;}
 	else if(plane=="alphajet"){vcruise=1.5;}
+	else if(plane=="f14"){vcruise=3.0;}
 	vcruise*=20/(20+flaps);
     if(Math.abs(o3)>10){o1+=(sin3-sign(sin3)*0.1)*dtime*0.007;}
 	//o1+=sin3*dt*0.010;
@@ -852,8 +856,8 @@ if(iview!=1 || tourelle==1){
              compas.style.top='8000px';compas2.style.top='8000px';
 			 radar.style.top='8000px';spot.style.top='8000px';}
 else{cockpit.style.top='0px';updatecompas();updateradar();}
-if(iview==0){myentity2.show=false;jetmesh.show=false;}
-else if(iview==1){myentity2.show=false;jetmesh.show=false;}
+if(iview==0){myentity2.show=false;jetmesh.show=false;f14mesh.show=false;}
+else if(iview==1){myentity2.show=false;jetmesh.show=false;f14mesh.show=false;}
 else{myentity2.show=true;
     var dr=51/scale,o11=o1-sin3*3;
 	var co1=Math.cos(degtorad(o11));
@@ -872,11 +876,19 @@ else{myentity2.show=true;
     if(plane=="alphajet"){
 	   myentity2.show=false;
 	   jetmesh.show=true;
+	   f14mesh.show=false;
 	   var mymatrix=new myCesium.Transforms.headingPitchRollToFixedFrame(position, heading, pitch, roll);//myCesium.Matrix3.fromRotationY(degtorad(30));
        jetmesh.modelMatrix = mymatrix;
+    }else if(plane=="f14"){
+	   myentity2.show=false;
+	   jetmesh.show=false;
+	   f14mesh.show=true;
+	   var mymatrix=new myCesium.Transforms.headingPitchRollToFixedFrame(position, heading, pitch, roll);//myCesium.Matrix3.fromRotationY(degtorad(30));
+       f14mesh.modelMatrix = mymatrix;
 	}else{
 	   myentity2.show=true;
 	   jetmesh.show=false;
+	   f14mesh.show=false;
        var orientation = myCesium.Transforms.headingPitchRollQuaternion(position, heading, pitch, roll);
 	   myentity2.orientation=orientation;
        myentity2.position=position;
@@ -1027,6 +1039,11 @@ var mygeometry = new myCesium.Geometry({
 	  componentsPerAttribute : 3,
 	  values : positions
     }),
+    normal : new myCesium.GeometryAttribute({
+      componentDatatype : myCesium.ComponentDatatype.FLOAT,
+	  componentsPerAttribute : 3,
+	  values : positions
+    }),
     st : new myCesium.GeometryAttribute({
       componentDatatype : myCesium.ComponentDatatype.FLOAT,
 	  componentsPerAttribute : 2,
@@ -1064,12 +1081,16 @@ var mymesh=new myCesium.Primitive({
     });
 return mymesh;
 }
-var jetgeometry,jetmesh;	
+var jetgeometry,jetmesh,f14geometry,f14mesh;	
 function createmymesh(){
 var scale=0.1;
 jetgeometry=loadmygeometry(alphajetobjtxt,scale);//addmygeometry(positions,textcoords);
 jetmesh=addmymesh(jetgeometry,alphajetjpg);
 myviewer.scene.primitives.add(jetmesh);
+scale=0.09;
+f14geometry=loadmygeometry(f14objtxt,scale);//addmygeometry(positions,textcoords);
+f14mesh=addmymesh(f14geometry,f14jpg);
+myviewer.scene.primitives.add(f14mesh);
 
 var position = myCesium.Cartesian3.fromDegrees(x,y,z+10);
 var heading = degtorad(aircrafto1);
@@ -1077,6 +1098,7 @@ var pitch = degtorad(aircrafto2);
 var roll = degtorad(-aircrafto3);
 var mymatrix=new myCesium.Transforms.headingPitchRollToFixedFrame(position, heading, pitch, roll);//myCesium.Matrix3.fromRotationY(degtorad(30));
 jetmesh.modelMatrix = mymatrix;
+f14mesh.modelMatrix = mymatrix;
 }
 function createModel(url, height) {
     myviewer.entities.removeAll();
@@ -1445,10 +1467,11 @@ scrollTo(0,0);tmap=0;//alert('ok');
 }
 var tvolume=0,tspeed=0,tgaz=0;
 function setvolume(){
-    var volume=(0.09+(Math.max(0,vplane)*0.4047+vrun*0.4033)*0.9);
+    var kvol=(1.7/vrunmax);kvol=Math.sqrt(kvol*Math.sqrt(kvol));
+    var volume=kvol*(0.09+(Math.max(0,vplane)*0.4047+vrun*0.4033)*0.9);
 	if(tgaz==1){if(vrun>vrunmax){volume+=0.27;}else{volume+=0.025;}}
 	if(volume>1){volume=1;};
-    var speed=(0.14+(Math.max(0,vplane)*0.7+vrun*0.1)*0.9);
+    var speed=kvol*(0.14+(Math.max(0,vplane)*0.7+vrun*0.1)*0.9);
 	if(tgaz==1){speed+=0.27;}
 	if(speed>1){speed=1;};
 	if(Math.abs(tvolume-volume)<0.005 && Math.abs(tspeed-speed)<0.005){return;}
@@ -1457,6 +1480,10 @@ function setvolume(){
 	//var volume0=0.35*volume,volume1=0.85*volume;
 if(twebaudio==1){
   if(plane=="alphajet"){
+	setvol(myaudio,0.002);
+	setvol(myaudiojet,volume*0.5);
+	setspeed(myaudiojet,speed+0.54);
+  }else if(plane=="f14"){
 	setvol(myaudio,0.002);
 	setvol(myaudiojet,volume*0.5);
 	setspeed(myaudiojet,speed+0.54);
