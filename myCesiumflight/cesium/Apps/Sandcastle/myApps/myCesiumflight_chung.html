@@ -646,7 +646,7 @@ soundpneu();
 }
 var wayx=-199,wayy=0;
 function testgetways(){
-if(Math.abs((wayx-x)*scale/klon)>400 || Math.abs((wayy-y)*scale)>400){
+if(Math.abs((wayx-x)*scale/klon)>800 || Math.abs((wayy-y)*scale)>800){
    wayx=x;wayy=y;
    getways();}
 }
@@ -772,9 +772,13 @@ bouss.style.top =  topOffset + 'px';
 bouss.style.left = leftOffset + 'px';
 var rotation=parseInt(o1-90) + 'deg';
 if(tourelle==1){rotation=parseInt(o1+to1-90) + 'deg';}
-bouss.style['-ms-transform'] = 'rotate(' + rotation + ')'; /* IE 9 */
-bouss.style['-webkit-transform'] = 'rotate(' + rotation + ')'; /* Chrome, Safari, Opera */
-bouss.style.transform = 'rotate(' + rotation + ')';
+//bouss.style['-ms-transform'] = 'rotate(' + rotation + ')'; /* IE 9 */
+//bouss.style['-webkit-transform'] = 'rotate(' + rotation + ')'; /* Chrome, Safari, Opera */
+//bouss.style.transform = 'rotate(' + rotation + ')';
+var cssscale1=0.99/cssscale,cssscaley1=0.99/cssscaley;
+bouss.style['-ms-transform'] =  "scale("+1+","+(cssscale1/cssscaley1)+") rotate("+rotation+")"; /* IE 9 */
+bouss.style['-webkit-transform'] = "scale("+1+","+(cssscale/cssscaley)+") rotate("+rotation+")"; /* Chrome, Safari, Opera */
+bouss.style.transform = "scale("+1+","+(cssscale/cssscaley)+") rotate("+rotation+")";
 }
 function subquit(){
   quit=1;
@@ -843,10 +847,10 @@ if(z<zsol-20){z=zsol+300.0;if(twebaudio==1){soundpneu();};}
 	movexyz/=scale;
 	x+=movexyz*klon*cos1*cos2;y+=movexyz*sin1*cos2;z+=movexyz*scale*sin2;
     //z=camera.positionCartographic.height;
-	if(z<0.2+zsol){//camera.moveUp(movexyz*0.105);}
+	if(z<1.8+zsol){//camera.moveUp(movexyz*0.105);}
 	     landing=1;
 	     o2=Math.max(0,o2);o3=0;if(twebaudio==1 && landing0==0){soundpneu();};//landing=1;
-	     z=0.199+zsol;movexyz=-movexyz*0.3;
+	     z=1.799+zsol;movexyz=-movexyz*0.3;
 	     x+=movexyz*klon*cos1*cos2;y+=movexyz*sin1*cos2;//z+=movexyz*scale*sin2;
 	     //camera.moveUp(4-z+movexyz);
 		 //camera.moveBackward(movexyz);
@@ -887,7 +891,7 @@ else{myentity2.show=true;
 	aircraft2y=y+dr*si1*cos2;
 	aircraft2z=z+scale*dr*sin2-3*cos3;
 	if(aircraft2z<aircraft2zsol+0.05){landing=1;aircraft2z=aircraft2zsol+0.0499;
-	                                 o2=Math.max(0,o2);o3=0;z=zsol+0.199;
+	                                 o2=Math.max(0,o2);o3=0;z=zsol+1.799;
 									 if(twebaudio==1 && landing0==0){soundpneu();}}
 	aircraft2o1=-o11-sin3*12;
 	aircraft2o2=o2+10+sin2*20;
@@ -1222,9 +1226,13 @@ function addbouss() {
             bouss.style.top = 'calc('+topOffset + 'px)';
             bouss.style.left = 'calc('+leftOffset + 'px)';
             bouss.style['pointer-events'] = 'none';
-            bouss.style['-ms-transform'] = 'rotate(' + rotation + ')'; /* IE 9 */
-            bouss.style['-webkit-transform'] = 'rotate(' + rotation + ')'; /* Chrome, Safari, Opera */
-            bouss.style.transform = 'rotate(' + rotation + ')';
+            //bouss.style['-ms-transform'] = 'rotate(' + rotation + ')'; /* IE 9 */
+            //bouss.style['-webkit-transform'] = 'rotate(' + rotation + ')'; /* Chrome, Safari, Opera */
+            //bouss.style.transform = 'rotate(' + rotation + ')';
+            var cssscale1=0.99/cssscale,cssscaley1=0.99/cssscaley;
+            bouss.style['-ms-transform'] =  "scale("+1+","+(cssscale1/cssscaley1)+") rotate("+rotation+")"; /* IE 9 */
+            bouss.style['-webkit-transform'] = "scale("+1+","+(cssscale/cssscaley)+") rotate("+rotation+")"; /* Chrome, Safari, Opera */
+            bouss.style.transform = "scale("+1+","+(cssscale/cssscaley)+") rotate("+rotation+")";
 }
 var cockpit;
 function addcockpit() {
@@ -1276,7 +1284,7 @@ function updatecompas(){
             var topOffset = windy-150/cssscaley;
             var leftOffset = windx*0.28;
             var cssscale1=0.99/cssscale,cssscaley1=0.99/cssscaley;
-            var wx=parseInt(145/cssscale)+"%";
+            var wx=parseInt(145/cssscale);
             //var wy=parseInt(100/cssscaley)+"%";
             //Position overlay with CSS styling
             compas.style.width = parseInt(wx)+'px';
@@ -1304,7 +1312,7 @@ function updatecompas2(){
             var topOffset = windy-150/cssscaley;
             var leftOffset = windx*0.28;
             var cssscale1=0.99/cssscale,cssscaley1=0.99/cssscaley;
-            var wx=parseInt(145/cssscale)+"%";
+            var wx=parseInt(145/cssscale);
 			var co2=cos2*(1-Math.abs(sin2))*0.95;
             //var wy=parseInt(100/cssscaley)+"%";
             //Position overlay with CSS styling
@@ -1356,7 +1364,7 @@ function updateradar(){
             var topOffset = windy-150/cssscaley;
             var leftOffset = windx*(0.59);
             var cssscale1=0.99/cssscale,cssscaley1=0.99/cssscaley;
-            var wx=parseInt(145/cssscale)+"%";
+            var wx=parseInt(145/cssscale);
             //var wy=parseInt(100/cssscaley)+"%";
             //Position overlay with CSS styling
             radar.style.width = parseInt(wx)+'px';
