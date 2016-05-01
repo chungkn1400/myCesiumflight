@@ -642,13 +642,14 @@ movexyz=v*dtime*0.0005;
 if(okinit>=1){okinit=2;myview();moveaircraft();testgetways();testradio();}
 }
 function subtest(){//addaircraft();return;
-soundpneu();
+alert(port0name+"/ "+port1name+" /"+port2name+" /"+port3name);
 }
-var wayx=-199,wayy=0;
+var wayx=-199,wayy=0,waytime=0;
 function testgetways(){
-if(Math.abs((wayx-x)*scale/klon)>800 || Math.abs((wayy-y)*scale)>800){
-   wayx=x;wayy=y;
-   getways();}
+if(tframe>waytime+12000){
+ if(Math.abs((wayx-x)*scale/klon)>1200 || Math.abs((wayy-y)*scale)>1200){
+   wayx=x;wayy=y;waytime=tframe;
+   getways();}}
 }
 var button=[];for(var i=0;i<16;i++){button[i]=0;};
 var vplane=0.5,vrun=1.3,vrunmax=1.7,tgaz=0,vplanez=0;
@@ -1244,6 +1245,7 @@ function addcockpit() {
 			addcompas();
 			updatecompas();
 			addradar();
+            port0x=-199;port1x=-199;port2x=-199;port3x=-199;
 			updateradar();
 }
 function updatecockpit(){
@@ -1729,7 +1731,37 @@ function httpGet(url,callback)
     //xmlhttp.open("GET", theUrl, false);
     xmlhttp.send();    
 }
-var wayjson,ways=[],nairport=0,airportname=[],airportnode=[];
+var wayjson,ways=[],nodejson,nodes=[],iport=0,nairport=0,airportname=[],airportnode=[];
+function nodecallback(r){//alert(r);
+  nodejson=JSON.parse(r);
+  var msg="";
+  nodes=[];
+  if(nodejson.elements){nodes=nodejson.elements;}
+  msg+="len="+nodes.length;
+  //port0x=-199;port1x=-199;port2x=-199;port3x=-199;
+  //iport=0;  
+  if(nodes.length>0){
+  for(var i=0;i<nodes.length;i++){
+   var node=(nodes[i]);
+   if(node.tags){
+      if(node.tags.name){var name=node.tags.name;
+    	msg+=" /"+node.tags.name;
+	    if(iport==0){port0x=node.lon;port0y=node.lat;port0name=name;}
+	    if(iport==1){port1x=node.lon;port1y=node.lat;port1name=name;}
+	    if(iport==2){port2x=node.lon;port2y=node.lat;port2name=name;}
+	    if(iport==3){port3x=node.lon;port3y=node.lat;port3name=name;}
+		iport+=1;if(iport>3){break;}
+      }}
+   }}
+  //alert("iport="+iport+" "+msg);
+  //if(iport<=3){setTimeout("getways2();",300);}
+  //else{tloading=0;}
+  if(iport<=0){port0x=-199;}
+  if(iport<=1){port1x=-199;}
+  if(iport<=2){port2x=-199;}
+  if(iport<=3){port3x=-199;}
+  tloading=0;
+}
 function waycallback(r){//alert(r);
   wayjson=JSON.parse(r);
   var msg="";
@@ -1746,13 +1778,13 @@ function waycallback(r){//alert(r);
 	  }*/
    if(way.tags && way.nodes){
       if(way.tags.name){nairport+=1;airportname[nairport]=way.tags.name;
-	                    airportnode[nairport]=way.nodes[0];
+	                    airportnode[nairport]=way.nodes[parseInt(way.nodes.length/2)];
 						msg+=" /"+way.tags.name;}}
    //if(ways[i].nodes){nnode+=ways[i].nodes.length;}
    }}
   //alert("nairport="+nairport+" "+msg);
   if(nairport>0){setTimeout("getnodes3();",300);}
-  else{tloading=0;}
+  else{iport=0;setTimeout("getnodes();",300);}//tloading=0;}
 }
 var nodejson3,nodes3=[],latnodes=[],lonnodes=[];
 function nodecallback3(r){//alert(r);
@@ -1771,8 +1803,8 @@ function nodecallback3(r){//alert(r);
 	 latnodes[inode]=nodes3[i].lat;
      lonnodes[inode]=nodes3[i].lon;
 	 }
-  var iport=0;
-  port0x=-199;port1x=-199;port2x=-199;port3x=-199;  
+  iport=0;
+  //port0x=-199;port1x=-199;port2x=-199;port3x=-199;  
   for(var i=1;i<=nairport;i++){
      var inode=airportnode[i];
 	 if(latnodes[inode]){
@@ -1785,9 +1817,34 @@ function nodecallback3(r){//alert(r);
 	 }
   }	 
   //alert(msg);
-  tloading=0;  
+  if(iport<=3){setTimeout("getnodes();",300);}
+  else{tloading=0;}
 }
 var tloading=0,http="http:",overpass="";
+function getnodes(){
+//if(tframe<tloading){return;}
+tloading=tframe+40000;
+var dx=18*360/40000;
+var lat1=lat-dx,lon1=lng-dx*klon;
+var lat2=lat+dx,lon2=lng+dx*klon;
+var latlon="%28"+lat1+"%2C"+lon1+"%2C"+lat2+"%2C"+lon2+"%29";
+http="http:";
+if(document.location.href.indexOf("https")>=0){
+   http="https:";}
+//http="http:";
+overpass="//overpass.osm.rambler.ru/cgi/";
+overpass="//overpass-api.de/api/";
+//overpass="//api.openstreetmap.fr/oapi/";
+if(http=="https:"){overpass="//overpass-api.de/api/";}
+//var wayurl=http+overpass+"interpreter?data=[out:json];%28way[aeroway~'aerodrome|runway']"+latlon+";";
+//var wayurl=http+overpass+"interpreter?data=[out:json];%28way[aeroway~'aerodrome']"+latlon+";";
+var nodeurl=http+overpass+"interpreter?data=[out:json];%28node[aeroway~'aerodrome|runway']"+latlon+";";
+//var nodeurl=http+overpass+"interpreter?data=[out:json];%28node[aeroway~'aerodrome']"+latlon+";";
+nodeurl+="%29%3Bout%20qt%20199%3B";
+try{		
+httpGet(nodeurl,nodecallback);
+}catch (e){alert("error getways");loading=0;}
+}
 function getways(){
 if(tframe<tloading){return;}
 tloading=tframe+40000;
@@ -1805,7 +1862,8 @@ overpass="//overpass-api.de/api/";
 if(http=="https:"){overpass="//overpass-api.de/api/";}
 //var wayurl=http+overpass+"interpreter?data=[out:json];%28way[aeroway~'aerodrome|runway']"+latlon+";";
 var wayurl=http+overpass+"interpreter?data=[out:json];%28way[aeroway~'aerodrome']"+latlon+";";
-wayurl+="%29%3Bout%201999%3B";
+//var wayurl=http+overpass+"interpreter?data=[out:json];%28node[aeroway~'aerodrome']"+latlon+";";
+wayurl+="%29%3Bout%20qt%201999%3B";
 try{		
 httpGet(wayurl,waycallback);
 }catch (e){alert("error getways");loading=0;}
@@ -1816,7 +1874,7 @@ for(var i=1;i<=nairport;i++){
     nodeurl3+="node%28"+airportnode[i]+"%29";
 	if(i<nairport){nodeurl3+=";";}
 	}
-nodeurl3+="%29%3Bout%20skel%201999%3B";
+nodeurl3+="%29%3Bout%20skel%20199%3B";
 try{		
 httpGet(nodeurl3,nodecallback3);
 }catch (e){alert("error getnodes3");loading=0;}
@@ -1938,9 +1996,9 @@ if(tframe<tairport){
 tairport=tframe+17000;
 portx=-199;distairport=20000;
 if(port0dist<distairport){portx=port0x;porty=port0y;portname=port0name;distairport=port0dist;}
-else if(port1dist<distairport){portx=port1x;porty=port1y;portname=port1name;distairport=port1dist;}
-else if(port2dist<distairport){portx=port2x;porty=port2y;portname=port2name;distairport=port2dist;}
-else if(port3dist<distairport){portx=port3x;porty=port3y;portname=port3name;distairport=port3dist;}
+if(port1dist<distairport){portx=port1x;porty=port1y;portname=port1name;distairport=port1dist;}
+if(port2dist<distairport){portx=port2x;porty=port2y;portname=port2name;distairport=port2dist;}
+if(port3dist<distairport){portx=port3x;porty=port3y;portname=port3name;distairport=port3dist;}
 var test=0;
 if(portx<-191){return;}
    do1airport=diro1((portx-x)/klon,porty-y);
