@@ -567,11 +567,13 @@ msg+="combobox => presets locations"+crlf;
 msg+="V => view"+crlf;
 msg+="K => jet/plane"+crlf;
 msg+="R => radio off/on"+crlf;
+//msg+="C => change cockpit"+crlf;
 alert(msg);
 resetkeys();
 }
 if(keys[vk_escape]){quit=1;subquit();}
 if(keys[vk_9]){subtest();resetkeys();}
+//if(keys[vk_c] && iview==1){subcockpit();resetkeys();}
 if(keys[vk_r]){subradio();resetkeys();}
 if(keys[vk_k]){subplane();resetkeys();}
 if(keys[vk_v]){iview+=1;if(iview>2){iview=0;};resetkeys();}
@@ -1252,6 +1254,14 @@ function addcockpit() {
 			addradar();
             port0x=-199;port1x=-199;port2x=-199;port3x=-199;
 			updateradar();
+}
+var icockpit=0;
+function subcockpit(){
+icockpit+=1;if(icockpit>3){icockpit=0;}
+if(icockpit==0){cockpit.src=cockpit1png;}
+if(icockpit==1){cockpit.src='cockpit_f14blue.png';}
+if(icockpit==2){cockpit.src='cockpit_f14yellow.png';}
+if(icockpit==3){cockpit.src='cockpit_f14.png';}
 }
 function updatecockpit(){
             if(!cockpit){return;}
@@ -2013,7 +2023,7 @@ var tairport=0;
 var radiotxt="",tradio=1,portname="",portname0="",portx=0,porty=0;
 var do1airport=0,do1airport0=0,distairport=0,distairport0=0;
 function testradio(){
-if(nairport==0 || tradio==0){return;}
+if(tradio==0){return;}
 if(tframe<tairport){
    if(tframe<(tairport-10000) || portname==portname0){return 0;}}
 tairport=tframe+17000;
