@@ -90,6 +90,9 @@ if(myurl.indexOf("localhost:8080")<0 && myurl.indexOf("file:")>=0){
 	<div id="north" style="position:absolute;top:3000px;left:0px;width:8px;height:8px;" >
 	<a>N</a>
     </div>
+	<div id="speed" style="position:absolute;top:3000px;left:0px;width:30px;height:30px;" >
+	km/h
+    </div>
 <script>
 var apikey='&key=AIzaSyAH372ZH8QSQgRHsqdtqNxkLVpcp_XUUkE';
 //put here your google static map apikey (=> https://developers.google.com/maps/documentation/static-maps/get-api-key)
@@ -881,7 +884,8 @@ if(iview!=1 || tourelle==1){
              compas.style.top='8000px';compas2.style.top='8000px';
 			 radar.style.top='8000px';spot.style.top='8000px';
 			 spot0.style.top='8000px';spot1.style.top='8000px';
-			 spot2.style.top='8000px';spot3.style.top='8000px';spotn.style.top='8000px';}
+			 spot2.style.top='8000px';spot3.style.top='8000px';
+			 spotn.style.top='8000px';spotv.style.top='8000px';}
 else{cockpit.style.top='0px';updatecompas();updateradar();}
 if(iview==0){myentity2.show=false;jetmesh.show=false;f14mesh.show=false;}
 else if(iview==1){myentity2.show=false;jetmesh.show=false;f14mesh.show=false;}
@@ -1354,6 +1358,8 @@ function addradar() {
             myviewer.container.appendChild(spotn);
             msgradio = document.getElementById('msgradio');
             //myviewer.container.appendChild(msgradio);
+            spotv=document.getElementById('speed');
+            myviewer.container.appendChild(spotv);
             updateradar();
 			var dr=1000*klon/scale;
 			port0x=x;port0y=y;
@@ -1417,6 +1423,7 @@ function updatespot(){
 			updatespot2();
 			updatespot3();
 			updatespotn();
+			updatespotv();
 }
 var port0x=0,port0y=0,port0dist=0,port1dist=0,port2dist=0,port3dist=0;
 var port0name="",port1name="",port2name="",port3name="";
@@ -1561,7 +1568,19 @@ function updatespotn(){
             spotn.style.transform = "scale("+1+","+(cssscale/cssscaley)+") rotate("+rotation+")";
             spotn.style.position = 'absolute';
             spotn.style.top = topOffset + 'px';
-            spotn.style.left = leftOffset + 'px';			
+            spotn.style.left = leftOffset + 'px';
+}
+var spotv;
+function updatespotv(){
+            var topOffset = windy-30/cssscaley-8;
+            var leftOffset = windx*(0.40)-4;
+			var size=parseInt(26/Math.sqrt(cssscaley*cssscale));
+            spotv.style.position = 'absolute';
+            spotv.style.top = topOffset + 'px';
+            spotv.style.left = leftOffset + 'px';
+            spotv.style['font-size'] = size + 'px';	
+            spotv.style['color'] = 'rgb(95,255,255)';	
+            spotv.innerHTML=parseInt(v*2)+" ";			
 }
 var cloud=[],ncloud=5;
 function addcloud(){
