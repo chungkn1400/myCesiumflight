@@ -754,7 +754,7 @@ var positions = [
     myCesium.Cartographic.fromDegrees(aircraftx,aircrafty),
     myCesium.Cartographic.fromDegrees(aircraft2x,aircraft2y)
 ];
-var promise = myCesium.sampleTerrain(myviewer.terrainProvider, 11, positions);
+var promise = myCesium.sampleTerrain(myviewer.terrainProvider, 12, positions);
 myCesium.when(promise, function(updatedPositions) {
     positionheight=positions[0].height;// and positions[1].height have been updated.
     positionheight0=positionheight;
@@ -1843,12 +1843,13 @@ var nodeurl=http+overpass+"interpreter?data=[out:json];%28node[aeroway~'aerodrom
 nodeurl+="%29%3Bout%20qt%20199%3B";
 try{		
 httpGet(nodeurl,nodecallback);
-}catch (e){alert("error getways");loading=0;}
+}catch (e){alert("error getnodes");loading=0;}
 }
 function getways(){
 if(tframe<tloading){return;}
 tloading=tframe+40000;
 var dx=18*360/40000;
+lng=x;lat=y;
 var lat1=lat-dx,lon1=lng-dx*klon;
 var lat2=lat+dx,lon2=lng+dx*klon;
 var latlon="%28"+lat1+"%2C"+lon1+"%2C"+lat2+"%2C"+lon2+"%29";
