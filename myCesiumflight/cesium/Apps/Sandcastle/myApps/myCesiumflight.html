@@ -80,6 +80,7 @@ if(myurl.indexOf("localhost:8080")<0 && myurl.indexOf("file:")>=0){
           <option id="tajmahal">tajmahal</option>
      </select>
 </div>
+	<div id="msgradio" style="width:220px;">msgradio</div>
 </div>
 	<div id="mapdiv" style="position:absolute;top:4028px;left:0px;width:97%;height:95%;" >
     </div>
@@ -1328,7 +1329,7 @@ function updatecompas2(){
             compas2.style['-webkit-transform'] = "scale("+1+","+(cssscale/cssscaley)+") rotate("+rotation+") scale(1,"+co2+")"; /* Chrome, Safari, Opera */
             compas2.style.transform = "scale("+1+","+(cssscale/cssscaley)+") rotate("+rotation+") scale(1,"+co2+")";
 }
-var radar,spot,spot0,spot1,spot2,spot3,spotn;
+var radar,spot,spot0,spot1,spot2,spot3,spotn,msgradio;
 function addradar() {
             //Add overlay by creating an HTML element
             radar = document.createElement('img');
@@ -1351,6 +1352,8 @@ function addradar() {
             myviewer.container.appendChild(spot3);
             spotn = document.getElementById('north');
             myviewer.container.appendChild(spotn);
+            msgradio = document.getElementById('msgradio');
+            //myviewer.container.appendChild(msgradio);
             updateradar();
 			var dr=1000*klon/scale;
 			port0x=x;port0y=y;
@@ -2000,6 +2003,7 @@ if(port0dist<distairport){portx=port0x;porty=port0y;portname=port0name;distairpo
 if(port1dist<distairport){portx=port1x;porty=port1y;portname=port1name;distairport=port1dist;}
 if(port2dist<distairport){portx=port2x;porty=port2y;portname=port2name;distairport=port2dist;}
 if(port3dist<distairport){portx=port3x;porty=port3y;portname=port3name;distairport=port3dist;}
+msgradio.innerHTML="";
 var test=0;
 if(portx<-191){return;}
    do1airport=diro1((portx-x)/klon,porty-y);
@@ -2017,6 +2021,7 @@ if(portx<-191){return;}
   radiotxt+=directiontext()+" "+dirtext((portx-x)*scale/klon,(porty-y)*scale);
 
   //alert(radiotxt);
+msgradio.innerHTML=radiotxt;
 try{speak(radiotxt);}catch(e){};
 }
 function subradio(){
