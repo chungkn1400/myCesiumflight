@@ -115,6 +115,8 @@ var apikey='&key=AIzaSyAH372ZH8QSQgRHsqdtqNxkLVpcp_XUUkE';
 <script src="http://chungkn1400.github.io/mywebglflight/mywebglflight/jet4mp3.js"></script>
 <script src="http://chungkn1400.github.io/myCesiumflight/myCesiumflight/cesium/Apps/Sandcastle/myApps/models/f14objtxt.js" ></script>
 <script src="http://chungkn1400.github.io/myCesiumflight/myCesiumflight/cesium/Apps/Sandcastle/myApps/models/f14jpg.js" ></script>
+<script src="http://chungkn1400.github.io/myCesiumflight/myCesiumflight/cesium/Apps/Sandcastle/myApps/cockpit_f14bluepng.js"></script>
+<script src="http://chungkn1400.github.io/myCesiumflight/myCesiumflight/cesium/Apps/Sandcastle/myApps/cockpit_f14graypng.js"></script>
 <script id="webaudio" >
 var twebaudio=1;
 try{
@@ -567,12 +569,13 @@ msg+="combobox => presets locations"+crlf;
 msg+="V => view"+crlf;
 msg+="K => jet/plane"+crlf;
 msg+="R => radio off/on"+crlf;
+msg+="C => change cockpit"+crlf;
 alert(msg);
 resetkeys();
 }
 if(keys[vk_escape]){quit=1;subquit();}
 if(keys[vk_9]){subtest();resetkeys();}
-//if(keys[vk_c] && iview==1){subcockpit();resetkeys();}
+if(keys[vk_c] && iview==1){subcockpit();resetkeys();}
 if(keys[vk_r]){subradio();resetkeys();}
 if(keys[vk_k]){subplane();resetkeys();}
 if(keys[vk_v]){iview+=1;if(iview>2){iview=0;};resetkeys();}
@@ -665,6 +668,13 @@ var vrunmax0=vrunmax;
 if(iplane==0){plane="c150";vrunmax=1.7;vplane*=vrunmax/vrunmax0;vrun*=vrunmax/vrunmax0;}
 if(iplane==1){plane="alphajet";vrunmax=3;vplane*=vrunmax/vrunmax0;vrun*=vrunmax/vrunmax0;}
 if(iplane==2){plane="f14";vrunmax=6;vplane*=vrunmax/vrunmax0;vrun*=vrunmax/vrunmax0;}
+subcockpit0();
+}
+function subcockpit0(){
+if(plane=="c150"){icockpit=0;}
+if(plane=="alphajet"){icockpit=1;}
+if(plane=="f14"){icockpit=2;}
+if(cockpit){icockpit-=1;subcockpit();}
 }
 function moveplane(){
     var dt=dtime;
@@ -1245,7 +1255,7 @@ var cockpit;
 function addcockpit() {
             //Add overlay by creating an HTML element
             cockpit = document.createElement('img');
-            cockpit.src = cockpit1png;//'cockpit1.png';
+            subcockpit0();//cockpit.src = cockpit1png;//'cockpit1.png';
             myviewer.container.appendChild(cockpit);
             updatecockpit();
 			addcompas();
@@ -1256,11 +1266,11 @@ function addcockpit() {
 }
 var icockpit=0;
 function subcockpit(){
-icockpit+=1;if(icockpit>3){icockpit=0;}
+icockpit+=1;if(icockpit>2){icockpit=0;}
 if(icockpit==0){cockpit.src=cockpit1png;}
-if(icockpit==1){cockpit.src='cockpit_f14blue.png';}
-if(icockpit==2){cockpit.src='cockpit_f142.png';}
-if(icockpit==3){cockpit.src='cockpit_f14.png';}
+if(icockpit==1){cockpit.src=cockpit_f14bluepng;}
+//if(icockpit==2){cockpit.src='cockpit_f14yellow.png';}
+if(icockpit==2){cockpit.src=cockpit_f14graypng;}
 }
 function updatecockpit(){
             if(!cockpit){return;}
