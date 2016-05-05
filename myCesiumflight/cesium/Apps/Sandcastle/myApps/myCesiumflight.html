@@ -125,6 +125,7 @@ var apikey='&key=AIzaSyAH372ZH8QSQgRHsqdtqNxkLVpcp_XUUkE';
 <script src="http://chungkn1400.github.io/mywebglflight/mywebglflight/capitolepng.js"></script>
 <script src="http://chungkn1400.github.io/mywebglflight/mywebglflight/tajmahalpng.js"></script>
 <script src="http://chungkn1400.github.io/mywebglflight/mywebglflight/buddahpng.js"></script>
+<script src="http://chungkn1400.github.io/myCesiumflight/myCesiumflight/cesium/Apps/Sandcastle/myApps/boeing512png.js" ></script>
 <script id="webaudio" >
 var twebaudio=1;
 try{
@@ -526,6 +527,7 @@ viewer.clock.onTick.addEventListener(function(clock) {
     //viewer.camera.lookAtTransform(Cesium.Matrix4.IDENTITY);
 	*/
 	initterrainheightvars();
+	addboeing();
 	okinit=1;
 
 }
@@ -610,8 +612,8 @@ if(tourelle==0  && landing==0){
  if(keys[vk_up]){o2-=d10*cos3;o1-=d10*sin3;}
  if(keys[vk_down]){o2+=d10*cos3;o1+=d10*sin3;;}
 }else{
- if(keys[vk_left]){to1+=d10*2;}
- if(keys[vk_right]){to1-=d10*2;}
+ if(keys[vk_left]){to1+=d10*4;}
+ if(keys[vk_right]){to1-=d10*4;}
  if(keys[vk_up]){to2+=d10*2;}
  if(keys[vk_down]){to2-=d10*2;}
 }
@@ -656,10 +658,12 @@ if(itime%20==1){setklon();}
 ////if(keys[vk_b]){v=Math.max(-20,v-dtime*0.025);}//x-=v*cos1*cos2/klon;y-=v*sin1*cos2;z-=v*sin2*500;}
 v=200*vplane/2;//vplane:-0.5 .. 4.5 -100..900km/h
 movexyz=v*dtime*0.0005;
-if(okinit>=1){okinit=2;myview();moveaircraft();testgetways();testradio();}
+if(okinit>=1){okinit=2;myview();moveaircraft();testgetways();testradio();
+			  }
 }
 function subtest(){//addaircraft();return;
-alert(port0name+"/ "+port1name+" /"+port2name+" /"+port3name);
+//alert(port0name+"/ "+port1name+" /"+port2name+" /"+port3name);
+moveboeing();
 }
 var wayx=-199,wayy=0,waytime=0;
 function testgetways(){
@@ -776,7 +780,8 @@ positionheight=-99999;
 var positions = [
     myCesium.Cartographic.fromDegrees(lngx,latx),
     myCesium.Cartographic.fromDegrees(aircraftx,aircrafty),
-    myCesium.Cartographic.fromDegrees(aircraft2x,aircraft2y)
+    myCesium.Cartographic.fromDegrees(aircraft2x,aircraft2y),
+    myCesium.Cartographic.fromDegrees(boeingx,boeingy)
 ];
 var promise = myCesium.sampleTerrain(myviewer.terrainProvider, 13, positions);
 myCesium.when(promise, function(updatedPositions) {
@@ -784,6 +789,7 @@ myCesium.when(promise, function(updatedPositions) {
     positionheight0=positionheight;
     aircraftzsol=positions[1].height;
     aircraft2zsol=positions[2].height;
+    boeingzsol=positions[3].height;
 	// updatedPositions is just a reference to positions.
 });
 return positionheight0;
@@ -906,7 +912,8 @@ if(iview!=1 || tourelle==1){
 			 radar.style.top='8000px';spot.style.top='8000px';
 			 spot0.style.top='8000px';spot1.style.top='8000px';
 			 spot2.style.top='8000px';spot3.style.top='8000px';
-			 spotn.style.top='8000px';spotv.style.top='8000px';}
+			 spotn.style.top='8000px';spotv.style.top='8000px';
+			 spotb.style.top='8000px';}
 else{cockpit.style.top='0px';updatecompas();updateradar();}
 if(iview==0){myentity2.show=false;jetmesh.show=false;f14mesh.show=false;}
 else if(iview==1){myentity2.show=false;jetmesh.show=false;f14mesh.show=false;}
@@ -951,6 +958,7 @@ else{myentity2.show=true;
 }
 if(sky){updatesky();}
 updatemonument();
+if(boeing){moveboeing();updateboeing();}
 }
 var icombo=3,combotext="deauville marinas";
 var lat=48.8261252,lng=2.35705595;
@@ -1369,7 +1377,7 @@ function updatecompas2(){
             compas2.style['-webkit-transform'] = "scale("+1+","+(cssscale/cssscaley)+") rotate("+rotation+") scale(1,"+co2+")"; /* Chrome, Safari, Opera */
             compas2.style.transform = "scale("+1+","+(cssscale/cssscaley)+") rotate("+rotation+") scale(1,"+co2+")";
 }
-var radar,spot,spot0,spot1,spot2,spot3,spotn,msgradio;
+var radar,spot,spot0,spot1,spot2,spot3,spotn,spotb,msgradio;
 function addradar() {
             //Add overlay by creating an HTML element
             radar = document.createElement('img');
@@ -1396,6 +1404,9 @@ function addradar() {
             //myviewer.container.appendChild(msgradio);
             spotv=document.getElementById('speed');
             myviewer.container.appendChild(spotv);
+            spotb = document.createElement('img');
+            spotb.src = compaspng;//'white.png';
+            myviewer.container.appendChild(spotb);
             updateradar();
 			var dr=1000*klon/scale;
 			port0x=x;port0y=y;
@@ -1425,13 +1436,14 @@ function updateradar(){
             radar.style.transform = "scale("+1+","+(cssscale/cssscaley)+") rotate("+rotation+")";
         
 		updatespot();
+		updatespotb();
 }
 function updatespot(){
             if(!spot){return;}
 			var dx=cos1,dy=cos1;
 			var dxx=(aircraftx-x)*scale/klon;
 			var dyy=(aircrafty-y)*scale;
-			var dmax=1500,dxy=Math.sqrt(dxx*dxx+dyy*dyy);
+			var dmax=1900,dxy=Math.sqrt(dxx*dxx+dyy*dyy);
 			dxx=dxx/(dmax+dxy);
 			dyy=dyy/(dmax+dxy);
 			dx=dxx*sin1-dyy*cos1;
@@ -1460,6 +1472,35 @@ function updatespot(){
 			updatespot3();
 			updatespotn();
 			updatespotv();
+}
+function updatespotb(){
+            if(!spotb){return;}
+			var dx=cos1,dy=cos1;
+			var dxx=(boeingx-x)*scale/klon;
+			var dyy=(boeingy-y)*scale;
+			var dmax=1900,dxy=Math.sqrt(dxx*dxx+dyy*dyy);
+			dxx=dxx/(dmax+dxy);
+			dyy=dyy/(dmax+dxy);
+			dx=dxx*sin1-dyy*cos1;
+			dy=dxx*cos1+dyy*sin1;
+            var wx0=parseInt(145/cssscale);
+			var rotation = parseInt(0) + 'deg';
+            var topOffset = windy-150/cssscaley+wx0*(0.5-dy*0.5*cssscale/cssscaley);
+            var leftOffset = windx*(0.59)+wx0*(0.5+dx*0.5);
+            var cssscale1=0.99/cssscale,cssscaley1=0.99/cssscaley;
+            var wx=parseInt(5/cssscale);//+"%";
+            //var wy=parseInt(100/cssscaley)+"%";
+            //Position overlay with CSS styling
+            spotb.style.width = parseInt(wx)+'px';
+            //spotb.style.height = '60px';
+            spotb.style.position = 'absolute';
+            spotb.style.top = 'calc('+topOffset + 'px)';
+            spotb.style.left = 'calc('+leftOffset + 'px)';
+            spotb.style['color'] = 'rgb(255,0,0)';	
+            spotb.style['pointer-events'] = 'none';
+            spotb.style['-ms-transform'] =  "scale("+1+","+(cssscale1/cssscaley1)+") rotate("+rotation+")"; /* IE 9 */
+            spotb.style['-webkit-transform'] = "scale("+1+","+(cssscale/cssscaley)+") rotate("+rotation+")"; /* Chrome, Safari, Opera */
+            spotb.style.transform = "scale("+1+","+(cssscale/cssscaley)+") rotate("+rotation+")";
 }
 var port0x=0,port0y=0,port0dist=0,port1dist=0,port2dist=0,port3dist=0;
 var port0name="",port1name="",port2name="",port3name="";
@@ -1666,6 +1707,46 @@ for(var i=0;i<nmonument;i++){
 	 }else{monument[i].billboard.show=false;}
    }
 }
+var boeing;
+function addboeing(){
+boeingx=x-0.1;boeingy=y;boeingz=z;
+boeing=myviewer.entities.add({
+  position : myCesium.Cartesian3.fromDegrees(boeingx,boeingy,boeingz),
+  billboard :{
+            image : boeing512png,
+            position : myCesium.Cartesian3.fromDegrees(boeingx,boeingy,boeingz),
+            scale : 1.0, // default: 1.0
+            imageIndex : -1, // default: -1
+            show : true, // default
+            horizontalOrigin : myCesium.HorizontalOrigin.CENTER, // default
+            //verticalOrigin : myCesium.VerticalOrigin.BOTTOM, // default: CENTER
+            //color : myCesium.Color.LIME, // default: WHITE
+            //rotation : 45, // default: 0.0
+            alignedAxis : myCesium.Cartesian3.ZERO, // default
+            width : 130, // default: undefined
+            height : 100 // default: undefined
+     }
+ });
+}
+function updateboeing(){
+   var dx=Math.abs((boeingx-x)*scale/klon);
+   var dy=Math.abs((boeingy-y)*scale);
+   var dxmax=25000;
+   if(dx<dxmax && dy<dxmax){
+        var sc=(1400/Math.sqrt(100+dx*dx+dy*dy))*2/cssscale;
+		var xxx=boeingx,yyy=boeingy;
+		var zzz=boeingz;
+		var o33=o3;if(tourelle==1){o33=0;}
+	    boeing.position=myCesium.Cartesian3.fromDegrees(xxx,yyy,zzz);
+	    boeing.billboard.position=myCesium.Cartesian3.fromDegrees(xxx,yyy,zzz);
+	    boeing.billboard.show=true;
+		boeing.billboard.rotation=degtorad(-o33);
+		if(boeingdo1>0){boeing.billboard.scale=sc;
+		                boeing.billboard.height=100;
+        }else{boeing.billboard.scale=-sc;
+		      boeing.billboard.height=-100;}
+	 }else{boeing.billboard.show=false;}
+}
 var cloud=[],ncloud=5;
 function addcloud(){
 for(var i=0;i<ncloud;i++){
@@ -1784,25 +1865,36 @@ function setvolume(){
     var speed=kvol*(0.14+(Math.max(0,vplane)*0.7+vrun*0.1)*0.9);
 	if(tgaz==1){speed+=0.27;}
 	if(speed>1){speed=1;};
-	if(Math.abs(tvolume-volume)<0.005 && Math.abs(tspeed-speed)<0.005){return;}
+	if(Math.abs(tvolume-volume)<0.005 && Math.abs(tspeed-speed)<0.005 && landing==0){return;}
 	tvolume=volume;tspeed=speed;
 	var volume0=0.45*volume,volume1=0.32*volume;
 	//var volume0=0.35*volume,volume1=0.85*volume;
+    var volboeing=Math.max(0.002,0.5*400*400/(400*400+distboeing*distboeing));
+    var speedboeing=0.95+0.4*400/(400+distboeing);
 if(twebaudio==1){
   if(plane=="alphajet"){
 	setvol(myaudio,0.002);
-	setvol(myaudiojet,volume*0.5);
-	setspeed(myaudiojet,speed+0.54);
+	if(volume*0.5<volboeing){
+	   setvol(myaudiojet,Math.max(volume*0.5,volboeing));
+	   setspeed(myaudiojet,Math.max(speed+0.54,speedboeing));}
+	else{
+	   setvol(myaudiojet,volume*0.5);
+	   setspeed(myaudiojet,speed+0.54);}   
   }else if(plane=="f14"){
 	setvol(myaudio,0.002);
-	setvol(myaudiojet,volume*0.5);
-	setspeed(myaudiojet,speed+0.54);
+	if(volume*0.5<volboeing){
+	   setvol(myaudiojet,Math.max(volume*0.5,volboeing));
+	   setspeed(myaudiojet,Math.max(speed+0.54,speedboeing));}
+	else{
+	   setvol(myaudiojet,volume*0.5);
+	   setspeed(myaudiojet,speed+0.54);}   
   }else{
 	setvol(myaudio,volume*0.5);
-	setvol(myaudiojet,0.002);
 	setspeed(myaudio,speed+0.54);
+	setvol(myaudiojet,volboeing);
+	setspeed(myaudiojet,speedboeing);
   }
-  }  
+}  
 }
 var xmlhttp,httpstatus=0;
 function httpGet(url,callback) 
@@ -2183,6 +2275,73 @@ myCesium.when(promise, function(updatedPositions) {
 	// updatedPositions is just a reference to positions.
 	addmonument(varname,dx,dy);
 });
+}
+var boeingx=0,boeingy=0,boeingz=0,boeingv=240,boeingo1=0,boeingzsol=0,boeingdo1=0;
+function resetboeing(){
+var r=10000,do1=Math.random()*360;
+var dist=distairportxx*1.5;
+if(dist<r){r=dist;do1=diro1((portx-x)/klon,porty-y)+Math.random()*4;}
+var co1=Math.cos(degtorad(do1)),si1=Math.sin(degtorad(do1));
+boeingx=x+co1*r*klon/scale;
+boeingy=y+si1*r/scale;
+boeingo1=do1+180+60*sign(Math.random()-0.5);
+while(boeingo1>180){boeingo1-=360;}
+while(boeingo1<-180){boeingo1+=360;}
+}
+var airportxx=0,airportyy=0,distairportxx=1,distboeing=999999;
+var distboeingport=999999,distboeingport0=999999;
+function moveboeing(){
+distboeing=999999;
+airportxx=(portx-x)*scale/klon;
+airportyy=(porty-y)*scale;
+distairportxx=100+Math.max(Math.abs(airportxx),Math.abs(airportyy));
+    var d720=Math.max(10500,Math.min(22000,25000*distairportxx/4000));
+    var xx=(boeingx-x)*scale/klon;
+    if(Math.abs(xx)>d720){resetboeing();return;}
+	var yy=(boeingy-y)*scale;
+    if(Math.abs(yy)>d720){resetboeing();return;}
+    distboeing=Math.max(Math.abs(xx),Math.abs(yy));
+    var xxx=(boeingx-portx)*scale/klon;
+    var yyy=(boeingy-porty)*scale;
+	distboeingport0=distboeingport;
+    distboeingport=Math.max(170,Math.sqrt(xxx*xxx+yyy*yyy));
+	var o11=diro1(xx,yy);
+	var do1=boeingo1-o11;
+	while(do1>180){do1-=360;}
+	while(do1<-180){do1+=360;}
+	if(distboeingport<distboeingport0-0.01 && distboeing>300 && Math.abs(do1)>29){
+	    var boeingo11=diro1(-xxx,-yyy);
+		if(Math.abs(do1)<160){do1=boeingo11-boeingo1;
+	                         while(do1>180){do1-=360;}
+	                         while(do1<-180){do1+=360;}
+							 boeingo1+=do1*dtime*0.001;
+		                     do1=boeingo1-o11;
+	                         while(do1>180){do1-=360;}
+	                         while(do1<-180){do1+=360;}
+		                     if(distboeing<600){do1=boeingdo1;};
+							 }}
+	var co1=Math.cos(degtorad(boeingo1));
+    var si1=Math.sin(degtorad(boeingo1));
+    var cos11=Math.cos(degtorad(o11));
+    var sin11=Math.sin(degtorad(o11));
+	if(Math.abs(do1)>150){do1=boeingdo1;co1*=2;si1*=2;cos11=0;sin11=0;}
+	boeingdo1=do1;
+    if(do1>0){
+	     if(do1<25){boeingo1+=dtime*0.012;}
+	     if(do1>150){boeingo1-=dtime*0.012;}
+		 boeingx+=boeingv*dtime*0.00035*(co1-sin11)*klon/scale;
+	     boeingy+=boeingv*dtime*0.00035*(si1+cos11)/scale;
+		 }
+	else{if(do1>-25){boeingo1-=dtime*0.012;}
+	     if(do1<-150){boeingo1+=dtime*0.012;}
+	     boeingx+=boeingv*dtime*0.00035*(co1+sin11)*klon/scale;
+         boeingy+=boeingv*dtime*0.00035*(si1-cos11)/scale;
+		 }
+	var zz=boeingzsol+(Math.abs(xx)+Math.abs(yy))*0.17-120;
+	//if(distairportxx>4000){zz=Math.max(zz,zsol+700);}
+	zz=Math.min(zz,boeingzsol+(distboeingport)*0.17-120);
+	boeingz+=(Math.max(zsol+20,Math.min(zsol+2000,zz))-boeingz)*0.05;
+	boeingz=Math.max(boeingzsol+20,Math.min(boeingzsol+3000,boeingz));
 }
 
 initgooglemap();
