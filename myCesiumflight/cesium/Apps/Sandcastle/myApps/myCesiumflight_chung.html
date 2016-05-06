@@ -125,6 +125,7 @@ var apikey='&key=AIzaSyAH372ZH8QSQgRHsqdtqNxkLVpcp_XUUkE';
 <script src="http://chungkn1400.github.io/mywebglflight/mywebglflight/capitolepng.js"></script>
 <script src="http://chungkn1400.github.io/mywebglflight/mywebglflight/tajmahalpng.js"></script>
 <script src="http://chungkn1400.github.io/mywebglflight/mywebglflight/buddahpng.js"></script>
+<script src="http://chungkn1400.github.io/mywebglflight/mywebglflight/airporttower256png.js"></script>
 <script src="http://chungkn1400.github.io/myCesiumflight/myCesiumflight/cesium/Apps/Sandcastle/myApps/boeing512png.js" ></script>
 <script id="webaudio" >
 var twebaudio=1;
@@ -528,6 +529,7 @@ viewer.clock.onTick.addEventListener(function(clock) {
 	*/
 	initterrainheightvars();
 	addboeing();
+	addairporttower();
 	okinit=1;
 
 }
@@ -780,7 +782,8 @@ var positions = [
     myCesium.Cartographic.fromDegrees(lngx,latx),
     myCesium.Cartographic.fromDegrees(aircraftx,aircrafty),
     myCesium.Cartographic.fromDegrees(aircraft2x,aircraft2y),
-    myCesium.Cartographic.fromDegrees(boeingx,boeingy)
+    myCesium.Cartographic.fromDegrees(boeingx,boeingy),
+    myCesium.Cartographic.fromDegrees(airporttowerx,airporttowery)
 ];
 var promise = myCesium.sampleTerrain(myviewer.terrainProvider, 13, positions);
 myCesium.when(promise, function(updatedPositions) {
@@ -789,6 +792,7 @@ myCesium.when(promise, function(updatedPositions) {
     aircraftzsol=positions[1].height;
     aircraft2zsol=positions[2].height;
     boeingzsol=positions[3].height;
+    airporttowerzsol=positions[4].height;
 	// updatedPositions is just a reference to positions.
 });
 return positionheight0;
@@ -958,6 +962,7 @@ else{myentity2.show=true;
 if(sky){updatesky();}
 updatemonument();
 if(boeing){moveboeing();updateboeing();}
+if(airporttower){updateairporttower();}
 }
 var icombo=3,combotext="deauville marinas";
 var lat=48.8261252,lng=2.35705595;
@@ -1706,6 +1711,51 @@ for(var i=0;i<nmonument;i++){
 	 }else{monument[i].billboard.show=false;}
    }
 }
+var airporttower,airporttowerx=0,airporttowery=0,airporttowerzsol=0,airporttowerdx=0;
+function addairporttower(){
+var dx=25,dy=1.0;
+airporttowerdx=dx*dy/1.3;
+var xx=x,yy=y,zz=zsol;
+airporttowerx=xx;airporttowery=yy;airporttowerzsol=zz;
+airporttower=myviewer.entities.add({
+  position : myCesium.Cartesian3.fromDegrees(xx,yy,zz),
+  billboard :{
+            image : airporttower256png,
+            position : myCesium.Cartesian3.fromDegrees(xx,yy,zz),
+            scale : 1.0, // default: 1.0
+            imageIndex : 0, // default: -1
+            show : false, // default
+            horizontalOrigin : myCesium.HorizontalOrigin.CENTER, // default
+            verticalOrigin : myCesium.VerticalOrigin.BOTTOM, // default: CENTER
+            //color : myCesium.Color.LIME, // default: WHITE
+            //rotation : 45, // default: 0.0
+            alignedAxis : myCesium.Cartesian3.ZERO, // default
+            width : dx, // default: undefined
+            height : dx*dy*1.3 // default: undefined
+     }
+ });
+}
+function updateairporttower(){
+   if(portx<-191){airporttowerx=x;airporttowery=y-1;}
+   else{airporttowerx=portx;airporttowery=porty;}
+   var dx=Math.abs((airporttowerx-x)*scale/klon);
+   var dy=Math.abs((airporttowery-y)*scale);
+   var dxmax=airporttowerdx*25000/80;
+   if(dx<dxmax && dy<dxmax){
+        var sc=(1400/Math.sqrt(100+dx*dx+dy*dy))*2/cssscale;
+		var s60=airporttowerdx*2;
+        var xx=airporttowerx,yy=airporttowery,zz=airporttowerzsol-8;
+		var xxx=xx+s60*sin3*sin1*cos2*klon/scale,yyy=yy-s60*sin3*cos1*cos2/scale;
+		//xxx+=50*sin3*sin3*cos1*sin2*klon/scale;yyy+=50*sin3*sin3*sin1*sin2/scale;
+		var zzz=zz-sin2*sin3*sin3*s60;
+		var o33=o3;if(tourelle==1){o33=0;}
+	    airporttower.position=myCesium.Cartesian3.fromDegrees(xxx,yyy,zzz);
+	    airporttower.billboard.position=myCesium.Cartesian3.fromDegrees(xxx,yyy,zzz);
+	    airporttower.billboard.show=true;
+		airporttower.billboard.rotation=degtorad(-o33);
+		airporttower.billboard.scale=sc;
+	 }else{airporttower.billboard.show=false;}
+}
 var boeing;
 function addboeing(){
 boeingx=x-0.1;boeingy=y;boeingz=z;
@@ -1975,7 +2025,7 @@ function waycallback(r){//alert(r);
 	  }*/
    if(way.tags && way.nodes){
       if(way.tags.name){nairport+=1;airportname[nairport]=way.tags.name;
-	                    airportnode[nairport]=way.nodes[parseInt(way.nodes.length/2)];
+	                    airportnode[nairport]=way.nodes[0];//parseInt(way.nodes.length/2)];
 						msg+=" /"+way.tags.name;}}
    //if(ways[i].nodes){nnode+=ways[i].nodes.length;}
    }}
