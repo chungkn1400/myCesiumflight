@@ -529,7 +529,7 @@ viewer.clock.onTick.addEventListener(function(clock) {
 	*/
 	initterrainheightvars();
 	addboeing();
-	addairporttower();
+	//addairporttower();
 	okinit=1;
 
 }
@@ -782,8 +782,8 @@ var positions = [
     myCesium.Cartographic.fromDegrees(lngx,latx),
     myCesium.Cartographic.fromDegrees(aircraftx,aircrafty),
     myCesium.Cartographic.fromDegrees(aircraft2x,aircraft2y),
-    myCesium.Cartographic.fromDegrees(boeingx,boeingy),
-    myCesium.Cartographic.fromDegrees(airporttowerx,airporttowery)
+    myCesium.Cartographic.fromDegrees(boeingx,boeingy)//,
+    //myCesium.Cartographic.fromDegrees(airporttowerx,airporttowery)
 ];
 var promise = myCesium.sampleTerrain(myviewer.terrainProvider, 13, positions);
 myCesium.when(promise, function(updatedPositions) {
@@ -792,7 +792,7 @@ myCesium.when(promise, function(updatedPositions) {
     aircraftzsol=positions[1].height;
     aircraft2zsol=positions[2].height;
     boeingzsol=positions[3].height;
-    airporttowerzsol=positions[4].height;
+    //airporttowerzsol=positions[4].height;
 	// updatedPositions is just a reference to positions.
 });
 return positionheight0;
@@ -962,7 +962,7 @@ else{myentity2.show=true;
 if(sky){updatesky();}
 updatemonument();
 if(boeing){moveboeing();updateboeing();}
-if(airporttower){updateairporttower();}
+//if(airporttower){updateairporttower();}
 }
 var icombo=3,combotext="deauville marinas";
 var lat=48.8261252,lng=2.35705595;
