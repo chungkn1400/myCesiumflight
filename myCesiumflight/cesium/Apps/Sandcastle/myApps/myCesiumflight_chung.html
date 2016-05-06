@@ -662,8 +662,7 @@ if(okinit>=1){okinit=2;myview();moveaircraft();testgetways();testradio();
 			  }
 }
 function subtest(){//addaircraft();return;
-//alert(port0name+"/ "+port1name+" /"+port2name+" /"+port3name);
-moveboeing();
+alert(port0name+"/ "+port1name+" /"+port2name+" /"+port3name);
 }
 var wayx=-199,wayy=0,waytime=0;
 function testgetways(){
@@ -2178,7 +2177,7 @@ switch (parseInt(Math.random()*2)){
 var radtodeg=180/Math.PI;
 function diro1(dx,dy){ 
 var do1;
-if (Math.abs(dx)>Math.max(0.001,0.001*Math.abs(dy))){
+if (Math.abs(dx)>Math.max(0.00001,0.001*Math.abs(dy))){
    if(dx>0){do1=Math.atan(dy/dx)*radtodeg;
    }else{do1=180-Math.atan(dy/Math.abs(dx))*radtodeg;}
    }
@@ -2280,11 +2279,11 @@ var boeingx=0,boeingy=0,boeingz=0,boeingv=240,boeingo1=0,boeingzsol=0,boeingdo1=
 function resetboeing(){
 var r=10000,do1=Math.random()*360;
 var dist=distairportxx*1.5;
-if(dist<r){r=dist;do1=diro1((portx-x)/klon,porty-y)+Math.random()*4;}
+if(dist<r){r=dist;do1=diro1((portx-x)/klon,porty-y)+(Math.random()-0.5)*60;}
 var co1=Math.cos(degtorad(do1)),si1=Math.sin(degtorad(do1));
 boeingx=x+co1*r*klon/scale;
 boeingy=y+si1*r/scale;
-boeingo1=do1+180+60*sign(Math.random()-0.5);
+boeingo1=do1+180+50*sign(Math.random()-0.5);
 while(boeingo1>180){boeingo1-=360;}
 while(boeingo1<-180){boeingo1+=360;}
 }
@@ -2301,20 +2300,25 @@ distairportxx=100+Math.max(Math.abs(airportxx),Math.abs(airportyy));
 	var yy=(boeingy-y)*scale;
     if(Math.abs(yy)>d720){resetboeing();return;}
     distboeing=Math.max(Math.abs(xx),Math.abs(yy));
-    var xxx=(boeingx-portx)*scale/klon;
-    var yyy=(boeingy-porty)*scale;
+    var xxx=(portx-boeingx)*scale/klon;
+    var yyy=(porty-boeingy)*scale;
 	distboeingport0=distboeingport;
     distboeingport=Math.max(170,Math.sqrt(xxx*xxx+yyy*yyy));
 	var o11=diro1(xx,yy);
 	var do1=boeingo1-o11;
 	while(do1>180){do1-=360;}
 	while(do1<-180){do1+=360;}
-	if(distboeingport<distboeingport0-0.01 && distboeing>300 && Math.abs(do1)>29){
-	    var boeingo11=diro1(-xxx,-yyy);
-		if(Math.abs(do1)<160){do1=boeingo11-boeingo1;
-	                         while(do1>180){do1-=360;}
-	                         while(do1<-180){do1+=360;}
-							 boeingo1+=do1*dtime*0.001;
+	while(boeingo1>180){boeingo1-=360;}
+	while(boeingo1<-180){boeingo1+=360;}
+	var test=0;
+	if(distboeingport<distboeingport0-0.0001 && distboeing>300 && 
+	      (Math.abs(do1)>20 || distboeing>1000)){
+	    var boeingo11=diro1(xxx,yyy);
+		if(Math.abs(do1)<160){test=1;
+		                     var do11=boeingo11-boeingo1;
+	                         while(do11>180){do11-=360;}
+	                         while(do11<-180){do11+=360;}
+							 boeingo1+=do11*Math.min(1,dtime*0.005);
 		                     do1=boeingo1-o11;
 	                         while(do1>180){do1-=360;}
 	                         while(do1<-180){do1+=360;}
@@ -2324,9 +2328,13 @@ distairportxx=100+Math.max(Math.abs(airportxx),Math.abs(airportyy));
     var si1=Math.sin(degtorad(boeingo1));
     var cos11=Math.cos(degtorad(o11));
     var sin11=Math.sin(degtorad(o11));
-	if(Math.abs(do1)>150){do1=boeingdo1;co1*=2;si1*=2;cos11=0;sin11=0;}
+	if(Math.abs(do1)>150 && test==0){do1=boeingdo1;co1*=2;si1*=2;cos11=0;sin11=0;}
 	boeingdo1=do1;
-    if(do1>0){
+	if(test==1){
+		 boeingx+=boeingv*dtime*0.00035*(co1*1.5)*klon/scale;
+	     boeingy+=boeingv*dtime*0.00035*(si1*1.5)/scale;
+		 }
+    else if(do1>0){
 	     if(do1<25){boeingo1+=dtime*0.012;}
 	     if(do1>150){boeingo1-=dtime*0.012;}
 		 boeingx+=boeingv*dtime*0.00035*(co1-sin11)*klon/scale;
@@ -2339,8 +2347,8 @@ distairportxx=100+Math.max(Math.abs(airportxx),Math.abs(airportyy));
 		 }
 	var zz=boeingzsol+(Math.abs(xx)+Math.abs(yy))*0.17-120;
 	//if(distairportxx>4000){zz=Math.max(zz,zsol+700);}
-	zz=Math.min(zz,boeingzsol+(distboeingport)*0.17-120);
-	boeingz+=(Math.max(zsol+20,Math.min(zsol+2000,zz))-boeingz)*0.05;
+	zz=Math.min(zz,boeingzsol+(Math.abs(xxx)+Math.abs(yyy))*0.17-120);
+	boeingz+=(Math.max(boeingzsol+20,Math.min(boeingzsol+2500,zz))-boeingz)*Math.min(1,dtime*0.0003);
 	boeingz=Math.max(boeingzsol+20,Math.min(boeingzsol+3000,boeingz));
 }
 
