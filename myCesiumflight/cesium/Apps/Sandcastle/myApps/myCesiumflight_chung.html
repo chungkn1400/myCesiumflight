@@ -529,7 +529,8 @@ viewer.clock.onTick.addEventListener(function(clock) {
 	*/
 	initterrainheightvars();
 	addboeing();
-	//addairporttower();
+	addairporttower();
+	addairporttower2();
 	okinit=1;
 
 }
@@ -782,8 +783,9 @@ var positions = [
     myCesium.Cartographic.fromDegrees(lngx,latx),
     myCesium.Cartographic.fromDegrees(aircraftx,aircrafty),
     myCesium.Cartographic.fromDegrees(aircraft2x,aircraft2y),
-    myCesium.Cartographic.fromDegrees(boeingx,boeingy)//,
-    //myCesium.Cartographic.fromDegrees(airporttowerx,airporttowery)
+    myCesium.Cartographic.fromDegrees(boeingx,boeingy),
+    myCesium.Cartographic.fromDegrees(airporttowerx,airporttowery),
+    myCesium.Cartographic.fromDegrees(airporttower2x,airporttower2y)
 ];
 var promise = myCesium.sampleTerrain(myviewer.terrainProvider, 13, positions);
 myCesium.when(promise, function(updatedPositions) {
@@ -792,7 +794,8 @@ myCesium.when(promise, function(updatedPositions) {
     aircraftzsol=positions[1].height;
     aircraft2zsol=positions[2].height;
     boeingzsol=positions[3].height;
-    //airporttowerzsol=positions[4].height;
+    airporttowerzsol=positions[4].height;
+    airporttower2zsol=positions[5].height;
 	// updatedPositions is just a reference to positions.
 });
 return positionheight0;
@@ -962,7 +965,8 @@ else{myentity2.show=true;
 if(sky){updatesky();}
 updatemonument();
 if(boeing){moveboeing();updateboeing();}
-//if(airporttower){updateairporttower();}
+if(airporttower){updateairporttower();}
+if(airporttower2){updateairporttower2();}
 }
 var icombo=3,combotext="deauville marinas";
 var lat=48.8261252,lng=2.35705595;
@@ -1712,6 +1716,7 @@ for(var i=0;i<nmonument;i++){
    }
 }
 var airporttower,airporttowerx=0,airporttowery=0,airporttowerzsol=0,airporttowerdx=0;
+var towerportx=0,towerporty=0;
 function addairporttower(){
 var dx=25,dy=1.0;
 airporttowerdx=dx*dy/1.3;
@@ -1736,13 +1741,13 @@ airporttower=myviewer.entities.add({
  });
 }
 function updateairporttower(){
-   if(portx<-191){airporttowerx=x;airporttowery=y-1;}
-   else{airporttowerx=portx;airporttowery=porty;}
+   if(towerportx<-191){airporttowerx=x;airporttowery=y-1;}
+   else{airporttowerx=towerportx;airporttowery=towerporty;}
    var dx=Math.abs((airporttowerx-x)*scale/klon);
    var dy=Math.abs((airporttowery-y)*scale);
    var dxmax=airporttowerdx*25000/80;
    if(dx<dxmax && dy<dxmax){
-        var sc=(1400/Math.sqrt(100+dx*dx+dy*dy))*2/cssscale;
+        var sc=(1100/Math.sqrt(100+dx*dx+dy*dy))*2/cssscale;
 		var s60=airporttowerdx*2;
         var xx=airporttowerx,yy=airporttowery,zz=airporttowerzsol-8;
 		var xxx=xx+s60*sin3*sin1*cos2*klon/scale,yyy=yy-s60*sin3*cos1*cos2/scale;
@@ -1755,6 +1760,52 @@ function updateairporttower(){
 		airporttower.billboard.rotation=degtorad(-o33);
 		airporttower.billboard.scale=sc;
 	 }else{airporttower.billboard.show=false;}
+}
+var airporttower2,airporttower2x=0,airporttower2y=0,airporttower2zsol=0,airporttower2dx=0;
+var tower2portx=0,tower2porty=0;
+function addairporttower2(){
+var dx=25,dy=1.0;
+airporttower2dx=dx*dy/1.3;
+var xx=x,yy=y,zz=zsol;
+airporttower2x=xx;airporttower2y=yy;airporttower2zsol=zz;
+airporttower2=myviewer.entities.add({
+  position : myCesium.Cartesian3.fromDegrees(xx,yy,zz),
+  billboard :{
+            image : airporttower256png,
+            position : myCesium.Cartesian3.fromDegrees(xx,yy,zz),
+            scale : 1.0, // default: 1.0
+            imageIndex : 0, // default: -1
+            show : false, // default
+            horizontalOrigin : myCesium.HorizontalOrigin.CENTER, // default
+            verticalOrigin : myCesium.VerticalOrigin.BOTTOM, // default: CENTER
+            //color : myCesium.Color.LIME, // default: WHITE
+            //rotation : 45, // default: 0.0
+            alignedAxis : myCesium.Cartesian3.ZERO, // default
+            width : dx, // default: undefined
+            height : dx*dy*1.3 // default: undefined
+     }
+ });
+}
+function updateairporttower2(){
+   if(tower2portx<-191){airporttower2x=x;airporttower2y=y-1;}
+   else{airporttower2x=tower2portx;airporttower2y=tower2porty;}
+   var dx=Math.abs((airporttower2x-x)*scale/klon);
+   var dy=Math.abs((airporttower2y-y)*scale);
+   var dxmax=airporttower2dx*25000/80;
+   if(dx<dxmax && dy<dxmax){
+        var sc=(1100/Math.sqrt(100+dx*dx+dy*dy))*2/cssscale;
+		var s60=airporttower2dx*2;
+        var xx=airporttower2x,yy=airporttower2y,zz=airporttower2zsol-8;
+		var xxx=xx+s60*sin3*sin1*cos2*klon/scale,yyy=yy-s60*sin3*cos1*cos2/scale;
+		//xxx+=50*sin3*sin3*cos1*sin2*klon/scale;yyy+=50*sin3*sin3*sin1*sin2/scale;
+		var zzz=zz-sin2*sin3*sin3*s60;
+		var o33=o3;if(tourelle==1){o33=0;}
+	    airporttower2.position=myCesium.Cartesian3.fromDegrees(xxx,yyy,zzz);
+	    airporttower2.billboard.position=myCesium.Cartesian3.fromDegrees(xxx,yyy,zzz);
+	    airporttower2.billboard.show=true;
+		airporttower2.billboard.rotation=degtorad(-o33);
+		airporttower2.billboard.scale=sc;
+	 }else{airporttower2.billboard.show=false;}
 }
 var boeing;
 function addboeing(){
@@ -1979,6 +2030,7 @@ function httpGet(url,callback)
     xmlhttp.send();    
 }
 var wayjson,ways=[],nodejson,nodes=[],iport=0,nairport=0,airportname=[],airportnode=[];
+var ntower=0,towernode=[];
 function nodecallback(r){//alert(r);
   nodejson=JSON.parse(r);
   var msg="";
@@ -2011,9 +2063,9 @@ function nodecallback(r){//alert(r);
 }
 function waycallback(r){//alert(r);
   wayjson=JSON.parse(r);
-  var msg="";
-  nairport=0;
-  ways=[];airportname=[];airportnode=[];
+  var msg="",test=0;
+  nairport=0;ntower=0;
+  ways=[];airportname=[];airportnode=[];towernode=[];
   if(wayjson.elements){ways=wayjson.elements;}
   msg+="len="+ways.length;
   if(ways.length>0){
@@ -2024,13 +2076,19 @@ function waycallback(r){//alert(r);
 	  nnode+=1;
 	  }*/
    if(way.tags && way.nodes){
-      if(way.tags.name){nairport+=1;airportname[nairport]=way.tags.name;
+      if(way.tags.aeroway){
+	     if(way.tags.aeroway=="terminal"){
+		     if(ntower<40 && test<15){ntower+=1;towernode[ntower]=way.nodes[0];
+	                    test+=1;msg+=" /tower /";}}
+         else if(way.tags.name){
+		     if(nairport<20){nairport+=1;airportname[nairport]=way.tags.name;
 	                    airportnode[nairport]=way.nodes[0];//parseInt(way.nodes.length/2)];
-						msg+=" /"+way.tags.name;}}
+						test=0;msg+=" /"+way.tags.name;}}
+						}}
    //if(ways[i].nodes){nnode+=ways[i].nodes.length;}
    }}
   //alert("nairport="+nairport+" "+msg);
-  if(nairport>0){setTimeout("getnodes3();",300);}
+  if(nairport>0 || ntower>0){setTimeout("getnodes3();",300);}
   else{iport=0;setTimeout("getnodes();",300);}//tloading=0;}
 }
 var nodejson3,nodes3=[],latnodes=[],lonnodes=[];
@@ -2062,7 +2120,31 @@ function nodecallback3(r){//alert(r);
 	    if(iport==3){port3x=lonnodes[inode];port3y=latnodes[inode];port3name=airportname[i];}
 		iport+=1;if(iport>3){break;}
 	 }
-  }	 
+  }
+  //towerportx=-199;
+  var dist=25000;
+  if(ntower>=1){
+    for(var i=1;i<=ntower;i++){ 
+     var inode=towernode[i];
+	 if(latnodes[inode]){var xx=lonnodes[inode],yy=latnodes[inode];
+	        if(Math.max(Math.abs(xx-towerportx)/klon,Math.abs(yy-towerporty))*scale>4000){
+			   var dist2=Math.max(Math.abs(xx-x)/klon,Math.abs(yy-y));
+			   if(dist2<dist){
+			      dist=dist2;
+				  towerportx=xx;towerporty=yy;}}}}
+  }  
+  //tower2portx=-199;
+  dist=25000;
+  if(ntower>=1){
+    for(var i=1;i<=ntower;i++){
+     var inode=towernode[i];
+	 if(latnodes[inode]){var xx=lonnodes[inode],yy=latnodes[inode];
+	        if(Math.max(Math.abs(xx-towerportx)/klon,Math.abs(yy-towerporty))*scale>4000){
+			   var dist2=Math.max(Math.abs(xx-x)/klon,Math.abs(yy-y));
+			   if(dist2<dist){
+			      dist=dist2;
+				  tower2portx=xx;tower2porty=yy;}}}}
+  }  
   //alert(msg);
   if(iport<=3){setTimeout("getnodes();",300);}
   else{tloading=0;}
@@ -2109,7 +2191,7 @@ overpass="//overpass-api.de/api/";
 //overpass="//api.openstreetmap.fr/oapi/";
 if(http=="https:"){overpass="//overpass-api.de/api/";}
 //var wayurl=http+overpass+"interpreter?data=[out:json];%28way[aeroway~'aerodrome|runway']"+latlon+";";
-var wayurl=http+overpass+"interpreter?data=[out:json];%28way[aeroway~'aerodrome']"+latlon+";";
+var wayurl=http+overpass+"interpreter?data=[out:json];%28way[aeroway~'aerodrome|terminal']"+latlon+";";
 //var wayurl=http+overpass+"interpreter?data=[out:json];%28node[aeroway~'aerodrome']"+latlon+";";
 wayurl+="%29%3Bout%20qt%201999%3B";
 try{		
@@ -2120,7 +2202,11 @@ function getnodes3(){
 var nodeurl3=http+overpass+"interpreter?data=[out:json];%28";
 for(var i=1;i<=nairport;i++){
     nodeurl3+="node%28"+airportnode[i]+"%29";
-	if(i<nairport){nodeurl3+=";";}
+	if(i<nairport || ntower>=1){nodeurl3+=";";}
+	}
+for(var i=1;i<=ntower;i++){
+    nodeurl3+="node%28"+towernode[i]+"%29";
+	if(i<ntower){nodeurl3+=";";}
 	}
 nodeurl3+="%29%3Bout%20skel%20199%3B";
 try{		
