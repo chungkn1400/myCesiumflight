@@ -108,6 +108,8 @@ var apikey='&key=AIzaSyAH372ZH8QSQgRHsqdtqNxkLVpcp_XUUkE';
 <script src="http://chungkn1400.github.io/myCesiumflight/myCesiumflight/cesium/Apps/Sandcastle/myApps/compaspng.js"></script>
 <script src="http://chungkn1400.github.io/myCesiumflight/myCesiumflight/cesium/Apps/Sandcastle/myApps/compas2png.js"></script>
 <script src="http://chungkn1400.github.io/myCesiumflight/myCesiumflight/cesium/Apps/Sandcastle/myApps/skydomejpg.js" ></script>
+<script src="http://chungkn1400.github.io/mywebglflight/mywebglflight/skydome2jpg.js" ></script>
+<script src="http://chungkn1400.github.io/mywebglflight/mywebglflight/skydome3jpg.js" ></script>
 <script src="http://chungkn1400.github.io/myCesiumflight/myCesiumflight/cesium/Apps/Sandcastle/myApps/radar2png.js" ></script>
 <script src="http://chungkn1400.github.io/myCesiumflight/myCesiumflight/cesium/Apps/Sandcastle/myApps/whitepng.js" ></script>
 <script src="http://chungkn1400.github.io/mywebglflight/mywebglflight/alphajetobjtxt.js"></script>
@@ -663,7 +665,7 @@ if(itime%20==1){setklon();}
 ////if(keys[vk_b]){v=Math.max(-20,v-dtime*0.025);}//x-=v*cos1*cos2/klon;y-=v*sin1*cos2;z-=v*sin2*500;}
 v=200*vplane/2;//vplane:-0.5 .. 4.5 -100..900km/h
 movexyz=v*dtime*0.0005;
-if(okinit>=1){okinit=2;myview();moveaircraft();testgetways();testradio();
+if(okinit>=1){okinit=2;myview();moveaircraft();testgetways();testradio();testgetweather();
 			  }
 }
 function subtest(){//addaircraft();return;
@@ -1862,7 +1864,7 @@ for(var i=0;i<ncloud;i++){
         }
     });}
 }
-var sky;
+var sky,isky=1;
 function addsky(){
   var dr=90000/scale;
   var xx=x+klon*dr*cos1;
@@ -2025,7 +2027,7 @@ function httpGet(url,callback)
 		if(xmlhttp.readyState==4){httpstatus=xmlhttp.status;
 		    if(httpstatus>400){
 			   if(loading==1){
-			      setTimeout("if(loading==1 && httpstatus>400){loading=0;};",8000);}}}
+			      setTimeout("if(tloading>0.1 && httpstatus>400){tloading=0;};",8000);}}}
         if(xmlhttp.readyState==4 && xmlhttp.status==200){callback(xmlhttp.responseText);}
     }	
     //xmlhttp.open("GET", theUrl, false);
@@ -2174,7 +2176,7 @@ var nodeurl=http+overpass+"interpreter?data=[out:json];%28node[aeroway~'aerodrom
 nodeurl+="%29%3Bout%20qt%20199%3B";
 try{		
 httpGet(nodeurl,nodecallback);
-}catch (e){alert("error getnodes");loading=0;}
+}catch (e){alert("error getnodes");tloading=0;}
 }
 function getways(){
 if(tframe<tloading){return;}
@@ -2198,7 +2200,7 @@ var wayurl=http+overpass+"interpreter?data=[out:json];%28way[aeroway~'aerodrome|
 wayurl+="%29%3Bout%20qt%201999%3B";
 try{		
 httpGet(wayurl,waycallback);
-}catch (e){alert("error getways");loading=0;}
+}catch (e){alert("error getways");tloading=0;}
 }
 function getnodes3(){
 var nodeurl3=http+overpass+"interpreter?data=[out:json];%28";
@@ -2213,7 +2215,7 @@ for(var i=1;i<=ntower;i++){
 nodeurl3+="%29%3Bout%20skel%20199%3B";
 try{		
 httpGet(nodeurl3,nodecallback3);
-}catch (e){alert("error getnodes3");loading=0;}
+}catch (e){alert("error getnodes3");tloading=0;}
 }
 function formatname(text){
 var text1="",c="";
@@ -2488,6 +2490,42 @@ distairportxx=100+Math.max(Math.abs(airportxx),Math.abs(airportyy));
 	zz=Math.min(zz,boeingzsol+(Math.abs(xxx)+Math.abs(yyy))*0.17-120);
 	boeingz+=(Math.max(boeingzsol+20,Math.min(boeingzsol+2500,zz))-boeingz)*Math.min(1,dtime*0.0003);
 	boeingz=Math.max(boeingzsol+20,Math.min(boeingzsol+3000,boeingz));
+}
+var humidity=50,temp=20,wind=3.6,wclouds=0;
+function weathercallback(r){//alert(r);
+  var weatherjson=JSON.parse(r);
+  var allclouds=weatherjson.clouds.all;alert("clouds="+allclouds);
+  wclouds=allclouds;
+  //wind=weatherjson.wind.speed*3.6;//kmh alert(wind);
+  //humidity=weatherjson.main.humidity;//alert(humidity);
+  //temp=parseInt((weatherjson.main.temp-273)*10)/10;//alert(temp);
+  if(sky){
+    var isky0=isky;
+    if(wclouds<20){isky=0;}
+	else if(wclouds<75){isky=1;}
+	else{isky=2;}
+	if(isky!=isky0){
+	      if(isky==0){sky.billboard.image= skydome3jpg;}
+	      if(isky==1){sky.billboard.image= skydomejpg;}
+	      if(isky==2){sky.billboard.image= skydome2jpg;}
+		  }
+	}	  
+  tloading=0;
+}
+var latweather=-91,lngweather=0;
+function testgetweather(){
+if(Math.abs(lat-latweather)>0.5 || Math.abs(lng-lngweather)>klon*0.5){
+  if(tloading<0.1){latweather=lat;lngweather=lng;getweather();}
+}
+}
+function getweather(){
+if(http!="http:"){return;}
+if(tloading>0.1){return;}
+tloading=timer()+20000;
+var weatherurl="http://api.openweathermap.org/data/2.5/weather?lat="+lat+"&lon="+lng+"&APPID=4cd1de75fbc57d92794e74ec918593ca";
+try{		
+httpGet(weatherurl,weathercallback);
+}catch (e){alert("error getweather");tloading=0;}
 }
 
 initgooglemap();
