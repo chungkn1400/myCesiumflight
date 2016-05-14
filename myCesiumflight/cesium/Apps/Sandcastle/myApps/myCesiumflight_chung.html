@@ -281,11 +281,13 @@ var cssx0=cssscale,cssy0=cssscaley;
   }else if(cssscaley<=1.2+0.01){cssscaley=1.4;
   }else if(cssscaley<=1.4+0.01){cssscaley=1.7;
   }else if(cssscaley<=1.7+0.01){cssscaley=2.0;
+  }else if(cssscale<=2.0+0.01){cssscale=2.5;
   }else{cssscale=1;cssscaley=1;}
   msg="cssscalex="+cssscale;
   if(cssscale==1){msg+=" normal";}
   if(Math.abs(cssscale-1.4)<0.01){msg+=" lowerres,faster";}
   if(Math.abs(cssscale-2.0)<0.01){msg+=" more lowerres,faster";}
+  if(Math.abs(cssscale-2.5)<0.01){msg+=" more lowerres,faster";}
   msg+=crlf+"cssscaley="+cssscaley;
   if(cssscaley==1){msg+=" normal";}
   if(Math.abs(cssscaley-1.2)<0.01){msg+=" lowerres,faster";}
@@ -2411,7 +2413,7 @@ myCesium.when(promise, function(updatedPositions) {
 	addmonument(varname,dx,dy);
 });
 }
-var boeingx=0,boeingy=0,boeingz=0,boeingv=240,boeingo1=0,boeingzsol=0,boeingdo1=0;
+var boeingx=0,boeingy=0,boeingz=0,boeingv=240+50,boeingo1=0,boeingzsol=0,boeingdo1=0;
 function resetboeing(){
 var r=10000,do1=Math.random()*360;
 var dist=distairportxx*1.5;
