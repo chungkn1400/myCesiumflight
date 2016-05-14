@@ -2494,7 +2494,7 @@ distairportxx=100+Math.max(Math.abs(airportxx),Math.abs(airportyy));
 var humidity=50,temp=20,wind=3.6,wclouds=0;
 function weathercallback(r){//alert(r);
   var weatherjson=JSON.parse(r);
-  var allclouds=weatherjson.clouds.all;alert("clouds="+allclouds);
+  var allclouds=weatherjson.clouds.all;//alert("clouds="+allclouds);
   wclouds=allclouds;
   //wind=weatherjson.wind.speed*3.6;//kmh alert(wind);
   //humidity=weatherjson.main.humidity;//alert(humidity);
