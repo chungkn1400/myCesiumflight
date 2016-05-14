@@ -665,7 +665,7 @@ if(itime%20==1){setklon();}
 ////if(keys[vk_b]){v=Math.max(-20,v-dtime*0.025);}//x-=v*cos1*cos2/klon;y-=v*sin1*cos2;z-=v*sin2*500;}
 v=200*vplane/2;//vplane:-0.5 .. 4.5 -100..900km/h
 movexyz=v*dtime*0.0005;
-if(okinit>=1){okinit=2;myview();moveaircraft();testgetways();testradio();testgetweather();
+if(okinit>=1 && spotb){okinit=2;myview();moveaircraft();testgetways();testradio();testgetweather();
 			  }
 }
 function subtest(){//addaircraft();return;
@@ -803,23 +803,6 @@ myCesium.when(promise, function(updatedPositions) {
 	// updatedPositions is just a reference to positions.
 });
 return positionheight0;
-}
-function updatebouss(){
-var topOffset = 10;
-var leftOffset = parseInt(windx-110/cssscale);
-bouss.style.width = parseInt(100/cssscale)+'px';
-//bouss.style.height = '60px';
-bouss.style.top =  topOffset + 'px';
-bouss.style.left = leftOffset + 'px';
-var rotation=parseInt(o1-90) + 'deg';
-if(tourelle==1){rotation=parseInt(o1+to1-90) + 'deg';}
-//bouss.style['-ms-transform'] = 'rotate(' + rotation + ')'; /* IE 9 */
-//bouss.style['-webkit-transform'] = 'rotate(' + rotation + ')'; /* Chrome, Safari, Opera */
-//bouss.style.transform = 'rotate(' + rotation + ')';
-var cssscale1=0.99/cssscale,cssscaley1=0.99/cssscaley;
-bouss.style['-ms-transform'] =  "scale("+1+","+(cssscale1/cssscaley1)+") rotate("+rotation+")"; /* IE 9 */
-bouss.style['-webkit-transform'] = "scale("+1+","+(cssscale/cssscaley)+") rotate("+rotation+")"; /* Chrome, Safari, Opera */
-bouss.style.transform = "scale("+1+","+(cssscale/cssscaley)+") rotate("+rotation+")";
 }
 function subquit(){
   quit=1;
@@ -1270,7 +1253,11 @@ function addbouss() {
             bouss = document.createElement('img');
             bouss.src = bousspng;//'_bouss.png';
             myviewer.container.appendChild(bouss);
+			updatebouss();
+}
+function updatebouss(){
 			var rotation = parseInt(o1-90) + 'deg';
+            if(tourelle==1){rotation=parseInt(o1+to1-90) + 'deg';}
             var topOffset = 10;
             var leftOffset = parseInt(windx-110/cssscale);
             //Position overlay with CSS styling
@@ -1287,6 +1274,23 @@ function addbouss() {
             bouss.style['-ms-transform'] =  "scale("+1+","+(cssscale1/cssscaley1)+") rotate("+rotation+")"; /* IE 9 */
             bouss.style['-webkit-transform'] = "scale("+1+","+(cssscale/cssscaley)+") rotate("+rotation+")"; /* Chrome, Safari, Opera */
             bouss.style.transform = "scale("+1+","+(cssscale/cssscaley)+") rotate("+rotation+")";
+}
+function updatebouss0(){
+var topOffset = 10;
+var leftOffset = parseInt(windx-110/cssscale);
+bouss.style.width = parseInt(100/cssscale)+'px';
+//bouss.style.height = '60px';
+bouss.style.top =  topOffset+ 'px';
+bouss.style.left = leftOffset + 'px';
+var rotation=parseInt(o1-90) + 'deg';
+if(tourelle==1){rotation=parseInt(o1+to1-90) + 'deg';}
+//bouss.style['-ms-transform'] = 'rotate(' + rotation + ')'; /* IE 9 */
+//bouss.style['-webkit-transform'] = 'rotate(' + rotation + ')'; /* Chrome, Safari, Opera */
+//bouss.style.transform = 'rotate(' + rotation + ')';
+var cssscale1=0.99/cssscale,cssscaley1=0.99/cssscaley;
+bouss.style['-ms-transform'] =  "scale("+1+","+(cssscale1/cssscaley1)+") rotate("+rotation+")"; /* IE 9 */
+bouss.style['-webkit-transform'] = "scale("+1+","+(cssscale/cssscaley)+") rotate("+rotation+")"; /* Chrome, Safari, Opera */
+bouss.style.transform = "scale("+1+","+(cssscale/cssscaley)+") rotate("+rotation+")";
 }
 var cockpit;
 function addcockpit() {
@@ -1537,15 +1541,15 @@ function updatespot0(){
             var topOffset = windy-150/cssscaley+wx0*(0.5-dy*0.5*cssscale/cssscaley);
             var leftOffset = windx*(0.59)+wx0*(0.5+dx*0.5);
             var cssscale1=0.99/cssscale,cssscaley1=0.99/cssscaley;
-            var wx=parseInt(2/cssscale);
+            var wx=parseInt(2/cssscale);if(wx<1){wx=1;}
             spot0.style.width = parseInt(wx)+'px';
             spot0.style['pointer-events'] = 'none';
             spot0.style['-ms-transform'] =  "scale("+3.5+","+(cssscale1/cssscaley1)+") rotate("+rotation+")"; /* IE 9 */
             spot0.style['-webkit-transform'] = "scale("+3.5+","+(cssscale/cssscaley)+") rotate("+rotation+")"; /* Chrome, Safari, Opera */
             spot0.style.transform = "scale("+3.5+","+(cssscale/cssscaley)+") rotate("+rotation+")";
             spot0.style.position = 'absolute';
-            spot0.style.top = topOffset + 'px';
-            spot0.style.left = leftOffset + 'px';			
+            spot0.style.top = 'calc('+topOffset + 'px)';
+            spot0.style.left = 'calc('+leftOffset + 'px)';
 }
 var port1x=0,port1y=0;
 function updatespot1(){
@@ -1569,15 +1573,15 @@ function updatespot1(){
             var topOffset = windy-150/cssscaley+wx0*(0.5-dy*0.5*cssscale/cssscaley);
             var leftOffset = windx*(0.59)+wx0*(0.5+dx*0.5);
             var cssscale1=0.99/cssscale,cssscaley1=0.99/cssscaley;
-            var wx=parseInt(2/cssscale);
+            var wx=parseInt(2/cssscale);if(wx<1){wx=1;}
             spot1.style.width = parseInt(wx)+'px';
             spot1.style['pointer-events'] = 'none';
             spot1.style['-ms-transform'] =  "scale("+3.5+","+(cssscale1/cssscaley1)+") rotate("+rotation+")"; /* IE 9 */
             spot1.style['-webkit-transform'] = "scale("+3.5+","+(cssscale/cssscaley)+") rotate("+rotation+")"; /* Chrome, Safari, Opera */
             spot1.style.transform = "scale("+3.5+","+(cssscale/cssscaley)+") rotate("+rotation+")";
             spot1.style.position = 'absolute';
-            spot1.style.top = topOffset + 'px';
-            spot1.style.left = leftOffset + 'px';			
+            spot1.style.top = 'calc('+topOffset + 'px)';
+            spot1.style.left = 'calc('+leftOffset + 'px)';
 }
 var port2x=0,port2y=0;
 function updatespot2(){
@@ -1601,15 +1605,15 @@ function updatespot2(){
             var topOffset = windy-150/cssscaley+wx0*(0.5-dy*0.5*cssscale/cssscaley);
             var leftOffset = windx*(0.59)+wx0*(0.5+dx*0.5);
             var cssscale1=0.99/cssscale,cssscaley1=0.99/cssscaley;
-            var wx=parseInt(2/cssscale);
+            var wx=parseInt(2/cssscale);if(wx<1){wx=1;}
             spot2.style.width = parseInt(wx)+'px';
             spot2.style['pointer-events'] = 'none';
             spot2.style['-ms-transform'] =  "scale("+3.5+","+(cssscale1/cssscaley1)+") rotate("+rotation+")"; /* IE 9 */
             spot2.style['-webkit-transform'] = "scale("+3.5+","+(cssscale/cssscaley)+") rotate("+rotation+")"; /* Chrome, Safari, Opera */
             spot2.style.transform = "scale("+3.5+","+(cssscale/cssscaley)+") rotate("+rotation+")";
             spot2.style.position = 'absolute';
-            spot2.style.top = topOffset + 'px';
-            spot2.style.left = leftOffset + 'px';			
+            spot2.style.top = 'calc('+topOffset + 'px)';
+            spot2.style.left = 'calc('+leftOffset + 'px)';
 }
 var port3x=0,port3y=0;
 function updatespot3(){
@@ -1633,15 +1637,15 @@ function updatespot3(){
             var topOffset = windy-150/cssscaley+wx0*(0.5-dy*0.5*cssscale/cssscaley);
             var leftOffset = windx*(0.59)+wx0*(0.5+dx*0.5);
             var cssscale1=0.99/cssscale,cssscaley1=0.99/cssscaley;
-            var wx=parseInt(2/cssscale);
+            var wx=parseInt(2/cssscale);if(wx<1){wx=1;}
             spot3.style.width = parseInt(wx)+'px';
             spot3.style['pointer-events'] = 'none';
             spot3.style['-ms-transform'] =  "scale("+3.5+","+(cssscale1/cssscaley1)+") rotate("+rotation+")"; /* IE 9 */
             spot3.style['-webkit-transform'] = "scale("+3.5+","+(cssscale/cssscaley)+") rotate("+rotation+")"; /* Chrome, Safari, Opera */
             spot3.style.transform = "scale("+3.5+","+(cssscale/cssscaley)+") rotate("+rotation+")";
             spot3.style.position = 'absolute';
-            spot3.style.top = topOffset + 'px';
-            spot3.style.left = leftOffset + 'px';			
+            spot3.style.top = 'calc('+topOffset + 'px)';
+            spot3.style.left = 'calc('+leftOffset + 'px)';
 }
 function updatespotn(){
 			var dx=-cos1*1.05;
@@ -1686,7 +1690,7 @@ monument[i]=myviewer.entities.add({
             image : eval(varname+"png"),
             position : myCesium.Cartesian3.fromDegrees(xx,yy,zz),
             scale : 1.0, // default: 1.0
-            imageIndex : 0, // default: -1
+            //imageIndex : 0, // default: -1
             show : false, // default
             horizontalOrigin : myCesium.HorizontalOrigin.CENTER, // default
             verticalOrigin : myCesium.VerticalOrigin.BOTTOM, // default: CENTER
@@ -1732,7 +1736,7 @@ airporttower=myviewer.entities.add({
             image : airporttower256png,
             position : myCesium.Cartesian3.fromDegrees(xx,yy,zz),
             scale : 1.0, // default: 1.0
-            imageIndex : 0, // default: -1
+            //imageIndex : 0, // default: -1
             show : false, // default
             horizontalOrigin : myCesium.HorizontalOrigin.CENTER, // default
             verticalOrigin : myCesium.VerticalOrigin.BOTTOM, // default: CENTER
@@ -1778,7 +1782,7 @@ airporttower2=myviewer.entities.add({
             image : airporttower256png,
             position : myCesium.Cartesian3.fromDegrees(xx,yy,zz),
             scale : 1.0, // default: 1.0
-            imageIndex : 0, // default: -1
+            //imageIndex : 0, // default: -1
             show : false, // default
             horizontalOrigin : myCesium.HorizontalOrigin.CENTER, // default
             verticalOrigin : myCesium.VerticalOrigin.BOTTOM, // default: CENTER
