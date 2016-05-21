@@ -521,8 +521,8 @@ viewer.clock.onTick.addEventListener(function(clock) {
     loadstorage('aircraftzsol','aircraftzsol');
     loadstorage('aircrafto1','aircrafto1');
 	moveaircraft();
-	addbouss();
 	addcockpit();
+	addbouss();
 	addsky();
 	/*var center = target;//Cesium.Cartesian3.fromDegrees(-72.0, 40.0);
     var heading = Cesium.Math.toRadians(0.0);
@@ -569,7 +569,6 @@ if(auxvar2){msg3+=" aux2="+auxvar2;}
 if(auxvar3){msg3+=" aux3="+auxvar3;}
 document.getElementById('msg2').innerHTML=msg2;
 document.getElementById('msg3').innerHTML=msg3;
-if(bouss){updatebouss();}
 if(twebaudio==1){setvolume();}
 }
 var d10=0.010*dtime;
@@ -908,8 +907,10 @@ if(iview!=1 || tourelle==1){
 			 spot0.style.top='8000px';spot1.style.top='8000px';
 			 spot2.style.top='8000px';spot3.style.top='8000px';
 			 spotn.style.top='8000px';spotv.style.top='8000px';
-			 spotb.style.top='8000px';}
+			 spotb.style.top='0px';spotb.style.left='0px';//because bypass bug 
+			 }
 else{cockpit.style.top='0px';updatecompas();updateradar();}
+updatebouss();
 if(iview==0){myentity2.show=false;jetmesh.show=false;f14mesh.show=false;}
 else if(iview==1){myentity2.show=false;jetmesh.show=false;f14mesh.show=false;}
 else{myentity2.show=true;
@@ -1269,6 +1270,7 @@ function updatebouss(){
             bouss.style.top = 'calc('+topOffset + 'px)';
             bouss.style.left = 'calc('+leftOffset + 'px)';
             bouss.style['pointer-events'] = 'none';
+            //bouss.style.zIndex='1000';
             //bouss.style['-ms-transform'] = 'rotate(' + rotation + ')'; /* IE 9 */
             //bouss.style['-webkit-transform'] = 'rotate(' + rotation + ')'; /* Chrome, Safari, Opera */
             //bouss.style.transform = 'rotate(' + rotation + ')';
@@ -1327,6 +1329,7 @@ function updatecockpit(){
             cockpit.style.position = 'absolute';
             cockpit.style.top = 'calc('+topOffset + 'px)';
             cockpit.style.left = 'calc('+leftOffset + 'px)';
+            //cockpit.style.zIndex='100';
             cockpit.style['pointer-events'] = 'none';
             cockpit.style['-ms-transform'] =  "scale("+1+","+(cssscale1/cssscaley1)+")"; /* IE 9 */
             cockpit.style['-webkit-transform'] = "scale("+1+","+(cssscale/cssscaley)+")"; /* Chrome, Safari, Opera */
