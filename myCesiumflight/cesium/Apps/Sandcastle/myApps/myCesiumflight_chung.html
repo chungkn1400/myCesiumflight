@@ -569,7 +569,6 @@ if(auxvar2){msg3+=" aux2="+auxvar2;}
 if(auxvar3){msg3+=" aux3="+auxvar3;}
 document.getElementById('msg2').innerHTML=msg2;
 document.getElementById('msg3').innerHTML=msg3;
-if(bouss){updatebouss();}
 if(twebaudio==1){setvolume();}
 }
 var d10=0.010*dtime;
@@ -908,8 +907,10 @@ if(iview!=1 || tourelle==1){
 			 spot0.style.top='8000px';spot1.style.top='8000px';
 			 spot2.style.top='8000px';spot3.style.top='8000px';
 			 spotn.style.top='8000px';spotv.style.top='8000px';
-			 spotb.style.top='8000px';}
+			 spotb.style.top='0px';spotb.style.left='0px';//because bypass bug 
+			 }
 else{cockpit.style.top='0px';updatecompas();updateradar();}
+updatebouss();
 if(iview==0){myentity2.show=false;jetmesh.show=false;f14mesh.show=false;}
 else if(iview==1){myentity2.show=false;jetmesh.show=false;f14mesh.show=false;}
 else{myentity2.show=true;
