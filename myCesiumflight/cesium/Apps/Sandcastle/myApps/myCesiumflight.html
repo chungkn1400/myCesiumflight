@@ -1261,8 +1261,10 @@ function addbouss() {
 function updatebouss(){
 			var rotation = parseInt(o1-90) + 'deg';
             if(tourelle==1){rotation=parseInt(o1+to1-90) + 'deg';}
-            var topOffset = 10;
-            var leftOffset = parseInt(windx-110/cssscale);
+            //var topOffset = 10;
+            //var leftOffset = parseInt(windx-110/cssscale);
+            var topOffset = parseInt(-15/cssscale) ;//10
+            var leftOffset = parseInt(120/cssscale);//parseInt(windx-110/cssscale);
             //Position overlay with CSS styling
             bouss.style.width = parseInt(100/cssscale)+'px';
             //bouss.style.height = '60px';
@@ -1275,9 +1277,12 @@ function updatebouss(){
             //bouss.style['-webkit-transform'] = 'rotate(' + rotation + ')'; /* Chrome, Safari, Opera */
             //bouss.style.transform = 'rotate(' + rotation + ')';
             var cssscale1=0.99/cssscale,cssscaley1=0.99/cssscaley;
-            bouss.style['-ms-transform'] =  "scale("+1+","+(cssscale1/cssscaley1)+") rotate("+rotation+")"; /* IE 9 */
-            bouss.style['-webkit-transform'] = "scale("+1+","+(cssscale/cssscaley)+") rotate("+rotation+")"; /* Chrome, Safari, Opera */
-            bouss.style.transform = "scale("+1+","+(cssscale/cssscaley)+") rotate("+rotation+")";
+            //bouss.style['-ms-transform'] =  "scale("+1+","+(cssscale1/cssscaley1)+") rotate("+rotation+")"; /* IE 9 */
+            //bouss.style['-webkit-transform'] = "scale("+1+","+(cssscale/cssscaley)+") rotate("+rotation+")"; /* Chrome, Safari, Opera */
+            //bouss.style.transform = "scale("+1+","+(cssscale/cssscaley)+") rotate("+rotation+")";
+            bouss.style['-ms-transform'] =  "scale("+0.375+","+(0.375*cssscale1/cssscaley1)+") rotate("+rotation+")"; /* IE 9 */
+            bouss.style['-webkit-transform'] = "scale("+0.375+","+(0.375*cssscale/cssscaley)+") rotate("+rotation+")"; /* Chrome, Safari, Opera */
+            bouss.style.transform = "scale("+0.375+","+(0.375*cssscale/cssscaley)+") rotate("+rotation+")";
 }
 function updatebouss0(){
 var topOffset = 10;
