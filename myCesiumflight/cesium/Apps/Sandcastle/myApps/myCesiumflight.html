@@ -791,7 +791,9 @@ var positions = [
     myCesium.Cartographic.fromDegrees(airporttowerx,airporttowery),
     myCesium.Cartographic.fromDegrees(airporttower2x,airporttower2y)
 ];
-var promise = myCesium.sampleTerrain(myviewer.terrainProvider, 13, positions);
+var promise ;
+if(z<zsol+8){promise= myCesium.sampleTerrain(myviewer.terrainProvider, 14, positions);}
+else{promise= myCesium.sampleTerrain(myviewer.terrainProvider, 13, positions);}
 myCesium.when(promise, function(updatedPositions) {
     positionheight=positions[0].height;// and positions[1].height have been updated.
     positionheight0=positionheight;
