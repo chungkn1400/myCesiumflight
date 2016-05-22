@@ -585,7 +585,7 @@ msg+="shift+G => flyto geocoding"+crlf;
 msg+="combobox => presets locations"+crlf;
 msg+="V => view"+crlf;
 msg+="K => jet/plane"+crlf;
-msg+="R => radio off/on"+crlf;
+msg+="R => radar / shift+R => radio off/on"+crlf;
 msg+="C => change cockpit"+crlf;
 alert(msg);
 resetkeys();
@@ -593,7 +593,8 @@ resetkeys();
 if(keys[vk_escape]){quit=1;subquit();}
 if(keys[vk_9]){subtest();resetkeys();}
 if(keys[vk_c] && iview==1){subcockpit();resetkeys();}
-if(keys[vk_r]){subradio();resetkeys();}
+if(keys[vk_r] && keys[vk_shift]){subradio();resetkeys();}
+if(keys[vk_r] && keys[vk_shift]==0){if(tradar==0){tradar=1;}else{tradar=0;};resetkeys();}
 if(keys[vk_k]){subplane();resetkeys();}
 if(keys[vk_v]){iview+=1;if(iview>2){iview=0;};resetkeys();}
 if(keys[vk_m] || (keys[vk_space] && tmap==1)){
@@ -900,15 +901,17 @@ if(1 || Math.abs(o10-o1)+Math.abs(o20-o2)+Math.abs(o30-o3)>0.01){
         }});
 }
 if(iview!=1 || tourelle==1){
-             updatespot0();updatespot1();updatespot2();updatespot3();
-             cockpit.style.top='8000px';
-             compas.style.top='8000px';compas2.style.top='8000px';
+           updatespot0();updatespot1();updatespot2();updatespot3();
+           cockpit.style.top='8000px';
+           compas.style.top='8000px';compas2.style.top='8000px';
+		   if(tradar==0){
 			 radar.style.top='8000px';spot.style.top='8000px';
 			 spot0.style.top='8000px';spot1.style.top='8000px';
 			 spot2.style.top='8000px';spot3.style.top='8000px';
 			 spotn.style.top='8000px';spotv.style.top='8000px';
-			 spotb.style.top='0px';spotb.style.left='0px';//because bypass bug 
-			 }
+             spotb.style.top='0px';spotb.style.left='0px';//bypass css bug 
+           }else{updateradar();spotv.style.top='8000px';}
+		 }
 else{cockpit.style.top='0px';updatecompas();updateradar();}
 updatebouss();
 if(iview==0){myentity2.show=false;jetmesh.show=false;f14mesh.show=false;}
@@ -1259,6 +1262,7 @@ function addbouss() {
 			updatebouss();
 }
 function updatebouss(){
+            bouss.style.zIndex='390';
 			var rotation = parseInt(o1-90) + 'deg';
             if(tourelle==1){rotation=parseInt(o1+to1-90) + 'deg';}
             //var topOffset = 10;
@@ -1313,6 +1317,18 @@ function addcockpit() {
 			addradar();
             port0x=-199;port1x=-199;port2x=-199;port3x=-199;
 			updateradar();
+            cockpit.style.zIndex='300';
+            compas.style.zIndex='400';
+            compas2.style.zIndex='410';
+            radar.style.zIndex='400';
+            spot.style.zIndex='500';
+            spot0.style.zIndex='500';
+            spot1.style.zIndex='500';
+            spot2.style.zIndex='500';
+            spot3.style.zIndex='500';
+            spotn.style.zIndex='500';
+            spotv.style.zIndex='500';
+            spotb.style.zIndex='405';
 }
 var icockpit=0;
 function subcockpit(){
@@ -1403,7 +1419,7 @@ function updatecompas2(){
             compas2.style['-webkit-transform'] = "scale("+1+","+(cssscale/cssscaley)+") rotate("+rotation+") scale(1,"+co2+")"; /* Chrome, Safari, Opera */
             compas2.style.transform = "scale("+1+","+(cssscale/cssscaley)+") rotate("+rotation+") scale(1,"+co2+")";
 }
-var radar,spot,spot0,spot1,spot2,spot3,spotn,spotb,msgradio;
+var radar,spot,spot0,spot1,spot2,spot3,spotn,spotb,msgradio,tradar=0;
 function addradar() {
             //Add overlay by creating an HTML element
             radar = document.createElement('img');
@@ -2048,6 +2064,7 @@ function httpGet(url,callback)
     xmlhttp.send();    
 }
 var wayjson,ways=[],nodejson,nodes=[],iport=0,nairport=0,airportname=[],airportnode=[];
+var airportinter=[],port0inter="",port1inter="",port2inter="",port3inter="";
 var ntower=0,towernode=[];
 function nodecallback(r){//alert(r);
   nodejson=JSON.parse(r);
@@ -2063,10 +2080,10 @@ function nodecallback(r){//alert(r);
    if(node.tags){
       if(node.tags.name){var name=node.tags.name;
     	msg+=" /"+node.tags.name;
-	    if(iport==0){port0x=node.lon;port0y=node.lat;port0name=name;}
-	    if(iport==1){port1x=node.lon;port1y=node.lat;port1name=name;}
-	    if(iport==2){port2x=node.lon;port2y=node.lat;port2name=name;}
-	    if(iport==3){port3x=node.lon;port3y=node.lat;port3name=name;}
+	    if(iport==0){port0x=node.lon;port0y=node.lat;port0name=name;port0inter="";}
+	    if(iport==1){port1x=node.lon;port1y=node.lat;port1name=name;port1inter="";}
+	    if(iport==2){port2x=node.lon;port2y=node.lat;port2name=name;port2inter="";}
+	    if(iport==3){port3x=node.lon;port3y=node.lat;port3name=name;port3inter="";}
 		iport+=1;if(iport>3){break;}
       }}
    }}
@@ -2083,7 +2100,7 @@ function waycallback(r){//alert(r);
   wayjson=JSON.parse(r);
   var msg="",test=0;
   nairport=0;ntower=0;
-  ways=[];airportname=[];airportnode=[];towernode=[];
+  ways=[];airportname=[];airportnode=[];towernode=[];airportinter=[];
   if(wayjson.elements){ways=wayjson.elements;}
   msg+="len="+ways.length;
   if(ways.length>0){
@@ -2101,6 +2118,8 @@ function waycallback(r){//alert(r);
          else if(way.tags.name){
 		     if(nairport<20){nairport+=1;airportname[nairport]=way.tags.name;
 	                    airportnode[nairport]=way.nodes[0];//parseInt(way.nodes.length/2)];
+						airportinter[nairport]="local";
+						if(way.tags.aerodrome){airportinter[nairport]=way.tags.aerodrome;}
 						test=0;msg+=" /"+way.tags.name;}}
 						}}
    //if(ways[i].nodes){nnode+=ways[i].nodes.length;}
@@ -2132,10 +2151,10 @@ function nodecallback3(r){//alert(r);
      var inode=airportnode[i];
 	 if(latnodes[inode]){
 	    msg+=" /"+airportname[i];
-	    if(iport==0){port0x=lonnodes[inode];port0y=latnodes[inode];port0name=airportname[i];}
-	    if(iport==1){port1x=lonnodes[inode];port1y=latnodes[inode];port1name=airportname[i];}
-	    if(iport==2){port2x=lonnodes[inode];port2y=latnodes[inode];port2name=airportname[i];}
-	    if(iport==3){port3x=lonnodes[inode];port3y=latnodes[inode];port3name=airportname[i];}
+	    if(iport==0){port0x=lonnodes[inode];port0y=latnodes[inode];port0name=airportname[i];port0inter=airportinter[i];}
+	    if(iport==1){port1x=lonnodes[inode];port1y=latnodes[inode];port1name=airportname[i];port1inter=airportinter[i];}
+	    if(iport==2){port2x=lonnodes[inode];port2y=latnodes[inode];port2name=airportname[i];port2inter=airportinter[i];}
+	    if(iport==3){port3x=lonnodes[inode];port3y=latnodes[inode];port3name=airportname[i];port3inter=airportinter[i];}
 		iport+=1;if(iport>3){break;}
 	 }
   }
@@ -2339,18 +2358,18 @@ else {if(dy>0){do1=90;}else{do1=-90;};}
 return do1;
 }
 var tairport=0;
-var radiotxt="",tradio=1,portname="",portname0="",portx=0,porty=0;
+var radiotxt="",tradio=1,portname="",portname0="",portx=0,porty=0,portinter="";
 var do1airport=0,do1airport0=0,distairport=0,distairport0=0;
 function testradio(){
 if(tradio==0){return;}
 if(tframe<tairport){
    if(tframe<(tairport-10000) || portname==portname0){return 0;}}
 tairport=tframe+17000;
-portx=-199;distairport=20000;
-if(port0dist<distairport){portx=port0x;porty=port0y;portname=port0name;distairport=port0dist;}
-if(port1dist<distairport){portx=port1x;porty=port1y;portname=port1name;distairport=port1dist;}
-if(port2dist<distairport){portx=port2x;porty=port2y;portname=port2name;distairport=port2dist;}
-if(port3dist<distairport){portx=port3x;porty=port3y;portname=port3name;distairport=port3dist;}
+portx=-199;distairport=20000;portinter="";
+if(port0dist<distairport){portx=port0x;porty=port0y;portname=port0name;distairport=port0dist;portinter=port0inter;}
+if(port1dist<distairport){portx=port1x;porty=port1y;portname=port1name;distairport=port1dist;portinter=port1inter;}
+if(port2dist<distairport){portx=port2x;porty=port2y;portname=port2name;distairport=port2dist;portinter=port2inter;}
+if(port3dist<distairport){portx=port3x;porty=port3y;portname=port3name;distairport=port3dist;portinter=port3inter;}
 msgradio.innerHTML="";
 var test=0;
 if(portx<-191){return;}
@@ -2448,7 +2467,8 @@ distboeing=999999;
 airportxx=(portx-x)*scale/klon;
 airportyy=(porty-y)*scale;
 distairportxx=100+Math.max(Math.abs(airportxx),Math.abs(airportyy));
-    var d720=Math.max(10500,Math.min(22000,25000*distairportxx/4000));
+    var d720=22000;
+	if(portinter=="international"){d720=Math.max(10500,Math.min(22000,25000*distairportxx/4000));}
     var xx=(boeingx-x)*scale/klon;
     if(Math.abs(xx)>d720){resetboeing();return;}
 	var yy=(boeingy-y)*scale;
@@ -2502,6 +2522,7 @@ distairportxx=100+Math.max(Math.abs(airportxx),Math.abs(airportyy));
 	var zz=boeingzsol+(Math.abs(xx)+Math.abs(yy))*0.17-120;
 	//if(distairportxx>4000){zz=Math.max(zz,zsol+700);}
 	zz=Math.min(zz,boeingzsol+(Math.abs(xxx)+Math.abs(yyy))*0.17-120);
+	if(portinter!="international"){zz=Math.max(boeingzsol+1800,zz);}
 	boeingz+=(Math.max(boeingzsol+20,Math.min(boeingzsol+2500,zz))-boeingz)*Math.min(1,dtime*0.0003);
 	boeingz=Math.max(boeingzsol+20,Math.min(boeingzsol+3000,boeingz));
 }
