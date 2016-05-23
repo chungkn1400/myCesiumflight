@@ -938,14 +938,18 @@ else{myentity2.show=true;
 	   myentity2.show=false;
 	   jetmesh.show=true;
 	   f14mesh.show=false;
-	   var mymatrix=new myCesium.Transforms.headingPitchRollToFixedFrame(position, heading, pitch, roll);//myCesium.Matrix3.fromRotationY(degtorad(30));
-       jetmesh.modelMatrix = mymatrix;
+	   //var mymatrix=new myCesium.Transforms.headingPitchRollToFixedFrame(position, heading, pitch, roll);//myCesium.Matrix3.fromRotationY(degtorad(30));
+       jetmesh.modelMatrix = myCesium.Transforms.headingPitchRollToFixedFrame(position, heading, pitch, roll);
     }else if(plane=="f14"){
 	   myentity2.show=false;
 	   jetmesh.show=false;
 	   f14mesh.show=true;
-	   var mymatrix=new myCesium.Transforms.headingPitchRollToFixedFrame(position, heading, pitch, roll);//myCesium.Matrix3.fromRotationY(degtorad(30));
-       f14mesh.modelMatrix = mymatrix;
+       f14mesh.modelMatrix = myCesium.Transforms.headingPitchRollToFixedFrame(position, heading, pitch, roll);
+	   /*var mymatrix=new  myCesium.Matrix4();//myCesium.Transforms.headingPitchRollToFixedFrame(position, heading, pitch, roll);//myCesium.Matrix3.fromRotationY(degtorad(30));
+       var myscalematrix=new myCesium.Cartesian3(1.0, 2.0, 1.0);
+	   f14mesh.modelMatrix = myCesium.Matrix4.multiplyByScale(
+	           myCesium.Transforms.headingPitchRollToFixedFrame(position, heading, pitch, roll),
+			   myscalematrix, mymatrix);*/
 	}else{
 	   myentity2.show=true;
 	   jetmesh.show=false;
