@@ -33,8 +33,8 @@ if(myurl.indexOf("localhost:8080")<0 && myurl.indexOf("file:")>=0){
     @import url(../templates/bucket.css);
     @import url(../Build/Cesium/Widgets/widgets.css);
     #cesiumContainer {
-          width: 70%;
-		 height: 70%;
+          width: 98%;
+		 height: 98%;
 		 overflow: hidden;
       }
 </style>
@@ -81,7 +81,9 @@ if(myurl.indexOf("localhost:8080")<0 && myurl.indexOf("file:")>=0){
      </select>
 </div>
 	<div id="msgradio" style="width:220px;">msgradio</div>
+	<br />
 </div>
+	<div id="credit" style="position:absolute;top:400px;left:0px;width:420px;"></div>
 	<div id="mapdiv" style="position:absolute;top:4028px;left:0px;width:97%;height:95%;" >
     </div>
 	<div id="mapdivmsg" style="position:absolute;top:4000px;left:0px;width:400px;height:20px;" >
@@ -129,6 +131,8 @@ var apikey='&key=AIzaSyAH372ZH8QSQgRHsqdtqNxkLVpcp_XUUkE';
 <script src="http://chungkn1400.github.io/mywebglflight/mywebglflight/buddahpng.js"></script>
 <script src="http://chungkn1400.github.io/mywebglflight/mywebglflight/airporttower256png.js"></script>
 <script src="http://chungkn1400.github.io/myCesiumflight/myCesiumflight/cesium/Apps/Sandcastle/myApps/boeing512png.js" ></script>
+<script src="http://chungkn1400.github.io/myCesiumflight/myCesiumflight/cesium/Apps/Sandcastle/myApps/models/mybridgeobjtxt.js" ></script>
+<script src="http://chungkn1400.github.io/myCesiumflight/myCesiumflight/cesium/Apps/Sandcastle/myApps/models/mybridgepng.js" ></script>
 <script id="webaudio" >
 var twebaudio=1;
 try{
@@ -271,6 +275,8 @@ windx=parseInt(window.innerWidth/cssscale);
 windy=parseInt(window.innerHeight/cssscaley);
 document.getElementById("cesiumContainer").setAttribute("style",
   "border: none;top:0px;left:0px;width:"+wx+";height:"+wy+";-ms-transform: scale("+cssscale1+","+cssscaley1+"); /* IE 9 */-webkit-transform: scale("+cssscale+","+cssscaley+"); /* Chrome, Safari, Opera */transform: scale("+cssscale+","+cssscaley+");-ms-transform-origin: 0 0;-webkit-transform-origin: 0 0;transform-origin: 0 0;");
+document.getElementById("credit").setAttribute("style",
+  "border: none;position:absolute;top:"+parseInt(window.innerHeight-39)+"px;left:0px;width:95%;height:35px;");
 if(cockpit){updatecockpit();}
 }
 sizescreen();
@@ -317,11 +323,16 @@ var viewer = new Cesium.Viewer('cesiumContainer',{
     fullscreenButton:false,
     homeButton:false,
     sceneModePicker:false,
-    timeline:false
-							   });
+    timeline:false,
+	creditContainer: document.getElementById("credit")
+    //webgl:{alpha:true }
+							   }
+							   
+							   );
 myviewer=viewer;
 myCesium=Cesium;
-
+//myviewer.Scene.contextOptions.webgl.alpha=true;
+//myviewer.Scene.creditContainer=document.getElementById("credit");
 var cesiumTerrainProviderMeshes = new Cesium.CesiumTerrainProvider({
     url : 'https://assets.agi.com/stk-terrain/world',
     requestWaterMask : true,
@@ -514,6 +525,7 @@ viewer.clock.onTick.addEventListener(function(clock) {
     cos1=Math.cos(degtorad(o1));sin1=Math.sin(degtorad(o1));
     cos2=Math.cos(degtorad(o2));sin2=Math.sin(degtorad(o2));
     cos3=Math.cos(degtorad(o3));sin3=Math.sin(degtorad(o3));
+	addbridgemesh();
 	addaircraft();
     loadstorage('aircraftx','aircraftx');
     loadstorage('aircrafty','aircrafty');
@@ -673,9 +685,12 @@ alert(port0name+"/ "+port1name+" /"+port2name+" /"+port3name);
 }
 var wayx=-199,wayy=0,waytime=0;
 function testgetways(){
-if(tframe>waytime+12000){
- if(Math.abs((wayx-x)*scale/klon)>1200 || Math.abs((wayy-y)*scale)>1200){
-   wayx=x;wayy=y;waytime=tframe;
+if(tframe>waytime+9000){
+ var dx=1.5*360/40000;
+ var xx=x+cos1*dx*klon,yy=y+sin1*dx;
+ if(Math.abs((wayx-xx)*scale/klon)>800 || Math.abs((wayy-yy)*scale)>800){
+   updatebridge();
+   wayx=xx;wayy=yy;waytime=tframe;
    getways();}}
 }
 var button=[];for(var i=0;i<16;i++){button[i]=0;};
@@ -805,6 +820,34 @@ myCesium.when(promise, function(updatedPositions) {
 	// updatedPositions is just a reference to positions.
 });
 return positionheight0;
+}
+var tgetterrainheightbridge=0;
+function getterrainheightbridge(){
+if(tgetterrainheightbridge>tframe-30000 || okinit<2 || tframe<tloading){return;}
+tgetterrainheightbridge=tframe;
+var positions = [];
+for(var i=0;i<nbridgemesh;i++){
+  if(bridgemeshx[i]<-179){positions.push(myCesium.Cartographic.fromDegrees(x,y));
+                          positions.push(myCesium.Cartographic.fromDegrees(x,y));}
+  else{var dr=bridgemeshscalex[i]*0.300*360/40000;
+       var dx=Math.cos(degtorad(bridgemesho1[i]))*dr*klon;
+       var dy=Math.sin(degtorad(bridgemesho1[i]))*dr;
+       positions.push(myCesium.Cartographic.fromDegrees(bridgemeshx[i]-dx,bridgemeshy[i]-dy));
+       positions.push(myCesium.Cartographic.fromDegrees(bridgemeshx[i]+dx,bridgemeshy[i]+dy));}
+}
+var promise ;
+if(z<zsol+8){promise= myCesium.sampleTerrain(myviewer.terrainProvider, 14, positions);}
+else{promise= myCesium.sampleTerrain(myviewer.terrainProvider, 13, positions);}
+myCesium.when(promise, function(updatedPositions) {
+    for(var i=0;i<nbridgemesh;i++){
+      if(bridgemeshx[i]>-179){
+	     var h0=bridgemeshzsol[i];
+	     bridgemeshzsol[i]=(positions[i+i].height+positions[i+i+1].height)/2;
+		 }}
+	// updatedPositions is just a reference to positions.
+    tgetterrainheightbridge=0;
+});
+//return 0;
 }
 function subquit(){
   quit=1;
@@ -1156,7 +1199,11 @@ var mymesh=new myCesium.Primitive({
     });
 return mymesh;
 }
-var jetgeometry,jetmesh,f14geometry,f14mesh;	
+var jetgeometry,jetmesh,f14geometry,f14mesh,bridgegeometry,bridgemesh=[];
+var nbridgemesh=50,ibridgemesh=0;
+var bridgemeshx=[],bridgemeshy=[],bridgemeshz=[],bridgemeshdz=[],bridgemesho1=[];
+var bridgemeshscale=[],bridgemeshmatrix=[],bridgemeshzsol=[];	
+var bridgemeshscalex=[],bridgemeshscaley=[],bridgemeshscalez=[];
 function createmymesh(){
 var scale=0.1;
 jetgeometry=loadmygeometry(alphajetobjtxt,scale);//addmygeometry(positions,textcoords);
@@ -1174,6 +1221,70 @@ var roll = degtorad(-aircrafto3);
 var mymatrix=new myCesium.Transforms.headingPitchRollToFixedFrame(position, heading, pitch, roll);//myCesium.Matrix3.fromRotationY(degtorad(30));
 jetmesh.modelMatrix = mymatrix;
 f14mesh.modelMatrix = mymatrix;
+
+}
+function addbridgemesh(){
+var scale=1.0;
+bridgegeometry=loadmygeometry(mybridgeobjtxt,scale);
+for(var i=0;i<nbridgemesh;i++){
+  bridgemesh[i]=addmymesh(bridgegeometry, mybridgepng);
+  myviewer.scene.primitives.add(bridgemesh[i]);  
+ }
+for(var i=0;i<nbridgemesh;i++){
+ bridgemeshx[i]=-180;//x;
+ bridgemeshy[i]=y+i*0.300*360/40000;
+ bridgemeshdz[i]=5.0;
+ bridgemeshzsol[i]=zsol;
+ bridgemeshz[i]=zsol+bridgemeshdz[i];
+ bridgemesho1[i]=-90.0;
+ bridgemeshscalex[i]=1.0;
+ bridgemeshscaley[i]=1.0;
+ bridgemeshscalez[i]=1.0;
+ bridgemeshscale[i]=new myCesium.Cartesian3(bridgemeshscalex[i],bridgemeshscaley[i],bridgemeshscalez[i]);
+ var position = new myCesium.Cartesian3.fromDegrees(bridgemeshx[i],bridgemeshy[i],bridgemeshz[i]);
+ var heading = degtorad(bridgemesho1[i]);
+ var pitch = degtorad(0.0);
+ var roll = degtorad(0.0);
+ bridgemeshmatrix[i]=new myCesium.Transforms.headingPitchRollToFixedFrame(position, heading, pitch, roll);//myCesium.Matrix3.fromRotationY(degtorad(30));
+ myCesium.Matrix4.multiplyByScale(
+	         myCesium.Transforms.headingPitchRollToFixedFrame(position, heading, pitch, roll),
+			 bridgemeshscale[i], bridgemeshmatrix[i]);
+ bridgemesh[i].modelMatrix=bridgemeshmatrix[i];
+ bridgemesh[i].show=false;
+ }
+}
+function updatebridge(){
+if(tgetterrainheightbridge>tframe-30000 || okinit<2 || tframe<tloading){return;}
+tgetterrainheightbridge=tframe;
+updatebridge0();
+tgetterrainheightbridge=0;
+}
+function updatebridge0(){
+var distmax=18*360/40000;
+for(var i=0;i<nbridgemesh;i++){
+ if(bridgemeshx[i]<-179){bridgemesh[i].show=false;}
+ else{
+  var test=0,dx=(bridgemeshx[i]-x)/klon,dy=bridgemeshy[i]-y;
+  if(Math.abs(dx)>distmax){bridgemesh[i].show=false;}
+  else{if(Math.abs(dy)>distmax){bridgemesh[i].show=false;}
+       else{test=1;bridgemesh[i].show=true;}
+   }
+  if(test==1){
+   bridgemeshdz[i]=10.0;
+   bridgemeshz[i]=bridgemeshzsol[i]+bridgemeshdz[i];
+   var position = myCesium.Cartesian3.fromDegrees(bridgemeshx[i],bridgemeshy[i],bridgemeshz[i]);
+   var heading = degtorad(bridgemesho1[i]);
+   if((dx*Math.sin(heading)+dy*Math.cos(heading))>0){heading+=degtorad(180);}
+   var pitch = degtorad(0.0);
+   var roll = degtorad(0.0);
+   bridgemeshscale[i]=new myCesium.Cartesian3(bridgemeshscalex[i],bridgemeshscaley[i],bridgemeshscalez[i]);
+   myCesium.Matrix4.multiplyByScale(
+	         myCesium.Transforms.headingPitchRollToFixedFrame(position, heading, pitch, roll),
+			 bridgemeshscale[i], bridgemeshmatrix[i]);
+   bridgemesh[i].modelMatrix=bridgemeshmatrix[i];
+   bridgemesh[i].show=true;
+  } 
+ }}
 }
 function createModel(url, height) {
     myviewer.entities.removeAll();
@@ -2074,6 +2185,7 @@ function httpGet(url,callback)
 var wayjson,ways=[],nodejson,nodes=[],iport=0,nairport=0,airportname=[],airportnode=[];
 var airportinter=[],port0inter="",port1inter="",port2inter="",port3inter="";
 var ntower=0,towernode=[],towernodemid=[];
+var nbridge=0,bridgenode=[],bridgenodemid=[],bridgenodemid2=[];
 function nodecallback(r){//alert(r);
   nodejson=JSON.parse(r);
   var msg="";
@@ -2107,8 +2219,9 @@ function nodecallback(r){//alert(r);
 function waycallback(r){//alert(r);
   wayjson=JSON.parse(r);
   var msg="",test=0;
-  nairport=0;ntower=0;
+  nairport=0;ntower=0;nbridge=0;
   ways=[];airportname=[];airportnode=[];towernode=[];airportinter=[];towernodemid=[];
+  bridgenode=[];bridgenodemid=[];bridgenodemid2=[];
   if(wayjson.elements){ways=wayjson.elements;}
   msg+="len="+ways.length;
   if(ways.length>0){
@@ -2121,7 +2234,7 @@ function waycallback(r){//alert(r);
    if(way.tags && way.nodes){
       if(way.tags.aeroway){
 	     if(way.tags.aeroway=="terminal"){
-		     if(ntower<40 && test<15){ntower+=1;towernode[ntower]=way.nodes[0];
+		     if(ntower<20 && test<15){ntower+=1;towernode[ntower]=way.nodes[0];
 			            towernodemid[ntower]=way.nodes[parseInt(way.nodes.length*0.51)];
 	                    test+=1;msg+=" /tower /";}}
          else if(way.tags.name){
@@ -2130,11 +2243,17 @@ function waycallback(r){//alert(r);
 						airportinter[nairport]="local";
 						if(way.tags.aerodrome){airportinter[nairport]=way.tags.aerodrome;}
 						test=0;msg+=" /"+way.tags.name;}}
-						}}
+						}
+      else if(nbridge<100){nbridge+=1;bridgenode[nbridge]=way.nodes[0];
+	                    bridgenodemid[nbridge]=way.nodes[parseInt(way.nodes.length*0.51)];
+	                    bridgenodemid2[nbridge]=way.nodes[parseInt(way.nodes.length*0.31)];
+						}
+	  }
    //if(ways[i].nodes){nnode+=ways[i].nodes.length;}
    }}
+  auxvar2=nbridge;
   //alert("nairport="+nairport+" "+msg);
-  if(nairport>0 || ntower>0){setTimeout("getnodes3();",300);}
+  if(nairport>0 || ntower>0 || nbridge>0){setTimeout("getnodes3();",300);}
   else{iport=0;setTimeout("getnodes();",300);}//tloading=0;}
 }
 var nodejson3,nodes3=[],latnodes=[],lonnodes=[];
@@ -2143,7 +2262,7 @@ function nodecallback3(r){//alert(r);
   var msg="";
   nodes3=[];latnodes=[];lonnodes=[];
   if(nodejson3.elements){nodes3=nodejson3.elements;}
-  msg+="len3="+nodes3.length;
+  msg+="len3="+nodes3.length;auxvar3=nodes3.length;
   for(var i=0;i<nodes3.length;i++){
      /*if(i<5){
 	  msg+="/ nodeid3="+nodes3[i].id;
@@ -2203,9 +2322,82 @@ function nodecallback3(r){//alert(r);
 				     tower2portwidth=Math.max(1.0,dxx/0.017);}
 				  }}}}
   }  
+  if(nbridge>=1 && okinit>=1 && tgetterrainheightbridge<tframe-30000){
+    tgetterrainheightbridge=tframe;
+    //for(var j=0;j<nbridgemesh;j++){bridgemeshx[j]=-180.0;}
+	//var jbridgemesh=0;
+    for(var i=1;i<=nbridge;i++){
+     var inode=bridgenode[i];
+	 if(latnodes[inode]){var xx=lonnodes[inode],yy=latnodes[inode];
+       var inodemid=bridgenodemid[i];
+	   if(latnodes[inodemid]){var xxx=lonnodes[inodemid],yyy=latnodes[inodemid];
+	     //jbridgemesh+=1;
+		 //var ii=jbridgemesh-1;
+		 var dx=(xxx-xx)/klon,dy=yyy-yy;
+		 var bridgemeshscalexii=Math.sqrt(dx*dx*100+dy*dy*100)/(20*0.230*360/40000);
+         var inodemid2=bridgenodemid2[i];
+		 if(latnodes[inodemid2]){var xxxx=lonnodes[inodemid2],yyyy=latnodes[inodemid2];
+		    var dx2=(xxxx-xx)/klon,dy2=yyyy-yy;
+		    var bridgemeshscalexii2=Math.sqrt(dx2*dx2*100+dy2*dy2*100)/(20*0.230*360/40000);
+			if(bridgemeshscalexii<bridgemeshscalexii2){bridgemeshscalexii=bridgemeshscalexii2;
+			                      xxx=xxxx;yyy=yyyy;dx=dx2;dy=dy2;}
+			}
+		 if(bridgemeshscalexii>0.55){
+		    var bridgemeshxii=(xx+xxx)*0.5;
+		    var bridgemeshyii=(yy+yyy)*0.5;
+		    var bridgemesho1ii=-diro1(dx*10000,dy*10000)+4/bridgemeshscalexii;
+            //bridgemeshscale[ii]=new myCesium.Cartesian3(bridgemeshscalex[ii],bridgemeshscaley[ii],bridgemeshscalez[ii]);
+			testaddbridgemesh(bridgemeshxii,bridgemeshyii,bridgemesho1ii,bridgemeshscalexii);
+		 //}else{bridgemeshx[ii]=-180.0;
+		 //      jbridgemesh-=1;}
+		 }
+		 }}}
+	 auxvar2=ibridgemesh;
+	 var distmax=600*360/40000,nbridges=0;
+	 for(var i=0;i<nbridgemesh;i++){
+	    if(Math.abs(bridgemeshx[i]-x)>distmax*klon ||
+		   Math.abs(bridgemeshy[i]-y)>distmax){bridgemeshx[i]=-180;bridgemesh[i].show=false;}
+		else{nbridges+=1;}   
+	 }
+	 auxvar=nbridges;
+     updatebridge0();	 
+	 tgetterrainheightbridge=0;
+	 }
   //alert(msg);
+  setTimeout("getterrainheightbridge();",90);
   if(iport<=3){setTimeout("getnodes();",300);}
   else{tloading=0;}
+}
+function testaddbridgemesh(xii,yii,o1ii,scalexii){
+for(var i=0;i<nbridgemesh;i++){
+  if(Math.abs(yii-bridgemeshy[i])<0.0003){
+    if(Math.abs(xii-bridgemeshx[i])<0.0003*klon){
+	   return;}
+	/*var do1=bridgemesho1[i]-o1ii;
+    while(do1>180){do1-=360;}
+    while(do1<-180){do1+=360;}
+    if(Math.abs(do1)<8){
+	   if(scalexii<=bridgescalex[i]){return;}
+	   bridgemeshx[i]=xii;
+	   bridgemeshy[i]=yii;
+	   bridgemesho1[i]=o1ii;
+	   bridgemeshscalex[i]=scalexii;
+	   return;       
+    }*/	   
+  }
+}
+var dist=Math.max(Math.abs(xii-x)/klon,Math.abs(yii-y));
+for(var i=0;i<nbridgemesh;i++){
+  ibridgemesh+=1;if(ibridgemesh>=nbridgemesh){ibridgemesh=0;}
+  if(dist<Math.max(Math.abs(bridgemeshx[ibridgemesh]-x)/klon,
+                   Math.abs(bridgemeshy[ibridgemesh]-y))){
+	 bridgemeshx[ibridgemesh]=xii;
+	 bridgemeshy[ibridgemesh]=yii;
+	 bridgemesho1[ibridgemesh]=o1ii;
+	 bridgemeshscalex[ibridgemesh]=scalexii;
+	 return;
+  }
+}
 }
 var tloading=0,http="http:",overpass="";
 function getnodes(){
@@ -2240,6 +2432,11 @@ lng=x;lat=y;
 var lat1=lat-dx,lon1=lng-dx*klon;
 var lat2=lat+dx,lon2=lng+dx*klon;
 var latlon="%28"+lat1+"%2C"+lon1+"%2C"+lat2+"%2C"+lon2+"%29";
+dx=2*360/40000;
+var dx1=dx+(z-zsol)*0.0015*360/40000;
+var lat11=lat-dx+dx1*sin1,lon11=lng-dx*klon+dx1*klon*cos1;
+var lat21=lat+dx+dx1*sin1,lon21=lng+dx*klon+dx1*klon*cos1;
+var latlon1="%28"+lat11+"%2C"+lon11+"%2C"+lat21+"%2C"+lon21+"%29";
 http="http:";
 if(document.location.href.indexOf("https")>=0){
    http="https:";}
@@ -2251,7 +2448,12 @@ if(http=="https:"){overpass="//overpass-api.de/api/";}
 //var wayurl=http+overpass+"interpreter?data=[out:json];%28way[aeroway~'aerodrome|runway']"+latlon+";";
 var wayurl=http+overpass+"interpreter?data=[out:json];%28way[aeroway~'aerodrome|terminal']"+latlon+";";
 //var wayurl=http+overpass+"interpreter?data=[out:json];%28node[aeroway~'aerodrome']"+latlon+";";
-wayurl+="%29%3Bout%20qt%201999%3B";
+//wayurl+="way['bridge:structure']"+latlon1+";";auxvar=0;
+//wayurl+="way['man_made'~'bridge'][highway~'motorway|trunk']"+latlon1+";";
+wayurl+="way['man_made'~'bridge']"+latlon1+";";
+wayurl+="way['bridge']"+latlon1+";";
+//wayurl+="way['bridge'][highway~'motorway|trunk|primary']"+latlon1+";";
+wayurl+="%29%3Bout%20qt%20399%3B";
 try{		
 httpGet(wayurl,waycallback);
 }catch (e){alert("error getways");tloading=0;}
@@ -2260,14 +2462,27 @@ function getnodes3(){
 var nodeurl3=http+overpass+"interpreter?data=[out:json];%28";
 for(var i=1;i<=nairport;i++){
     nodeurl3+="node%28"+airportnode[i]+"%29";
-	if(i<nairport || ntower>=1){nodeurl3+=";";}
+	if(i<nairport || ntower>=1 || nbridge>=1){nodeurl3+=";";}
 	}
 for(var i=1;i<=ntower;i++){
     nodeurl3+="node%28"+towernode[i]+"%29";
     nodeurl3+=";node%28"+towernodemid[i]+"%29";
-	if(i<ntower){nodeurl3+=";";}
+	if(i<ntower || nbridge>=1){nodeurl3+=";";}
 	}
-nodeurl3+="%29%3Bout%20skel%20199%3B";
+for(var i=1;i<=nbridge;i++){
+    nodeurl3+="node%28"+bridgenode[i]+"%29";
+    nodeurl3+=";node%28"+bridgenodemid[i]+"%29";
+	if(nodeurl3.length>1900){break;}
+	if(i<nbridge){nodeurl3+=";";}
+	}
+var dx=2*360/40000;
+var dx1=dx+(z-zsol)*0.0015*360/40000;
+dx=1.0*360/40000;
+var lat11=lat-dx+dx1*sin1,lon11=lng-dx*klon+dx1*klon*cos1;
+var lat21=lat+dx+dx1*sin1,lon21=lng+dx*klon+dx1*klon*cos1;
+var latlon1="%28"+lat11+"%2C"+lon11+"%2C"+lat21+"%2C"+lon21+"%29";
+nodeurl3+=";node"+latlon1
+nodeurl3+="%29%3Bout%20qt%20skel%2025999%3B";
 try{		
 httpGet(nodeurl3,nodecallback3);
 }catch (e){alert("error getnodes3");tloading=0;}
