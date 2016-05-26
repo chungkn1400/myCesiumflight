@@ -2389,10 +2389,12 @@ function nodecallback3(r){//alert(r);
 	 tgetterrainheightbridge=0;
 	 }
   //alert(msg);
-  setTimeout("getterrainheightbridge();",90);
+  if(testbridgechanged==1){testbridgechanged=0;
+                           setTimeout("getterrainheightbridge();",90);}
   if(iport<=3){setTimeout("getnodes();",300);}
   else{tloading=0;}
 }
+var testbridgechanged=0;
 function testaddbridgemesh(xii,yii,o1ii,scalexii){
 if(xii<-179){return;}
 for(var i=0;i<nbridgemesh;i++){
@@ -2403,6 +2405,7 @@ for(var i=0;i<nbridgemesh;i++){
 	   bridgemeshy[i]=yii;
 	   bridgemesho1[i]=o1ii;
 	   bridgemeshscalex[i]=scalexii;
+	   testbridgechanged=1;
 	   //var sc=Math.max(1,scalexii/(scalexii*0.75+0.25));
 	   //bridgemeshscalez[i]=sc;
 	   return;
@@ -2418,6 +2421,7 @@ for(var i=0;i<nbridgemesh;i++){
 	 bridgemeshy[ibridgemesh]=yii;
 	 bridgemesho1[ibridgemesh]=o1ii;
 	 bridgemeshscalex[ibridgemesh]=scalexii;
+	 testbridgechanged=1;
 	 //var sc=Math.max(1,scalexii/(scalexii*0.75+0.25));
      //bridgemeshscalez[ibridgemesh]=sc;
 	 return;
