@@ -543,7 +543,6 @@ viewer.clock.onTick.addEventListener(function(clock) {
     viewer.camera.lookAt(center, new Cesium.HeadingPitchRange(heading, pitch, range));	
     //viewer.camera.lookAtTransform(Cesium.Matrix4.IDENTITY);
 	*/
-	initterrainheightvars();
 	addboeing();
 	addairporttower();
 	addairporttower2();
@@ -677,24 +676,30 @@ if(itime%20==1){setklon();}
 ////if(keys[vk_b]){v=Math.max(-20,v-dtime*0.025);}//x-=v*cos1*cos2/klon;y-=v*sin1*cos2;z-=v*sin2*500;}
 v=200*vplane/2;//vplane:-0.5 .. 4.5 -100..900km/h
 movexyz=v*dtime*0.0005;
-if(okinit>=1 && spotb){okinit=2;myview();moveaircraft();testgetways();testradio();testgetweather();
+if(okinit>=1 && spotb){okinit=2;
+   myview();moveaircraft();
+   if(taskgetterrainheightbridge==1){getterrainheightbridge();}
+   testgetways();testradio();
+   testgetweather();
+   if(tinitterrainheightvars==1){initterrainheightvars();}
+          
 			  }
 }
 function subtest(){//addaircraft();return;
 alert(port0name+"/ "+port1name+" /"+port2name+" /"+port3name);
 }
-var wayx=-199,wayy=0,waytime=0,tupdatebridge=0;
+var wayx=-199,wayy=0,waytime=0,tupdatebridge=0,tnearbridge=0;
 function testgetways(){
 if(tframe>waytime+8000){
  var dx=1.5*360/40000;
  var xx=x+cos1*dx*klon,yy=y+sin1*dx;
  var d800=Math.min(800,200+z-zsol);
  if(Math.abs((wayx-xx)*scale/klon)>d800 || Math.abs((wayy-yy)*scale)>d800){
-   updatebridge();tupdatebridge=tframe;
+   updatebridge();tupdatebridge=tframe;tnearbridge=0;
    wayx=xx;wayy=yy;waytime=tframe;
    getways();}
-}else if(tframe>tupdatebridge+4000 && tframe>tloading){
-   tupdatebridge=tframe;
+}else if(tframe>tupdatebridge+4000 && tnearbridge==1 && tframe>tloading){
+   tupdatebridge=tframe;tnearbridge=0;
    updatebridge();
 }
 }
@@ -796,7 +801,8 @@ function moveplane(){
     cos3=Math.cos(degtorad(o3));sin3=Math.sin(degtorad(o3));
 }
 var positionheight=0,positionheight0=0;
-function getterrainheight(lngx,latx){
+function getterrainheight(lngx,latx){auxvar3=myviewer.terrainProvider.ready;
+if(myviewer.terrainProvider.ready==false){return positionheight0;}
 //if(positionheight){positionheight = new myCesium.Cartographic(longitude, latitude);}
 //else{positionheight = new myCesium.Cartographic(longitude, latitude);}
 //positionheight=myCesium.Cartographic.fromDegrees(lngx,latx,-1000);
@@ -826,28 +832,46 @@ myCesium.when(promise, function(updatedPositions) {
 });
 return positionheight0;
 }
-var tgetterrainheightbridge=0;
+var tgetterrainheightbridge=0,taskgetterrainheightbridge=0;
 function getterrainheightbridge(){
-if(tgetterrainheightbridge>tframe-30000 || okinit<2 || tframe<tloading){return;}
+if(myviewer.terrainProvider.ready==false){return;}
+if(tgetterrainheightbridge>tframe-20000 || okinit<2 || tframe<tloading){return;}
 tgetterrainheightbridge=tframe;
-var positions = [];
+taskgetterrainheightbridge=0;
+var positions = [],dr=0,dx=0;dy=0;
 for(var i=0;i<nbridgemesh;i++){
-  if(bridgemeshx[i]<-179){positions.push(myCesium.Cartographic.fromDegrees(x,y));
+  if(bridgemeshx[i]<-178){
+                          positions.push(myCesium.Cartographic.fromDegrees(x,y));
+                          positions.push(myCesium.Cartographic.fromDegrees(x,y));
+                          positions.push(myCesium.Cartographic.fromDegrees(x,y));
+                          positions.push(myCesium.Cartographic.fromDegrees(x,y));
                           positions.push(myCesium.Cartographic.fromDegrees(x,y));}
-  else{var dr=bridgemeshscalex[i]*0.300*360/40000;
-       var dx=Math.cos(degtorad(bridgemesho1[i]))*dr*klon;
-       var dy=Math.sin(degtorad(bridgemesho1[i]))*dr;
+  else{dr=Math.min(0.2,bridgemeshscalex[i]*0.300*360/40000);
+       dx=Math.cos(degtorad(bridgemesho1[i]))*dr*klon;
+       dy=Math.sin(degtorad(bridgemesho1[i]))*dr;
        positions.push(myCesium.Cartographic.fromDegrees(bridgemeshx[i]-dx,bridgemeshy[i]-dy));
-       positions.push(myCesium.Cartographic.fromDegrees(bridgemeshx[i]+dx,bridgemeshy[i]+dy));}
+       positions.push(myCesium.Cartographic.fromDegrees(bridgemeshx[i]+dx,bridgemeshy[i]+dy));
+       positions.push(myCesium.Cartographic.fromDegrees(bridgemeshx[i]-dx/2,bridgemeshy[i]-dy/2));
+       positions.push(myCesium.Cartographic.fromDegrees(bridgemeshx[i]+dx/2,bridgemeshy[i]+dy/2));
+       positions.push(myCesium.Cartographic.fromDegrees(bridgemeshx[i],bridgemeshy[i]));}
 }
 var promise ;
-if(z<zsol+8){promise= myCesium.sampleTerrain(myviewer.terrainProvider, 14, positions);}
-else{promise= myCesium.sampleTerrain(myviewer.terrainProvider, 13, positions);}
+promise= myCesium.sampleTerrain(myviewer.terrainProvider, 13, positions);
 myCesium.when(promise, function(updatedPositions) {
     for(var i=0;i<nbridgemesh;i++){
-      if(bridgemeshx[i]>-179){
-	     var h0=bridgemeshzsol[i];
-	     bridgemeshzsol[i]=(positions[i+i].height+positions[i+i+1].height)/2;
+      if(bridgemeshx[i]>-178){
+	     var i5=i*5;
+	     var h=(positions[i5].height+positions[i5+1].height)/2;
+	     bridgemeshzsol[i]=h;		 
+	     var h1=positions[i5+2].height;
+	     var h2=positions[i5+3].height;
+	     var h3=positions[i5+4].height;
+		 var dh=h-2.0;
+		 if(h1<dh || h2<dh || h3<dh){bridgemeshcolor[i]=2;}
+		 else{dh=h+1.0;
+		      if(h1>dh || h2>dh || h3>dh){bridgemeshcolor[i]=0;}
+			  else{bridgemeshcolor[i]=1;}
+		 }
 		 }}
 	// updatedPositions is just a reference to positions.
     tgetterrainheightbridge=0;
@@ -860,8 +884,8 @@ bridgesave="";
 loadstoragetext('bridgesave','bridgesave');
 if(bridgesave==""){return;}
 var aux = bridgesave.split("?");
-for(var i=0;i<aux.length-3;i+=4){
-   var xii=aux[i],yii=aux[i+1],o1ii=aux[i+2],scalexii=aux[i+3];
+for(var i=0;i<aux.length-4;i+=4){
+   var xii=aux[i]*1.0,yii=aux[i+1]*1.0,o1ii=aux[i+2]*1.0,scalexii=aux[i+3]*1.0;
    testaddbridgemesh(xii,yii,o1ii,scalexii);
 }
 updatebridge0();	 
@@ -1220,10 +1244,10 @@ var mymesh=new myCesium.Primitive({
 return mymesh;
 }
 var jetgeometry,jetmesh,f14geometry,f14mesh,bridgegeometry,bridgemesh=[];
-var nbridgemesh=50,ibridgemesh=0;
+var nbridgemesh=60,ibridgemesh=0;
 var bridgemeshx=[],bridgemeshy=[],bridgemeshz=[],bridgemeshdz=[],bridgemesho1=[];
 var bridgemeshscale=[],bridgemeshmatrix=[],bridgemeshzsol=[];	
-var bridgemeshscalex=[],bridgemeshscaley=[],bridgemeshscalez=[];
+var bridgemeshscalex=[],bridgemeshscaley=[],bridgemeshscalez=[],bridgemeshcolor=[];
 function createmymesh(){
 var scale=0.1;
 jetgeometry=loadmygeometry(alphajetobjtxt,scale);//addmygeometry(positions,textcoords);
@@ -1252,7 +1276,7 @@ for(var i=0;i<nbridgemesh;i++){
  }
 for(var i=0;i<nbridgemesh;i++){
  bridgemeshx[i]=-180;//x;
- bridgemeshy[i]=y+i*0.300*360/40000;
+ bridgemeshy[i]=-89;//y+i*0.300*360/40000;
  bridgemeshdz[i]=5.0;
  bridgemeshzsol[i]=zsol;
  bridgemeshz[i]=zsol+bridgemeshdz[i];
@@ -1271,6 +1295,7 @@ for(var i=0;i<nbridgemesh;i++){
 			 bridgemeshscale[i], bridgemeshmatrix[i]);
  bridgemesh[i].modelMatrix=bridgemeshmatrix[i];
  bridgemesh[i].show=false;
+ bridgemeshcolor[i]=0;
  }
 }
 function updatebridge(){
@@ -1285,6 +1310,7 @@ function updatebridge0(){
 var distmax=18*360/40000;
 for(var i=0;i<nbridgemesh;i++){
  if(bridgemeshx[i]<-179){bridgemesh[i].show=false;}
+ else if(bridgemeshcolor[i]<=0){bridgemesh[i].show=false;}
  else{
   var test=0,dx=(bridgemeshx[i]-x)/klon,dy=bridgemeshy[i]-y;
   if(Math.abs(dx)>distmax){bridgemesh[i].show=false;}
@@ -1292,6 +1318,7 @@ for(var i=0;i<nbridgemesh;i++){
        else{test=1;bridgemesh[i].show=true;}
    }
   if(test==1){
+   if(Math.max(Math.abs(dx),Math.abs(dy))<360/40000){tnearbridge=1;}
    bridgemeshdz[i]=7.0;
    bridgemeshz[i]=bridgemeshzsol[i]+bridgemeshdz[i];
    var position = myCesium.Cartesian3.fromDegrees(bridgemeshx[i],bridgemeshy[i],bridgemeshz[i]);
@@ -2390,7 +2417,7 @@ function nodecallback3(r){//alert(r);
 	 }
   //alert(msg);
   if(testbridgechanged==1){testbridgechanged=0;
-                           setTimeout("getterrainheightbridge();",90);}
+                           taskgetterrainheightbridge=1;}
   if(iport<=3){setTimeout("getnodes();",300);}
   else{tloading=0;}
 }
@@ -2693,7 +2720,10 @@ var tajmahalx=worldx,tajmahaly=worldy,tajmahalz=-9999;
 lat2=22.253985;lng2=113.904984;
 worldx=lng2;worldy=lat2;
 var buddahx=worldx,buddahy=worldy,buddahz=-9999;
+var tinitterrainheightvars=1;
 function initterrainheightvars(){
+if(myviewer.terrainProvider.ready==false){return;}
+tinitterrainheightvars=0;
 getterrainheightvar("libertystatue",32.5,1.3);
 getterrainheightvar("eiffeltower",80,1.3);
 getterrainheightvar("christrio",37,1.8);
