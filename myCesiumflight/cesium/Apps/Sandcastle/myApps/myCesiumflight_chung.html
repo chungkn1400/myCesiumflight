@@ -2138,6 +2138,8 @@ function addsky(){
 }
 function updatesky(){
 if(tourelle==0){
+  while(o1>180){o1-=360}
+  while(o1<-180){o1+=360}
   var dr=90000/scale,dr2=-2*dr*o1/180;
   var xx=x+klon*dr*cos1-klon*dr2*sin1;
   var yy=y+dr*sin1+dr2*cos1;
@@ -2146,8 +2148,11 @@ if(tourelle==0){
   sky.billboard.position= myCesium.Cartesian3.fromDegrees(xx,yy);
   sky.billboard.rotation=degtorad(-o3);
 }else{
-  var dr=90000/scale,dr2=-2*dr*(o1+to1)/180;
-  var co1=Math.cos(degtorad(o1+to1)),si1=Math.sin(degtorad(o1+to1));
+  var do1=o1+to1;
+  while(do1>180){do1-=360}
+  while(do1<-180){do1+=360}
+  var dr=90000/scale,dr2=-2*dr*(do1)/180;
+  var co1=Math.cos(degtorad(do1)),si1=Math.sin(degtorad(do1));
   var xx=x+klon*dr*co1-klon*dr2*si1;
   var yy=y+dr*si1+dr2*co1;
   //var zz=0;if(sin2>0){zz=dr*sin2*sin2;}
