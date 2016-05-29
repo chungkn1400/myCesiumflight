@@ -801,7 +801,7 @@ function moveplane(){
     cos3=Math.cos(degtorad(o3));sin3=Math.sin(degtorad(o3));
 }
 var positionheight=0,positionheight0=0;
-function getterrainheight(lngx,latx){auxvar3=myviewer.terrainProvider.ready;
+function getterrainheight(lngx,latx){
 if(myviewer.terrainProvider.ready==false){return positionheight0;}
 //if(positionheight){positionheight = new myCesium.Cartographic(longitude, latitude);}
 //else{positionheight = new myCesium.Cartographic(longitude, latitude);}
@@ -866,7 +866,7 @@ myCesium.when(promise, function(updatedPositions) {
 	     var h1=positions[i5+2].height;
 	     var h2=positions[i5+3].height;
 	     var h3=positions[i5+4].height;
-		 var dh=h-2.0;
+		 var dh=h-1.0;
 		 if(h1<dh || h2<dh || h3<dh){bridgemeshcolor[i]=2;}
 		 else{dh=h+1.0;
 		      if(h1>dh || h2>dh || h3>dh){bridgemeshcolor[i]=0;}
@@ -1295,7 +1295,7 @@ for(var i=0;i<nbridgemesh;i++){
 			 bridgemeshscale[i], bridgemeshmatrix[i]);
  bridgemesh[i].modelMatrix=bridgemeshmatrix[i];
  bridgemesh[i].show=false;
- bridgemeshcolor[i]=0;
+ bridgemeshcolor[i]=1;
  }
 }
 function updatebridge(){
@@ -2297,8 +2297,8 @@ function waycallback(r){//alert(r);
 						test=0;msg+=" /"+way.tags.name;}}
 						}
       else if(nbridge<100){nbridge+=1;bridgenode[nbridge]=way.nodes[0];
-	                    bridgenodemid[nbridge]=way.nodes[parseInt(way.nodes.length*0.51)];
-	                    bridgenodemid2[nbridge]=way.nodes[parseInt(way.nodes.length*0.31)];
+	                    bridgenodemid[nbridge]=way.nodes[parseInt(way.nodes.length-1)];
+	                    bridgenodemid2[nbridge]=way.nodes[parseInt(way.nodes.length*0.51)];
 						}
 	  }
    //if(ways[i].nodes){nnode+=ways[i].nodes.length;}
@@ -2386,11 +2386,11 @@ function nodecallback3(r){//alert(r);
 	     //jbridgemesh+=1;
 		 //var ii=jbridgemesh-1;
 		 var dx=(xxx-xx)/klon,dy=yyy-yy;
-		 var bridgemeshscalexii=Math.sqrt(dx*dx*100+dy*dy*100)/(20*0.230*360/40000);
+		 var bridgemeshscalexii=Math.sqrt(dx*dx*100+dy*dy*100)*klon/(20*0.230*360/40000);
          var inodemid2=bridgenodemid2[i];
 		 if(latnodes[inodemid2]){var xxxx=lonnodes[inodemid2],yyyy=latnodes[inodemid2];
 		    var dx2=(xxxx-xx)/klon,dy2=yyyy-yy;
-		    var bridgemeshscalexii2=Math.sqrt(dx2*dx2*100+dy2*dy2*100)/(20*0.230*360/40000);
+		    var bridgemeshscalexii2=Math.sqrt(dx2*dx2*100+dy2*dy2*100)*klon/(20*0.230*360/40000);
 			if(bridgemeshscalexii<bridgemeshscalexii2){bridgemeshscalexii=bridgemeshscalexii2;
 			                      xxx=xxxx;yyy=yyyy;dx=dx2;dy=dy2;}
 			}
