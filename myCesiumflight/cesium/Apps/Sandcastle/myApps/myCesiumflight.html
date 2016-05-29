@@ -133,6 +133,7 @@ var apikey='&key=AIzaSyAH372ZH8QSQgRHsqdtqNxkLVpcp_XUUkE';
 <script src="http://chungkn1400.github.io/myCesiumflight/myCesiumflight/cesium/Apps/Sandcastle/myApps/boeing512png.js" ></script>
 <script src="http://chungkn1400.github.io/myCesiumflight/myCesiumflight/cesium/Apps/Sandcastle/myApps/models/mybridgeobjtxt.js" ></script>
 <script src="http://chungkn1400.github.io/myCesiumflight/myCesiumflight/cesium/Apps/Sandcastle/myApps/models/mybridgepng.js" ></script>
+<script src="http://chungkn1400.github.io/myCesiumflight/myCesiumflight/cesium/Apps/Sandcastle/myApps/models/mybridgeorangepng.js" ></script>
 <script id="webaudio" >
 var twebaudio=1;
 try{
@@ -866,11 +867,15 @@ myCesium.when(promise, function(updatedPositions) {
 	     var h1=positions[i5+2].height;
 	     var h2=positions[i5+3].height;
 	     var h3=positions[i5+4].height;
-		 var dh=h-1.0;
+		 var dh=h-1.0,color0=bridgemeshcolor[i];
 		 if(h1<dh || h2<dh || h3<dh){bridgemeshcolor[i]=2;}
 		 else{dh=h+1.0;
 		      if(h1>dh || h2>dh || h3>dh){bridgemeshcolor[i]=0;}
 			  else{bridgemeshcolor[i]=1;}
+		 }
+		 if(color0!=bridgemeshcolor[i]){
+            if(bridgemeshcolor[i]==1){bridgemesh[i].appearance=mybridgeorangeappearance;}
+            else if(bridgemeshcolor[i]==2){bridgemesh[i].appearance=mybridgeredappearance;}
 		 }
 		 }}
 	// updatedPositions is just a reference to positions.
@@ -1243,6 +1248,31 @@ var mymesh=new myCesium.Primitive({
     });
 return mymesh;
 }
+var mybridgeredappearance,mybridgeorangeappearance,mybridgegreenappearance;
+function initmyappearance(){
+		mybridgeredappearance = new myCesium.MaterialAppearance({
+		   //translucent : false,
+		   material : new myCesium.Material({
+		       fabric : {
+                   type : 'Image',
+                   uniforms : {
+		              image : mybridgepng
+                   }
+			   }
+			  })
+			});
+		mybridgeorangeappearance = new myCesium.MaterialAppearance({
+		   //translucent : false,
+		   material : new myCesium.Material({
+		       fabric : {
+                   type : 'Image',
+                   uniforms : {
+		              image : mybridgeorangepng
+                   }
+			   }
+			  })
+			});
+}
 var jetgeometry,jetmesh,f14geometry,f14mesh,bridgegeometry,bridgemesh=[];
 var nbridgemesh=60,ibridgemesh=0;
 var bridgemeshx=[],bridgemeshy=[],bridgemeshz=[],bridgemeshdz=[],bridgemesho1=[];
@@ -1274,6 +1304,7 @@ for(var i=0;i<nbridgemesh;i++){
   bridgemesh[i]=addmymesh(bridgegeometry, mybridgepng);
   myviewer.scene.primitives.add(bridgemesh[i]);  
  }
+initmyappearance();
 for(var i=0;i<nbridgemesh;i++){
  bridgemeshx[i]=-180;//x;
  bridgemeshy[i]=-89;//y+i*0.300*360/40000;
@@ -1296,6 +1327,8 @@ for(var i=0;i<nbridgemesh;i++){
  bridgemesh[i].modelMatrix=bridgemeshmatrix[i];
  bridgemesh[i].show=false;
  bridgemeshcolor[i]=1;
+ if(bridgemeshcolor[i]==1){bridgemesh[i].appearance=mybridgeorangeappearance;}
+ else if(bridgemeshcolor[i]==2){bridgemesh[i].appearance=mybridgeredappearance;}
  }
 }
 function updatebridge(){
