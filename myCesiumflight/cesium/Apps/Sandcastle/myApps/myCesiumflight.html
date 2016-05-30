@@ -365,6 +365,7 @@ myellipsoid=ellipsoid;
     if(scene.sun){scene.sun.destroy();}
     scene.sun = undefined;*/
     //scene.backgroundColor = new Cesium.Color(0.8,0.8,1.0,1.0);
+	scene.skyAtmosphere.show=false;
 
 
 // disable the default event handlers
@@ -557,6 +558,10 @@ viewer.clock.onTick.addEventListener(function(clock) {
 	addairporttower();
 	addairporttower2();
 	okinit=1;
+	
+	loadstorage('terrainquality','terrainquality')
+	if(terrainquality>=1 && terrainquality<=10){
+    	myCesium.TerrainProvider.heightmapTerrainQuality=terrainquality/10.0;}
 
 }
 var quit=0,crlf=String.fromCharCode(10),auxvar=null,auxvar2=null,auxvar3=null,auxvar4=null;
@@ -609,11 +614,13 @@ msg+="V => view"+crlf;
 msg+="K => jet/plane"+crlf;
 msg+="R => radar / shift+R => radio off/on"+crlf;
 msg+="C => change cockpit"+crlf;
+msg+="shift+Q => terrain quality"+crlf;
 alert(msg);
 resetkeys();
 }
 if(keys[vk_escape]){quit=1;subquit();}
 if(keys[vk_9]){subtest();resetkeys();}
+if(keys[vk_q] && keys[vk_shift]){subterrainquality();resetkeys();}
 if(keys[vk_c] && iview==1){subcockpit();resetkeys();}
 if(keys[vk_r] && keys[vk_shift]){subradio();resetkeys();}
 if(keys[vk_r] && keys[vk_shift]==0){if(tradar==0){tradar=1;}else{tradar=0;};resetkeys();}
@@ -846,7 +853,7 @@ myCesium.when(promise, function(updatedPositions) {
 return positionheight0;
 }
 var tgetterrainheightbridge=0,taskgetterrainheightbridge=0;
-var hidebridgeid=[],nhidebridge=400,ihidebridge=0;
+var hidebridgeid=[],nhidebridge=220,ihidebridge=0;
 for(var i=0;i<=nhidebridge;i++){hidebridgeid[i]=0;}
 function getterrainheightbridge(){auxvar4=ihidebridge;
 if(myviewer.terrainProvider.ready==false){return;}
@@ -934,6 +941,7 @@ function subquit(){
   savestorage('aircraftz',aircraftz);
   savestorage('aircraftzsol',aircraftzsol);
   savestorage('aircrafto1',aircrafto1);
+  savestorage('terrainquality',terrainquality);
   bridgesave="";for(var i=0;i<nbridgemesh;i++){
    bridgesave+=bridgemeshx[i]+"?"+bridgemeshy[i]+"?"+bridgemesho1[i]+"?"+bridgemeshscalex[i]+"?";}
   savestorage('bridgesave',bridgesave);
@@ -1117,7 +1125,7 @@ if (combotext=="le caire"){lat=30.04441959;lng=31.23571160;o1=36.3920;}
 if (combotext=="washington"){lat=38.8850399;lng=-77.08054296;o1=36.3920;}
 if (combotext=="tajmahal"){lat=27.17015;lng=78.002155;o1=36.3920;}
 document.getElementById('combo').blur();
-o2=-4;o3=0;x=lng;y=lat;z=300.0;
+o2=-4;o3=0;x=lng;y=lat;z=300.0;setsun();
 myviewer.camera.setView({
     destination : myCesium.Cartesian3.fromDegrees(lng, lat, z),
 	orientation: {
@@ -1132,8 +1140,9 @@ function subfocus(){
 //document.getElementById('msg').focus();
 myviewer.canvas.focus();
 }
-function subflyto(lng,lat){
-o2=-4;o3=0;x=lng;y=lat;z=300.0;
+function subflyto(lngx,latx){
+o2=-4;o3=0;x=lngx;y=latx;z=300.0;
+lat=latx;lng=lngx;setsun();
 //myviewer.camera.flyTo({
 myviewer.camera.setView({
     destination : myCesium.Cartesian3.fromDegrees(lng, lat, z),
@@ -1143,6 +1152,16 @@ myviewer.camera.setView({
             roll : degtorad(-o3)}
 });
 setklon();
+}
+var terrainquality=5;
+function subterrainquality(){
+var aux=window.prompt("terrain quality : enter a number 1 .. 10 (last="+terrainquality+")");
+if(aux.length==0){return;}
+aux=Math.max(1,Math.min(10,parseInt(aux)));
+if(aux>=1 && aux<=10){
+  terrainquality=aux;
+  myCesium.TerrainProvider.heightmapTerrainQuality=aux/10.0;
+  }
 }
 var geolocation="";
 function geolocate(){
@@ -2218,8 +2237,10 @@ function setsun(){
 		sunz=800*Math.cos((12-hour2)*3.14/24)*Math.cos((12-hour2)*3.14/24)+40;
 		o1sun=(12-hour2)*180/24;
 		o2sun=diro1(1000,sunz);
-		//var r=Math.sqrt(sunx*sunx+suny*suny+0.59*sunz*sunz);
-		//sunx*=980/r;suny*=980/r;sunz*=980/r;
+		var alpha=Math.min(1.0,Math.max(0.25,Math.abs(hour2-12)/6.2-0.35));
+		if(sun){sun.billboard.color=new myCesium.Color(1,1,1,alpha);}
+		alpha=Math.min(1.0,Math.max(0.25,0.25+(12-Math.abs(hour2-12))/5.5));
+		if(sky){sky.billboard.color=new myCesium.Color(1,1,1,alpha);}
 }
 function updatesun(){
 if(tframe>tupdatesun+60000){tupdatesun=tframe;setsun();}
