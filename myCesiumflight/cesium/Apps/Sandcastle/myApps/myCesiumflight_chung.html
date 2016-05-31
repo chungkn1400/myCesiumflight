@@ -135,6 +135,7 @@ var apikey='&key=AIzaSyAH372ZH8QSQgRHsqdtqNxkLVpcp_XUUkE';
 <script src="http://chungkn1400.github.io/myCesiumflight/myCesiumflight/cesium/Apps/Sandcastle/myApps/models/mybridgepng.js" ></script>
 <script src="http://chungkn1400.github.io/myCesiumflight/myCesiumflight/cesium/Apps/Sandcastle/myApps/models/mybridgeorangepng.js" ></script>
 <script src="http://chungkn1400.github.io/myCesiumflight/myCesiumflight/cesium/Apps/Sandcastle/myApps/sunpng.js" ></script>
+<script src="http://chungkn1400.github.io/mywebglflight/mywebglflight/cloudpng.js"></script>
 <script id="webaudio" >
 var twebaudio=1;
 try{
@@ -547,6 +548,7 @@ viewer.clock.onTick.addEventListener(function(clock) {
 	addbouss();
 	addsky();
 	addsun();
+	addcloud();
 	/*var center = target;//Cesium.Cartesian3.fromDegrees(-72.0, 40.0);
     var heading = Cesium.Math.toRadians(0.0);
     var pitch = Cesium.Math.toRadians(-20.0);   
@@ -1078,6 +1080,7 @@ else{myentity2.show=true;
 }
 if(sky){updatesky();}
 if(sun){updatesun();}
+if(cloud[ncloud-1]){updatecloud();}
 updatemonument();
 if(boeing){moveboeing();updateboeing();}
 if(airporttower){updateairporttower();}
@@ -2123,18 +2126,55 @@ function updateboeing(){
 		      boeing.billboard.height=-100;}
 	 }else{boeing.billboard.show=false;}
 }
-var cloud=[],ncloud=5;
+var cloud=[],ncloud=50,cloudx=[],cloudy=[],cloudz=[],cloudsc=[],icloud=[],ncloud2=ncloud;
 function addcloud(){
 for(var i=0;i<ncloud;i++){
-  var xx=x+(Math.random()-0.5)*1000*klon/scale;
-  var yy=y+(Math.random()-0.5)*1000/scale;
-  var zz=z+(Math.random()-0.5)*100;
+  icloud[i]=i;
+  var dymax=28*360/40000;
+  cloudx[i]=x+(Math.random()-0.5)*2*dymax*klon;
+  cloudy[i]=y+(Math.random()-0.5)*2*dymax;
+  cloudz[i]=(z+zsol)/2+(Math.random()-0.35)*2*800;
+  var sc=0.14*(2+Math.random());//if(Math.random()<0.3){sc=-sc;}
+  cloudsc[i]=sc;
+  var alpha=1;
   cloud[i]=myviewer.entities.add({
-        position : myCesium.Cartesian3.fromDegrees(xx,yy,zz),
+        position : myCesium.Cartesian3.fromDegrees(cloudx[i],cloudy[i],cloudz[i]),
         billboard :{
-            image : '../images/Cesium_Logo_overlay.png'
+		    scale : sc,
+			color : new myCesium.Color(1,1,1,alpha),
+            image : cloudpng
         }
     });}
+}
+var tseticloud=0,ticloud=[],dcloud=[];
+function seticloud(){
+for(var i=0;i<ncloud2;i++){
+    ticloud[i]=0;dcloud[i]=((cloudx[i]-x)*(cloudx[i]-x)+(cloudy[i]-y)*(cloudy[i]-y)*klon*klon);}
+for(var i=0;i<ncloud2;i++){
+  var d=99999,k=0;
+  for(var j=0;j<ncloud2;j++){if(ticloud[j]==0 && d>dcloud[j]){k=j;d=dcloud[j];}}
+  ticloud[k]=1;icloud[i]=k;
+}
+}
+function updatecloud(){
+var dymax=28*360/40000,dxmax=dymax*klon;
+var ncloud20=ncloud2;
+ncloud2=Math.min(ncloud,ncloud*(70+0*wclouds)/170);
+for(var i=0;i<ncloud;i++){
+  if(i<ncloud2){
+   var test=0;
+   while(cloudx[i]>x+dxmax){cloudx[i]-=dxmax+dxmax;test=1;}
+   while(cloudx[i]<x-dxmax){cloudx[i]+=dxmax+dxmax;test=1;}
+   while(cloudy[i]>y+dymax){cloudy[i]-=dymax+dymax;test=1;}
+   while(cloudy[i]<y-dymax){cloudy[i]+=dymax+dymax;test=1;}
+   if(test==1){cloudz[i]=(z+zsol)/2+(Math.random()-0.35)*2*800;}
+   cloud[i].position= myCesium.Cartesian3.fromDegrees(cloudx[i],cloudy[i],cloudz[i]);
+   cloud[i].billboard.rotation=degtorad(-o3);
+   cloud[i].show=true;
+   }else{
+    cloud[i].show=false;
+   }
+}
 }
 var sky,isky=1;
 function addsky(){
