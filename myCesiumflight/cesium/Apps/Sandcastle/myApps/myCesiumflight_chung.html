@@ -2159,7 +2159,7 @@ for(var i=0;i<ncloud2;i++){
 function updatecloud(){
 var dymax=28*360/40000,dxmax=dymax*klon;
 var ncloud20=ncloud2;
-ncloud2=Math.min(ncloud,ncloud*(70+0*wclouds)/170);
+ncloud2=Math.min(ncloud,ncloud*(70+wclouds)/170);
 for(var i=0;i<ncloud;i++){
   if(i<ncloud2){
    var test=0;
