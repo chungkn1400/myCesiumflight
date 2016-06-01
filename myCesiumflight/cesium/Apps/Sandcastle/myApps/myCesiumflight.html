@@ -632,7 +632,10 @@ if(keys[vk_m] || (keys[vk_space] && tmap==1)){
           if(tmap==0){tmap=1;showmap();subcentermap();}//map.setCenter(new google.maps.LatLng(latx,lngx));updatemarker();}
           else{tmap=0;}
           if(tmap!=1){hidemap();}
-          document.getElementById('msgmap').value="lat="+lat+"  lng="+lng+"  z="+parseInt(z);
+		  var msgmap="lat="+parseInt(lat*10000)/10000+"  lng="+parseInt(lng*10000)/10000;
+		  msgmap+="  z="+parseInt(z)+"  clouds="+wclouds+"  wind="+parseInt(wind*10)/10+" km/h";
+		  msgmap+="  hour="+parseInt(hour*10)/10;
+          document.getElementById('msgmap').value=msgmap;
 		  resetkeys();
 } 
 if(keys[vk_t]){tourelle=(tourelle+1)%2;resetkeys();} 
@@ -2126,40 +2129,52 @@ function updateboeing(){
 		      boeing.billboard.height=-100;}
 	 }else{boeing.billboard.show=false;}
 }
-var cloud=[],ncloud=50,cloudx=[],cloudy=[],cloudz=[],cloudsc=[],icloud=[],ncloud2=ncloud;
+var cloud=[],ncloud=40,cloudx=[],cloudy=[],cloudz=[],cloudsc=[],icloud=[],ncloud2=ncloud;
 function addcloud(){
 for(var i=0;i<ncloud;i++){
   icloud[i]=i;
   var dymax=28*360/40000;
   cloudx[i]=x+(Math.random()-0.5)*2*dymax*klon;
   cloudy[i]=y+(Math.random()-0.5)*2*dymax;
-  cloudz[i]=(z+zsol)/2+(Math.random()-0.35)*2*800;
+  cloudz[i]=(z+zsol)/2+(Math.random()-0.2)*2*800;
   var sc=0.14*(2+Math.random());//if(Math.random()<0.3){sc=-sc;}
   cloudsc[i]=sc;
   var alpha=1;
+  //var dist=(Math.abs(cloudx[i]-x)/klon+Math.abs(cloudy[i]-y))*40000/360;
   cloud[i]=myviewer.entities.add({
-        position : myCesium.Cartesian3.fromDegrees(cloudx[i],cloudy[i],cloudz[i]),
+        position : new myCesium.Cartesian3.fromDegrees(cloudx[i],cloudy[i],cloudz[i]),
         billboard :{
-		    scale : sc,
+		    //eyeOffset : new myCesium.Cartesian3(0,0,i*0.3),
+            //verticalOrigin : myCesium.VerticalOrigin.BOTTOM, // default: CENTER
+			scale : sc,
 			color : new myCesium.Color(1,1,1,alpha),
             image : cloudpng
         }
     });}
 }
 var tseticloud=0,ticloud=[],dcloud=[];
+var cloudx2=[],cloudy2=[],cloudz2=[],cloudsc2=[];
 function seticloud(){
 for(var i=0;i<ncloud2;i++){
-    ticloud[i]=0;dcloud[i]=((cloudx[i]-x)*(cloudx[i]-x)+(cloudy[i]-y)*(cloudy[i]-y)*klon*klon);}
+    ticloud[i]=0;dcloud[i]=(cloudx[i]-x)*(cloudx[i]-x)+(cloudy[i]-y)*(cloudy[i]-y)*klon*klon;
+	cloudx2[i]=cloudx[i];cloudy2[i]=cloudy[i];cloudz2[i]=cloudz[i];cloudsc2[i]=cloudsc[i];
+	}
 for(var i=0;i<ncloud2;i++){
-  var d=99999,k=0;
-  for(var j=0;j<ncloud2;j++){if(ticloud[j]==0 && d>dcloud[j]){k=j;d=dcloud[j];}}
+  var d=-999,k=0;
+  for(var j=0;j<ncloud2;j++){if(ticloud[j]==0 && d<dcloud[j]){k=j;d=dcloud[j];}}
   ticloud[k]=1;icloud[i]=k;
+}
+for(var i=0;i<ncloud2;i++){
+    var ii=icloud[i];
+	cloudx[i]=cloudx2[ii];cloudy[i]=cloudy2[ii];cloudz[i]=cloudz2[ii];cloudsc[i]=cloudsc2[ii];
 }
 }
 function updatecloud(){
 var dymax=28*360/40000,dxmax=dymax*klon;
+if(tframe>tseticloud){tseticloud=tframe+10000;seticloud();}
 var ncloud20=ncloud2;
-ncloud2=Math.min(ncloud,ncloud*(70+wclouds)/170);
+ncloud2=Math.min(ncloud,parseInt(ncloud*(90+wclouds)/190));
+if(ncloud20!=ncloud2){tseticloud=0;}
 for(var i=0;i<ncloud;i++){
   if(i<ncloud2){
    var test=0;
@@ -2167,10 +2182,20 @@ for(var i=0;i<ncloud;i++){
    while(cloudx[i]<x-dxmax){cloudx[i]+=dxmax+dxmax;test=1;}
    while(cloudy[i]>y+dymax){cloudy[i]-=dymax+dymax;test=1;}
    while(cloudy[i]<y-dymax){cloudy[i]+=dymax+dymax;test=1;}
-   if(test==1){cloudz[i]=(z+zsol)/2+(Math.random()-0.35)*2*800;}
-   cloud[i].position= myCesium.Cartesian3.fromDegrees(cloudx[i],cloudy[i],cloudz[i]);
+   if(test==1){cloudz[i]=(z+zsol)/2+(Math.random()-0.2)*2*800;tseticloud=0;}
+   var dist=(Math.abs(cloudx[i]-x)/klon+Math.abs(cloudy[i]-y))*40000/360;
+   //cloud[i].billboard.eyeOffset= myCesium.Cartesian3(0,0,i*dist/10);
+   var d10000=50000,ki=1.0-i*0.0003/(d10000);
+   var xx=x+ki*Math.round((cloudx[i]-x)*d10000)/d10000;
+   var yy=y+ki*Math.round((cloudy[i]-y)*d10000)/d10000;
+   var zz=cloudz[i];
+   //var xx=cloudx[i],yy=cloudy[i],zz=cloudz[i];
+   cloud[i].position= myCesium.Cartesian3.fromDegrees(xx,yy,zz);
    cloud[i].billboard.rotation=degtorad(-o3);
    cloud[i].show=true;
+   cloud[i].billboard.scale=cloudsc[i]*28/(0.75+dist);
+   var alpha=Math.max(0.03,Math.min(1.0,dist*dist/(35*35)))
+   cloud[i].billboard.color= myCesium.Color(1,1,1,alpha);
    }else{
     cloud[i].show=false;
    }
@@ -3046,7 +3071,7 @@ function weathercallback(r){//alert(r);
   var weatherjson=JSON.parse(r);
   var allclouds=weatherjson.clouds.all;//alert("clouds="+allclouds);
   wclouds=allclouds;
-  //wind=weatherjson.wind.speed*3.6;//kmh alert(wind);
+  wind=weatherjson.wind.speed*3.6;//kmh alert(wind);
   //humidity=weatherjson.main.humidity;//alert(humidity);
   //temp=parseInt((weatherjson.main.temp-273)*10)/10;//alert(temp);
   if(sky){
