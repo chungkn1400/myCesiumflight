@@ -2469,9 +2469,11 @@ function nodecallback(r){//alert(r);
   if(nodejson.elements){nodes=nodejson.elements;}
   msg+="len="+nodes.length;
   //port0x=-199;port1x=-199;port2x=-199;port3x=-199;
-  //iport=0;  
-  if(nodes.length>0){
+  //iport=0; 
+  var jnode=0;  
+  if(nodes.length>0 && iport<=3){
   for(var i=0;i<nodes.length;i++){
+   jnode=i+1;
    var node=(nodes[i]);
    if(node.tags){
       if(node.tags.name){var name=node.tags.name;
@@ -2483,6 +2485,23 @@ function nodecallback(r){//alert(r);
 		iport+=1;if(iport>3){break;}
       }}
    }}
+  if(nodes.length>jnode && iport>3){
+   for(var i=nodes.length-1;i>=jnode;i-=1){
+   var node=(nodes[i]);
+   if(node.tags){
+      if(node.tags.name){var name=node.tags.name;
+	   var dx=Math.max(Math.abs(node.lon-lng)/klon,Math.abs(node.lat-lat));
+	   if(dx<Math.max(Math.abs(port0x-lng)/klon,Math.abs(port0y-lat))){
+        port3x=port2x;port3y=port2y;port3name=port2name;port3inter=port2inter;
+        port2x=port1x;port2y=port1y;port2name=port1name;port2inter=port1inter;
+        port1x=port0x;port1y=port0y;port1name=port0name;port1inter=port0inter;
+	    port0x=node.lon;port0y=node.lat;port0name=name;port0inter="";
+       }else if(dx<Math.max(Math.abs(port1x-lng)/klon,Math.abs(port1y-lat))){
+        port3x=port2x;port3y=port2y;port3name=port2name;port3inter=port2inter;
+        port2x=port1x;port2y=port1y;port2name=port1name;port2inter=port1inter;
+	    port1x=node.lon;port1y=node.lat;port1name=name;port1inter="";
+       }
+  }}}}
   //alert("iport="+iport+" "+msg);
   //if(iport<=3){setTimeout("getways2();",300);}
   //else{tloading=0;}
@@ -2651,7 +2670,7 @@ function nodecallback3(r){//alert(r);
   //alert(msg);
   if(testbridgechanged==1){testbridgechanged=0;
                            taskgetterrainheightbridge=1;}
-  if(iport<=3){setTimeout("getnodes();",300);}
+  if(iport<=399){setTimeout("getnodes();",300);}
   else{tloading=0;}
 }
 var testbridgechanged=0;
@@ -2711,6 +2730,8 @@ function getnodes(){
 //if(tframe<tloading){return;}
 tloading=tframe+40000;
 var dx=18*360/40000;
+if(iport>3){dx=Math.min(dx,Math.max(Math.abs(port0x-lng)/klon,Math.abs(port0y-lat)));
+            dx=Math.max(7*360/40000,dx);}
 var lat1=lat-dx,lon1=lng-dx*klon;
 var lat2=lat+dx,lon2=lng+dx*klon;
 var latlon="%28"+lat1+"%2C"+lon1+"%2C"+lat2+"%2C"+lon2+"%29";
@@ -2726,7 +2747,7 @@ if(http=="https:"){overpass="//overpass-api.de/api/";}
 //var wayurl=http+overpass+"interpreter?data=[out:json];%28way[aeroway~'aerodrome']"+latlon+";";
 var nodeurl=http+overpass+"interpreter?data=[out:json];%28node[aeroway~'aerodrome|runway']"+latlon+";";
 //var nodeurl=http+overpass+"interpreter?data=[out:json];%28node[aeroway~'aerodrome']"+latlon+";";
-nodeurl+="%29%3Bout%20qt%20199%3B";
+nodeurl+="%29%3Bout%20qt%2099%3B";
 try{		
 httpGet(nodeurl,nodecallback);
 }catch (e){alert("error getnodes");tloading=0;}
