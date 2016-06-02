@@ -2460,7 +2460,7 @@ function httpGet(url,callback)
 }
 var wayjson,ways=[],nodejson,nodes=[],iport=0,nairport=0,airportname=[],airportnode=[];
 var airportinter=[],port0inter="",port1inter="",port2inter="",port3inter="";
-var ntower=0,towernode=[],towernodemid=[];
+var ntower=0,towernode=[],towernodemid=[],airportnodemid=[];
 var nbridge=0,bridgenode=[],bridgenodemid=[],bridgenodemid2=[],bridgeid=[];
 function nodecallback(r){//alert(r);
   nodejson=JSON.parse(r);
@@ -2497,7 +2497,7 @@ function waycallback(r){//alert(r);
   var msg="",test=0;
   nairport=0;ntower=0;nbridge=0;
   ways=[];airportname=[];airportnode=[];towernode=[];airportinter=[];towernodemid=[];
-  bridgenode=[];bridgenodemid=[];bridgenodemid2=[];bridgeid=[];
+  bridgenode=[];bridgenodemid=[];bridgenodemid2=[];bridgeid=[];airportnodemid=[];
   if(wayjson.elements){ways=wayjson.elements;}
   msg+="len="+ways.length;
   if(ways.length>0){
@@ -2510,12 +2510,13 @@ function waycallback(r){//alert(r);
    if(way.tags && way.nodes){
       if(way.tags.aeroway){
 	     if(way.tags.aeroway=="terminal"){
-		     if(ntower<20 && test<15){ntower+=1;towernode[ntower]=way.nodes[0];
+		     if(ntower<14 && test<4){ntower+=1;towernode[ntower]=way.nodes[0];
 			            towernodemid[ntower]=way.nodes[parseInt(way.nodes.length*0.51)];
 	                    test+=1;msg+=" /tower /";}}
          else if(way.tags.name){
-		     if(nairport<20){nairport+=1;airportname[nairport]=way.tags.name;
-	                    airportnode[nairport]=way.nodes[0];//parseInt(way.nodes.length/2)];
+		     if(nairport<7){nairport+=1;airportname[nairport]=way.tags.name;
+	                    airportnode[nairport]=way.nodes[0];
+	                    airportnodemid[nairport]=way.nodes[parseInt(way.nodes.length*0.51)];
 						airportinter[nairport]="local";
 						if(way.tags.aerodrome){airportinter[nairport]=way.tags.aerodrome;}
 						test=0;msg+=" /"+way.tags.name;}}
@@ -2553,13 +2554,19 @@ function nodecallback3(r){//alert(r);
   iport=0;
   //port0x=-199;port1x=-199;port2x=-199;port3x=-199;  
   for(var i=1;i<=nairport;i++){
-     var inode=airportnode[i];
+     var inode=airportnode[i],inodemid=airportnodemid[i];
 	 if(latnodes[inode]){
 	    msg+=" /"+airportname[i];
 	    if(iport==0){port0x=lonnodes[inode];port0y=latnodes[inode];port0name=airportname[i];port0inter=airportinter[i];}
 	    if(iport==1){port1x=lonnodes[inode];port1y=latnodes[inode];port1name=airportname[i];port1inter=airportinter[i];}
 	    if(iport==2){port2x=lonnodes[inode];port2y=latnodes[inode];port2name=airportname[i];port2inter=airportinter[i];}
 	    if(iport==3){port3x=lonnodes[inode];port3y=latnodes[inode];port3name=airportname[i];port3inter=airportinter[i];}
+	    if(latnodes[inodemid]){
+	     if(iport==0){port0x=(port0x+lonnodes[inodemid])/2;port0y=(port0y+latnodes[inodemid])/2;}
+	     if(iport==1){port1x=(port1x+lonnodes[inodemid])/2;port1y=(port1y+latnodes[inodemid])/2;}
+	     if(iport==2){port2x=(port2x+lonnodes[inodemid])/2;port2y=(port2y+latnodes[inodemid])/2;}
+	     if(iport==3){port3x=(port3x+lonnodes[inodemid])/2;port3y=(port3y+latnodes[inodemid])/2;}
+		}
 		iport+=1;if(iport>3){break;}
 	 }
   }
@@ -2762,6 +2769,7 @@ function getnodes3(){
 var nodeurl3=http+overpass+"interpreter?data=[out:json];%28";
 for(var i=1;i<=nairport;i++){
     nodeurl3+="node%28"+airportnode[i]+"%29";
+    nodeurl3+=";node%28"+airportnodemid[i]+"%29";
 	if(i<nairport || ntower>=1 || nbridge>=1){nodeurl3+=";";}
 	}
 for(var i=1;i<=ntower;i++){
