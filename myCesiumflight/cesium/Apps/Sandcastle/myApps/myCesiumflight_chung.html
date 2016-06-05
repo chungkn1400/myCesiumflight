@@ -136,6 +136,7 @@ var apikey='&key=AIzaSyAH372ZH8QSQgRHsqdtqNxkLVpcp_XUUkE';
 <script src="http://chungkn1400.github.io/myCesiumflight/myCesiumflight/cesium/Apps/Sandcastle/myApps/models/mybridgeorangepng.js" ></script>
 <script src="http://chungkn1400.github.io/myCesiumflight/myCesiumflight/cesium/Apps/Sandcastle/myApps/sunpng.js" ></script>
 <script src="http://chungkn1400.github.io/mywebglflight/mywebglflight/cloudpng.js"></script>
+<script src="http://chungkn1400.github.io/myCesiumflight/myCesiumflight/cesium/Apps/Sandcastle/myApps/building128png.js" ></script>
 <script id="webaudio" >
 var twebaudio=1;
 try{
@@ -343,7 +344,6 @@ var cesiumTerrainProviderMeshes = new Cesium.CesiumTerrainProvider({
 viewer.terrainProvider = cesiumTerrainProviderMeshes;
 viewer.scene.globe.enableLighting = false;
 viewer.scene.fog.enabled = false;
-
 
 Sandcastle.addToolbarButton('Lighting', function() {
     viewer.scene.globe.enableLighting = !viewer.scene.globe.enableLighting;
@@ -559,7 +559,9 @@ viewer.clock.onTick.addEventListener(function(clock) {
 	addboeing();
 	addairporttower();
 	addairporttower2();
-	okinit=1;
+	loadstorage('tbuilding','tbuilding');
+	addbuildtower();
+	setTimeout("okinit=1;",8000);
 	
 	loadstorage('terrainquality','terrainquality')
 	if(terrainquality>=1 && terrainquality<=10){
@@ -617,11 +619,13 @@ msg+="K => jet/plane"+crlf;
 msg+="R => radar / shift+R => radio off/on"+crlf;
 msg+="C => change cockpit"+crlf;
 msg+="shift+Q => terrain quality"+crlf;
+msg+="shift+B => osm buildings on/off"+crlf;
 alert(msg);
 resetkeys();
 }
 if(keys[vk_escape]){quit=1;subquit();}
 if(keys[vk_9]){subtest();resetkeys();}
+if(keys[vk_b] && keys[vk_shift]){subbuilding();resetkeys();}
 if(keys[vk_q] && keys[vk_shift]){subterrainquality();resetkeys();}
 if(keys[vk_c] && iview==1){subcockpit();resetkeys();}
 if(keys[vk_r] && keys[vk_shift]){subradio();resetkeys();}
@@ -699,16 +703,18 @@ if(itime%20==1){setklon();}
 ////if(keys[vk_b]){v=Math.max(-20,v-dtime*0.025);}//x-=v*cos1*cos2/klon;y-=v*sin1*cos2;z-=v*sin2*500;}
 v=200*vplane/2;//vplane:-0.5 .. 4.5 -100..900km/h
 movexyz=v*dtime*0.0005;
-if(okinit>=1 && spotb){okinit=2;
+if(okinit>=1 && spotb){okinit=2;auxvar=parseInt(tloading2-tframe);
    myview();moveaircraft();
    if(taskgetterrainheightbridge==1){getterrainheightbridge();}
+   testupdatebuildtower();//before testgetways2()
    testgetways();testradio();
-   testgetweather();
+   testgetweather();testgetways2();
    if(tinitterrainheightvars==1){initterrainheightvars();}
           
 			  }
 }
 function subtest(){
+getways2();return;
 thour+=3;if(thour>24){thour-=24;};setsun();return;
 //addaircraft();return;
 alert(port0name+"/ "+port1name+" /"+port2name+" /"+port3name);
@@ -857,6 +863,30 @@ myCesium.when(promise, function(updatedPositions) {
 });
 return positionheight0;
 }
+var terrainbuildi=[];
+function getterrainheightbuild(){
+if(myviewer.terrainProvider.ready==false){setTimeout("getterrainheightbuild();",1000);return;}
+tloading2=tframe+40000;
+var positions = [];
+terrainbuildi=[];
+for(var i=0;i<nbuild;i++){
+  if(buildchanged[i]==1 && buildh[i]>0){
+    positions.push(myCesium.Cartographic.fromDegrees(buildx[i],buildy[i]));
+	terrainbuildi.push(i);
+}}
+    //alert("terrainbuild "+terrainbuildi.length);
+var promise ;
+promise= myCesium.sampleTerrain(myviewer.terrainProvider, 13, positions);
+myCesium.when(promise, function(updatedPositions) {
+    for(var i=0;i<terrainbuildi.length;i++){
+		 buildz[terrainbuildi[i]]=positions[i].height;
+		 buildchanged[terrainbuildi[i]]=0;}
+	// updatedPositions is just a reference to positions.
+    //alert("terrainbuild ok "+terrainbuildi.length);
+	tloading2=0;
+});
+//return 0;
+}
 var tgetterrainheightbridge=0,taskgetterrainheightbridge=0;
 var hidebridgeid=[],nhidebridge=220,ihidebridge=0;
 for(var i=0;i<=nhidebridge;i++){hidebridgeid[i]=0;}
@@ -947,6 +977,7 @@ function subquit(){
   savestorage('aircraftzsol',aircraftzsol);
   savestorage('aircrafto1',aircrafto1);
   savestorage('terrainquality',terrainquality);
+  savestorage('tbuilding',tbuilding);
   bridgesave="";for(var i=0;i<nbridgemesh;i++){
    bridgesave+=bridgemeshx[i]+"?"+bridgemeshy[i]+"?"+bridgemesho1[i]+"?"+bridgemeshscalex[i]+"?";}
   savestorage('bridgesave',bridgesave);
@@ -1088,6 +1119,7 @@ updatemonument();
 if(boeing){moveboeing();updateboeing();}
 if(airporttower){updateairporttower();}
 if(airporttower2){updateairporttower2();}
+if(buildtower[0] && tbuilding==1){updatebuildtower();}
 }
 var icombo=3,combotext="deauville marinas";
 var lat=48.8261252,lng=2.35705595;
@@ -1958,10 +1990,11 @@ monument[i]=myviewer.entities.add({
   position : myCesium.Cartesian3.fromDegrees(xx,yy,zz),
   billboard :{
             image : eval(varname+"png"),
+            //heightReference: myCesium.HeightReference.CLAMP_TO_GROUND,
             position : myCesium.Cartesian3.fromDegrees(xx,yy,zz),
             scale : 1.0, // default: 1.0
             //imageIndex : 0, // default: -1
-            show : false, // default
+            show : true, // default
             horizontalOrigin : myCesium.HorizontalOrigin.CENTER, // default
             verticalOrigin : myCesium.VerticalOrigin.BOTTOM, // default: CENTER
             //color : myCesium.Color.LIME, // default: WHITE
@@ -1978,7 +2011,8 @@ for(var i=0;i<nmonument;i++){
    var dy=Math.abs((monumenty[i]-y)*scale);
    var dxmax=monumentdx[i]*25000/80;
    if(dx<dxmax && dy<dxmax){
-        var sc=(1400/Math.sqrt(100+dx*dx+dy*dy))*2/cssscale;
+       //if(monument[i].billboard.show==false){  
+		var sc=(1400/Math.sqrt(100+dx*dx+dy*dy))*2/cssscale;
 		var s60=monumentdx[i]*2;
         var xx=monumentx[i],yy=monumenty[i],zz=monumentz[i];
 		var xxx=xx+s60*sin3*sin1*cos2*klon/scale,yyy=yy-s60*sin3*cos1*cos2/scale;
@@ -1989,7 +2023,7 @@ for(var i=0;i<nmonument;i++){
 	    monument[i].billboard.position=myCesium.Cartesian3.fromDegrees(xxx,yyy,zzz);
 	    monument[i].billboard.show=true;
 		monument[i].billboard.rotation=degtorad(-o33);
-		monument[i].billboard.scale=sc;
+		monument[i].billboard.scale=sc;//}
 	 }else{monument[i].billboard.show=false;}
    }
 }
@@ -2089,6 +2123,87 @@ function updateairporttower2(){
 		//airporttower2.billboard.height=25*1.3;
 	 }else{airporttower2.billboard.show=false;}
 }
+var buildimage;
+var nbuildtower=490,buildtower=[];//buildtower[i].x=0,buildtower[i].y=0,buildtower[i].zsol=0,buildtower[i].dx=0;
+function addbuildtower(){
+nbuildtower=Math.min(nbuildtower,nbuild);
+buildimage=new Image();
+buildimage.src= building128png;
+for(var i=0;i<nbuildtower;i++){
+var dx=50,dy=3.0;//dx*=towerportwidth;dy=dy/towerportwidth;
+var xx=x+i*0.1*360/40000,yy=y-1,zz=zsol;
+buildtower[i]=myviewer.entities.add({
+  position : myCesium.Cartesian3.fromDegrees(xx,yy),
+  billboard :{
+            image : buildimage,//'building128.png' ,
+            position : myCesium.Cartesian3.fromDegrees(xx,yy),
+            heightReference: myCesium.HeightReference.CLAMP_TO_GROUND,
+            scale : 1.0, // default: 1.0
+            //imageIndex : 0, // default: -1
+            show : false, // default
+            horizontalOrigin : myCesium.HorizontalOrigin.CENTER, // default
+            //verticalOrigin : myCesium.VerticalOrigin.BOTTOM, // default: CENTER
+            //color : myCesium.Color.LIME, // default: WHITE
+            //rotation : 45, // default: 0.0
+            alignedAxis : myCesium.Cartesian3.ZERO, // default
+            //sizeInMeters : true,
+			width : dx, // default: undefined
+            height : dx*dy*1.3 // default: undefined
+     }
+ });
+buildtower[i].dx=dx*dy/1.3;
+buildtower[i].x=xx;buildtower[i].y=yy;buildtower[i].z=zz;
+buildtower[i].h=0;buildtower[i].w=0;
+}}
+var tupdatebuildtower=0;
+function testupdatebuildtower(){if(tbuilding==0){return;}
+if(tloading2<tframe){
+ if(tupdatebuildtower==1){
+  tupdatebuildtower=0;
+  for(var i=0;i<Math.min(nbuildtower,nbuild);i++){  
+   buildtower[i].h=buildh[i];
+   if(buildh[i]>0.1){
+    buildtower[i].x=buildx[i];buildtower[i].y=buildy[i];buildtower[i].z=buildz[i];
+    buildtower[i].w=buildw[i];
+  }}}
+}else{tupdatebuildtower=1;}
+}
+function updatebuildtower(){
+//if(itime%3!=1){return;}
+var ki=itime%2;
+for(var i=parseInt(0.001+ki*nbuildtower/2);i<parseInt(0.001+(ki+1)*nbuildtower/2);i++){
+  if(buildtower[i].h<0.1){buildtower[i].x=0;buildtower[i].y=0;
+                    buildtower[i].billboard.show=false;}
+  else{
+   var dx=Math.abs((buildtower[i].x-x)*scale/klon);
+   var dy=Math.abs((buildtower[i].y-y)*scale);
+   var dxmax=buildtower[i].dx*25000/80;
+   if(dx<dxmax && dy<dxmax){
+		var dz=Math.abs(buildtower[i].z-z);
+        var sc=Math.max(0.1,Math.min(25,(buildtower[i].h*5/Math.sqrt(2500+dx*dx+dy*dy+dz*dz))*2/cssscale));
+		var s60=buildtower[i].dx*2;
+        var xx=buildtower[i].x,yy=buildtower[i].y,zz=buildtower[i].z-8;
+		var xxx=xx+s60*sin3*sin1*cos2*klon/scale,yyy=yy-s60*sin3*cos1*cos2/scale;
+		//xxx+=50*sin3*sin3*cos1*sin2*klon/scale;yyy+=50*sin3*sin3*sin1*sin2/scale;
+		var zzz=zz-sin2*sin3*sin3*s60;
+		var o33=o3;if(tourelle==1){o33=0;}
+	    buildtower[i].position=myCesium.Cartesian3.fromDegrees(xx,yy,zz);
+	    buildtower[i].billboard.position=myCesium.Cartesian3.fromDegrees(xx,yy,zz);
+	    buildtower[i].billboard.show=true;
+		buildtower[i].billboard.rotation=degtorad(-o33);
+		buildtower[i].billboard.scale=sc;
+		var kh=Math.max(1,Math.min(2.5,(buildtower[i].w/35)*Math.min(1,70/buildh[i])));
+		buildtower[i].billboard.width=50*kh;
+		//buildtower[i].billboard.height=25*1.3;
+	 }else{buildtower[i].billboard.show=false;}
+}}
+/*if(tourelle==0){
+var ki=itime%3;
+for(var i=parseInt(0.001+ki*nbuildtower/3);i<parseInt(0.001+(ki+1)*nbuildtower/3);i++){
+   if(buildtower[i].billboard.show==true){
+		buildtower[i].billboard.rotation=degtorad(-o3);
+}}}*/
+}
 var boeing;
 function addboeing(){
 boeingx=x-0.1;boeingy=y;boeingz=z;
@@ -2129,8 +2244,11 @@ function updateboeing(){
 		      boeing.billboard.height=-100;}
 	 }else{boeing.billboard.show=false;}
 }
+var cloudimage;
 var cloud=[],ncloud=40,cloudx=[],cloudy=[],cloudz=[],cloudsc=[],icloud=[],ncloud2=ncloud;
 function addcloud(){
+cloudimage=new Image();
+cloudimage.src=cloudpng;
 for(var i=0;i<ncloud;i++){
   icloud[i]=i;
   var dymax=28*360/40000;
@@ -2148,7 +2266,7 @@ for(var i=0;i<ncloud;i++){
             //verticalOrigin : myCesium.VerticalOrigin.BOTTOM, // default: CENTER
 			scale : sc,
 			color : new myCesium.Color(1,1,1,alpha),
-            image : cloudpng
+            image : cloudimage//cloudpng
         }
     });}
 }
@@ -2451,12 +2569,45 @@ function httpGet(url,callback)
     {
 		if(xmlhttp.readyState==4){httpstatus=xmlhttp.status;
 		    if(httpstatus>400){
-			   if(loading==1){
+			   if(tloading>0.1){
 			      setTimeout("if(tloading>0.1 && httpstatus>400){tloading=0;};",8000);}}}
         if(xmlhttp.readyState==4 && xmlhttp.status==200){callback(xmlhttp.responseText);}
     }	
     //xmlhttp.open("GET", theUrl, false);
     xmlhttp.send();    
+}
+var xmlhttp2,httpstatus2=0;
+function httpGet2(url,callback) 
+{
+  xmlhttp2=null;
+  xmlhttp2 = new XMLHttpRequest();
+  if ("withCredentials" in xmlhttp) {
+    // Check if the XMLHttpRequest object has a "withCredentials" property.
+    // "withCredentials" only exists on XMLHTTPRequest2 objects.
+    //alert("withCredentials");
+	xmlhttp2.open("GET", url, true);
+  } else if (typeof XDomainRequest != "undefined") {
+    // Otherwise, check if XDomainRequest.
+    // XDomainRequest only exists in IE, and is IE's way of making CORS requests.
+    xmlhttp2 = new XDomainRequest();
+	//alert("XDomainRequest");
+    xmlhttp2.open("GET", url);
+  } else {
+    // Otherwise, CORS is not supported by the browser.
+    xmlhttp2 = null;
+	alert("cors crossdomain not supported by browser");
+	return;
+  }
+	xmlhttp2.onreadystatechange=function()
+    {
+		if(xmlhttp2.readyState==4){httpstatus2=xmlhttp2.status*1;//alert(httpstatus2);
+		    if(httpstatus2>400){alert(httpstatus2);
+			   if(tloading2>0.1){
+			      setTimeout("if(tloading2>0.1 && httpstatus2>400){tloading2=0;};",8000);}}}
+        if(xmlhttp2.readyState==4 && xmlhttp2.status==200){callback(xmlhttp2.responseText);}
+    }	
+    //xmlhttp.open("GET", theUrl, false);
+    xmlhttp2.send();    
 }
 var wayjson,ways=[],nodejson,nodes=[],iport=0,nairport=0,airportname=[],airportnode=[];
 var airportinter=[],port0inter="",port1inter="",port2inter="",port3inter="";
@@ -2503,8 +2654,6 @@ function nodecallback(r){//alert(r);
        }
   }}}}
   //alert("iport="+iport+" "+msg);
-  //if(iport<=3){setTimeout("getways2();",300);}
-  //else{tloading=0;}
   if(iport<=0){port0x=-199;}
   if(iport<=1){port1x=-199;}
   if(iport<=2){port2x=-199;}
@@ -2725,7 +2874,157 @@ for(var i=0;i<nbridgemesh;i++){
   }
 }
 }
-var tloading=0,http="http:",overpass="";
+var wayjson2,ways2=[],iibuild=0,buildi=[],buildhi=[],buildhh=[],buildnode=[],buildnodemid=[];
+var nbuild=490,ibuild=0,buildh=[],buildx=[],buildy=[],buildxmid=[],buildymid=[],buildz=[];
+var buildchanged=[],buildw=[],buildnode0=[];
+for(var i=0;i<nbuild;i++){buildh[i]=-1;buildx[i]=0;buildy[i]=0;buildxmid[i]=0;buildymid[i]=0;
+                          buildz[i]=0;buildchanged[i]=0;buildw[i]=0;buildnode0[i]=0;}
+var nbuild0=30000,ibuild0=0,build0=[];
+for(var i=0;i<nbuild0;i++){build0[i]=new Object();
+   build0[i].node0=0;build0[i].h=0;build0[i].xx=0;build0[i].yy=0;
+   build0[i].xxmid=0;build0[i].yymid=0;}
+function testaddbuild0(node0){
+  var j=ibuild0+1;
+  for(var i=0;i<nbuild0;i++){
+    j-=1;if(j<0){j=nbuild0-1;}
+    if(build0[j].node0==node0){
+	 addbuild(build0[j].node0,build0[j].h,build0[j].xx,build0[j].yy,
+	                                      build0[j].xxmid,build0[j].yymid);
+	 return 1;
+	}
+  }
+  return 0;
+}
+function addbuild0(node0,h,xx,yy,xxmid,yymid){
+ibuild0+=1;if(ibuild0>=nbuild0){ibuild0=0;}
+var build0j=build0[ibuild0];
+build0j.node0=node0;build0j.h=h;build0j.xx=xx;build0j.yy=yy;
+build0j.xxmid=xxmid;build0j.yymid=yymid;
+}
+function addbuild(node0,h,xx,yy,xxmid,yymid){
+addbuild0(node0,h,xx,yy,xxmid,yymid);
+var dy0=0.001*360/40000,dx0=dy0*klon;
+var dy=5*360/40000,dx=dy*klon;
+for(var i=0;i<nbuild;i++){
+  if(Math.abs(xx-buildx[i])<dx0){if(Math.abs(yy-buildy[i])<dy0){return;}}
+}
+var j=ibuild,test=0;
+for(var i=0;i<nbuild;i++){
+  j+=1;if(j>=nbuild){j=0;}
+  if(Math.abs(buildx[j]-x)>dx){test=1;break;}
+  if(Math.abs(buildy[j]-y)>dy){test=1;break;}
+}
+if(test==1){buildh[j]=h;buildx[j]=xx;buildy[j]=yy;buildxmid[j]=xxmid;buildymid[j]=yymid;
+            buildchanged[j]=1;buildnode0[j]=node0;
+			var dx=(xxmid-xx)/klon,dy=yymid-yy;
+			buildw[j]=Math.sqrt(dx*dx+dy*dy)*40000000/360;return;}
+j=ibuild;
+var dist=Math.max(Math.abs(xx-x)/klon,Math.abs(yy-y));
+for(var i=0;i<nbuild;i++){
+  j+=1;if(j>=nbuild){j=0;}
+  if(Math.max(Math.abs(buildx[j]-x)/klon,Math.abs(buildy[j]-y))>dist){test=1;break;}  
+}
+if(test==0){ibuild+=1;if(ibuild>=nbuild){ibuild=0;};j=ibuild;}
+buildh[j]=h;buildx[j]=xx;buildy[j]=yy;buildxmid[j]=xxmid;buildymid[j]=yymid;
+buildchanged[j]=1;buildnode0[j]=node0;
+var dx=(xxmid-xx)/klon,dy=yymid-yy;
+buildw[j]=Math.sqrt(dx*dx+dy*dy)*40000000/360;
+}
+function waycallback2(r){//alert(r);
+  wayjson2=JSON.parse(r);
+  var msg="",test=0,h=0,hbuild=0;
+  iibuild=0;
+  ways2=[];buildi=[];buildhi=[];buildnode=[];buildnodemid=[];
+  if(wayjson2.elements){ways2=wayjson2.elements;}
+  msg+="len="+ways2.length;
+  if(ways2.length>0){
+  for(var i=0;i<ways2.length;i++){
+    var way=(ways2[i]);
+    if(way.tags && way.nodes){
+	  h=0;
+      if(way.tags.height){h=way.tags.height*1;}
+      else if(way.tags["building:height"]){h=way.tags["building:height"]*1;}
+      else if(way.tags["building:levels"]){h=way.tags["building:levels"]*3;}
+      else if(way.tags.levels){h=way.tags.levels*3;}
+	  if(h>40){test+=1;buildi[test]=i;buildhi[test]=h;
+	           //buildnode[test]=way.nodes[0];
+			   //buildnodemid[test]=way.nodes[parseInt(way.nodes.length*0.51)];
+			   }
+  }}
+  var i=test,hh=40;
+  if(i>100){while(i>100){hh+=10;i=0;for(var j=1;j<=test;j++){if(buildhi[j]>hh){i+=1;}}}}
+  else{while(i<10 && hh>20){hh-=5;i=0;for(var j=1;j<=test;j++){if(buildhi[j]>hh){i+=1;}}}}
+  i=0;for(var j=1;j<=test;j++){if(buildhi[j]>hh){
+           var testadd=1;
+		   var node0=ways2[buildi[j]].nodes[0];
+		   for(var k=0;k<nbuild;k++){if(buildnode0[k]==node0){testadd=0;
+		       addbuild0(buildnode0[k],buildh[k],buildx[k],buildy[k],buildxmid[k],buildymid[k]);
+			   break;}}
+		   if(testadd==1){if(testaddbuild0(node0)==1){testadd=0;};}	   
+		   if(testadd==1){
+			 i+=1;
+             buildhh[i]=buildhi[j];
+			 buildnode[i]=node0;
+			 buildnodemid[i]=ways2[buildi[j]].nodes[parseInt(ways2[buildi[j]].nodes.length*0.51)];
+			 //addbuild(node0,hi,nodei.lat,nodei.lon,nodeimid.lat,nodeimid.lon);
+			 }
+  }
+  iibuild=i;hbuild=hh;
+  }
+}
+//alert(msg+" test="+test+" iibuild="+iibuild+" hbuild="+hbuild);
+if(iibuild>0){setTimeout("getnodes2();",3100);}
+else{setTimeout("tloading2=0;",3100);}
+}
+var nodejson2,nodes2=[],latnodes2=[],lonnodes2=[];
+function nodecallback2(r){//alert(r);
+  nodejson2=JSON.parse(r);
+  var msg="";
+  nodes2=[];
+  latnodes2=[];lonnodes2=[];
+  if(nodejson2.elements){nodes2=nodejson2.elements;}
+  msg+="len2="+nodes2.length;
+  for(var i=0;i<nodes2.length;i++){
+	 var inode=nodes2[i].id; 
+	 latnodes2[inode]=nodes2[i].lat;
+     lonnodes2[inode]=nodes2[i].lon;
+	 }
+//alert(msg);	 
+setTimeout("getnodes22();",3100);
+}
+var nodejson22,nodes22=[];
+function nodecallback22(r){//alert(r);
+  nodejson22=JSON.parse(r);
+  var msg="";
+  nodes22=[];
+  if(nodejson22.elements){nodes22=nodejson22.elements;}
+  msg+="len22="+nodes22.length;
+  for(var i=0;i<nodes22.length;i++){
+	 var inode=nodes22[i].id; 
+	 latnodes2[inode]=nodes22[i].lat;
+     lonnodes2[inode]=nodes22[i].lon;
+	 }
+//alert(msg+" iibuild="+iibuild);
+for(var i=1;i<=iibuild;i++){
+  if(lonnodes2[buildnode[i]] && lonnodes2[buildnodemid[i]]){
+   var testadd=1;
+   var lonxx=lonnodes2[buildnode[i]],latyy=latnodes2[buildnode[i]];
+   if(testmonument(lonxx,latyy)==1){testadd=0;}
+   if(testadd==1){
+     addbuild(buildnode[i],buildhh[i],lonxx,latyy,
+                              lonnodes2[buildnodemid[i]],latnodes2[buildnodemid[i]]);}
+}}
+//alert("ok22");	 
+setTimeout("getterrainheightbuild();",3100);
+}
+function testmonument(lonxx,latyy){
+   var dlat=0.200*360/40000,dlon=dlat*klon;
+   for(var k=0;k<nmonument;k++){
+      if(Math.abs(monumentx[k]-lonxx)<dlon){
+	    if(Math.abs(monumenty[k]-latyy)<dlat){return 1;}}}
+return 0;
+}
+var tloading=0,tloading2=0,http="http:",overpass="",overpass2="";
 function getnodes(){
 //if(tframe<tloading){return;}
 tloading=tframe+40000;
@@ -2739,7 +3038,7 @@ http="http:";
 if(document.location.href.indexOf("https")>=0){
    http="https:";}
 //http="http:";
-overpass="//overpass.osm.rambler.ru/cgi/";
+overpass2="//overpass.osm.rambler.ru/cgi/";
 overpass="//overpass-api.de/api/";
 //overpass="//api.openstreetmap.fr/oapi/";
 if(http=="https:"){overpass="//overpass-api.de/api/";}
@@ -2769,7 +3068,7 @@ http="http:";
 if(document.location.href.indexOf("https")>=0){
    http="https:";}
 //http="http:";
-overpass="//overpass.osm.rambler.ru/cgi/";
+overpass2="//overpass.osm.rambler.ru/cgi/";
 overpass="//overpass-api.de/api/";
 //overpass="//api.openstreetmap.fr/oapi/";
 if(http=="https:"){overpass="//overpass-api.de/api/";}
@@ -2789,18 +3088,18 @@ httpGet(wayurl,waycallback);
 function getnodes3(){
 var nodeurl3=http+overpass+"interpreter?data=[out:json];%28";
 for(var i=1;i<=nairport;i++){
-    nodeurl3+="node%28"+airportnode[i]+"%29";
-    nodeurl3+=";node%28"+airportnodemid[i]+"%29";
+    nodeurl3+="node("+airportnode[i]+")";
+    nodeurl3+=";node("+airportnodemid[i]+")";
 	if(i<nairport || ntower>=1 || nbridge>=1){nodeurl3+=";";}
 	}
 for(var i=1;i<=ntower;i++){
-    nodeurl3+="node%28"+towernode[i]+"%29";
-    nodeurl3+=";node%28"+towernodemid[i]+"%29";
+    nodeurl3+="node("+towernode[i]+")";
+    nodeurl3+=";node("+towernodemid[i]+")";
 	if(i<ntower || nbridge>=1){nodeurl3+=";";}
 	}
 for(var i=1;i<=nbridge;i++){
-    nodeurl3+="node%28"+bridgenode[i]+"%29";
-    nodeurl3+=";node%28"+bridgenodemid[i]+"%29";
+    nodeurl3+="node("+bridgenode[i]+")";
+    nodeurl3+=";node("+bridgenodemid[i]+")";
 	if(nodeurl3.length>1900){break;}
 	if(i<nbridge){nodeurl3+=";";}
 	}
@@ -2815,6 +3114,69 @@ nodeurl3+="%29%3Bout%20qt%20skel%2025999%3B";
 try{		
 httpGet(nodeurl3,nodecallback3);
 }catch (e){alert("error getnodes3");tloading=0;}
+}
+var xgetways2=-89,ygetways2=0,tbuilding=0;
+function testgetways2(){if(tbuilding==0){return;}
+if(tframe<tloading2){return;}
+var dx=3*360/40000,dx1=dx*(0.7+(z-zsol)/500);
+var dxx=(xgetways2-x-dx1*cos1*klon)/klon;
+var dyy=(ygetways2-y-dx1*sin1);
+if(dxx*dxx+dyy*dyy<dx*dx*1.2){return;}
+tloading2=tframe+59000;
+xgetways2=x+dx1*cos1*klon;
+ygetways2=y+dx1*sin1;
+var lat1=y-dx+dx1*sin1,lon1=x-dx*klon+dx1*cos1*klon;
+var lat2=y+dx+dx1*sin1,lon2=x+dx*klon+dx1*cos1*klon;
+var latlon2="%28"+lat1+"%2C"+lon1+"%2C"+lat2+"%2C"+lon2+"%29";
+//var keyway2="way['building:height']"+latlon2+";way['building']['height']"+latlon2+";way['building']['levels']"+latlon2+";way['building:levels']"+latlon2;
+overpass2="//overpass.osm.rambler.ru/cgi/";
+var keyway2="way['building:height']"+latlon2+";way['building']['height']"+latlon2+";way['building']['levels']"+latlon2+";way['building:levels']"+latlon2;
+var wayurl2=http+overpass2+"interpreter?data=[out:json];%28"+keyway2;
+wayurl2+="%29%3Bout%20qt%2079999%3B";
+try{		
+httpGet2(wayurl2,waycallback2);
+}catch (e){alert("error getways2");tloading=0;}
+}
+var iibuild2=0;
+function getnodes2(){
+tloading2=tframe+50000;
+var nodeurl2=http+overpass2+"interpreter?data=[out:json];%28";
+iibuild2=0;
+for(var i=1;i<=iibuild;i++){
+    iibuild2=i;
+	nodeurl2+="node("+buildnode[i]+")";
+    nodeurl2+=";node("+buildnodemid[i]+")";
+	if(nodeurl2.length>1900){break;}
+	if(i<iibuild){nodeurl2+=";";}
+	}
+nodeurl2+="%29%3Bout%20skel%20199%3B";
+try{		
+httpGet2(nodeurl2,nodecallback2);
+}catch (e){alert("error getnodes2");tloading2=0;}
+}
+function getnodes22(){
+if(iibuild2>=iibuild){
+  for(var i=1;i<=iibuild;i++){
+   if(lonnodes2[buildnode[i]] && lonnodes2[buildnodemid[i]]){
+    var lonxx=lonnodes2[buildnode[i]],latyy=latnodes2[buildnode[i]];
+	if(testmonument(lonxx,latyy)==0){
+      addbuild(buildnode[i],buildhh[i],lonxx,latyy,
+                        lonnodes2[buildnodemid[i]],latnodes2[buildnodemid[i]]);
+  }}}
+  setTimeout("getterrainheightbuild();",100);return;
+}
+tloading2=tframe+50000;
+var nodeurl22=http+overpass2+"interpreter?data=[out:json];%28";
+for(var i=iibuild2+1;i<=iibuild;i++){
+    nodeurl22+="node("+buildnode[i]+")";
+    nodeurl22+=";node("+buildnodemid[i]+")";
+	if(nodeurl22.length>1900){break;}
+	if(i<iibuild){nodeurl22+=";";}
+	}
+nodeurl22+="%29%3Bout%20skel%20199%3B";
+try{		
+httpGet2(nodeurl22,nodecallback22);
+}catch (e){alert("error getnodes22");tloading2=0;}
 }
 function formatname(text){
 var text1="",c="";
@@ -2960,6 +3322,11 @@ try{speak(radiotxt);}catch(e){};
 function subradio(){
 if(tradio==1){if(confirm("set radio off ?")){tradio=0;}}
 else if(confirm("set radio on ?")){tradio=1;}
+}
+function subbuilding(){
+if(tbuilding==1){if(confirm("set buildings off ?")){tbuilding=0;
+   for(var i=0;i<nbuildtower;i++){buildtower[i].billboard.show=false;}}}
+else if(confirm("set buildings on ?")){tbuilding=1;}
 }
 //libertystatue
 var lat2=40.689249,lng2=-74.0444999;
