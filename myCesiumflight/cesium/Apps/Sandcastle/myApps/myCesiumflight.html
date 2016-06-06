@@ -2893,7 +2893,7 @@ for(var i=0;i<nbridgemesh;i++){
 var wayjson2,ways2=[],iibuild=0,buildi=[],buildhi=[],buildhh=[],buildnode=[],buildnodemid=[];
 var nbuild=490,ibuild=0,buildh=[],buildx=[],buildy=[],buildxmid=[],buildymid=[],buildz=[];
 var buildchanged=[],buildw=[],buildnode0=[];
-var buildi2=[],buildhi2=[]
+var buildi2=[],buildhi2=[],iicomm=0;
 for(var i=0;i<nbuild;i++){buildh[i]=-1;buildx[i]=0;buildy[i]=0;buildxmid[i]=0;buildymid[i]=0;
                           buildz[i]=0;buildchanged[i]=0;buildw[i]=0;buildnode0[i]=0;}
 var nbuild0=30000,ibuild0=0,build0=[];
@@ -2959,7 +2959,7 @@ function waycallback2(r){//alert(r);
     var way=(ways2[i]);
     if(way.tags && way.nodes){
 	  h=0;
-      //if(way.tags.building=="commercial"){test3+=1;}
+      if(way.tags.building=="commercial"){test3+=1;}
       if(way.tags.height){h=way.tags.height*1;}
       else if(way.tags["building:height"]){h=way.tags["building:height"]*1;}
       else if(way.tags["building:levels"]){h=way.tags["building:levels"]*3;}
@@ -2970,7 +2970,7 @@ function waycallback2(r){//alert(r);
 			   }
 	  if(h>20){test2+=1;buildi2[test2]=i;buildhi2[test2]=h;}
   }}
-  //alert("test3="+test3);
+  iicomm=test3;//alert("test3="+test3);
   var i=test,hh=40;
   if(i>100){while(i>100){hh+=10;i=0;for(var j=1;j<=test;j++){if(buildhi[j]>hh){i+=1;}}}}
   else if(i<20){for(var j=1;j<=test2;j++){buildi[j]=buildi2[j];buildhi[j]=buildhi2[j];}
