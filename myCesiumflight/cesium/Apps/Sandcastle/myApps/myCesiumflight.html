@@ -2893,6 +2893,7 @@ for(var i=0;i<nbridgemesh;i++){
 var wayjson2,ways2=[],iibuild=0,buildi=[],buildhi=[],buildhh=[],buildnode=[],buildnodemid=[];
 var nbuild=490,ibuild=0,buildh=[],buildx=[],buildy=[],buildxmid=[],buildymid=[],buildz=[];
 var buildchanged=[],buildw=[],buildnode0=[];
+var buildi2=[],buildhi2=[]
 for(var i=0;i<nbuild;i++){buildh[i]=-1;buildx[i]=0;buildy[i]=0;buildxmid[i]=0;buildymid[i]=0;
                           buildz[i]=0;buildchanged[i]=0;buildw[i]=0;buildnode0[i]=0;}
 var nbuild0=30000,ibuild0=0,build0=[];
@@ -2948,7 +2949,7 @@ buildw[j]=Math.sqrt(dx*dx+dy*dy)*40000000/360;
 }
 function waycallback2(r){//alert(r);
   wayjson2=JSON.parse(r);
-  var msg="",test=0,h=0,hbuild=0;
+  var msg="",test=0,h=0,hbuild=0,test2=0,test3=0;
   iibuild=0;
   ways2=[];buildi=[];buildhi=[];buildnode=[];buildnodemid=[];
   if(wayjson2.elements){ways2=wayjson2.elements;}
@@ -2958,6 +2959,7 @@ function waycallback2(r){//alert(r);
     var way=(ways2[i]);
     if(way.tags && way.nodes){
 	  h=0;
+      //if(way.tags.building=="commercial"){test3+=1;}
       if(way.tags.height){h=way.tags.height*1;}
       else if(way.tags["building:height"]){h=way.tags["building:height"]*1;}
       else if(way.tags["building:levels"]){h=way.tags["building:levels"]*3;}
@@ -2966,10 +2968,14 @@ function waycallback2(r){//alert(r);
 	           //buildnode[test]=way.nodes[0];
 			   //buildnodemid[test]=way.nodes[parseInt(way.nodes.length*0.51)];
 			   }
+	  if(h>20){test2+=1;buildi2[test2]=i;buildhi2[test2]=h;}
   }}
+  //alert("test3="+test3);
   var i=test,hh=40;
   if(i>100){while(i>100){hh+=10;i=0;for(var j=1;j<=test;j++){if(buildhi[j]>hh){i+=1;}}}}
-  else{while(i<10 && hh>20){hh-=5;i=0;for(var j=1;j<=test;j++){if(buildhi[j]>hh){i+=1;}}}}
+  else if(i<20){for(var j=1;j<=test2;j++){buildi[j]=buildi2[j];buildhi[j]=buildhi2[j];}
+       test=test2;
+       while(i<20 && hh>20){hh-=5;i=0;for(var j=1;j<=test;j++){if(buildhi[j]>hh){i+=1;}}}}
   i=0;for(var j=1;j<=test;j++){if(buildhi[j]>hh){
            var testadd=1;
 		   var node0=ways2[buildi[j]].nodes[0];
@@ -3131,7 +3137,7 @@ try{
 httpGet(nodeurl3,nodecallback3);
 }catch (e){alert("error getnodes3");tloading=0;}
 }
-var xgetways2=-89,ygetways2=0,tbuilding=0;
+var xgetways2=-89,ygetways2=0,tbuilding=1;
 function testgetways2(){if(tbuilding==0){return;}
 if(tframe<tloading2){return;}
 var dx=3*360/40000,dx1=dx*(0.7+(z-zsol)/500);
@@ -3147,6 +3153,7 @@ var latlon2="%28"+lat1+"%2C"+lon1+"%2C"+lat2+"%2C"+lon2+"%29";
 //var keyway2="way['building:height']"+latlon2+";way['building']['height']"+latlon2+";way['building']['levels']"+latlon2+";way['building:levels']"+latlon2;
 overpass2="//overpass.osm.rambler.ru/cgi/";
 var keyway2="way['building:height']"+latlon2+";way['building']['height']"+latlon2+";way['building']['levels']"+latlon2+";way['building:levels']"+latlon2;
+//keyway2+=";way[building=commercial]"+latlon2;
 var wayurl2=http+overpass2+"interpreter?data=[out:json];%28"+keyway2;
 wayurl2+="%29%3Bout%20qt%2079999%3B";
 try{		
