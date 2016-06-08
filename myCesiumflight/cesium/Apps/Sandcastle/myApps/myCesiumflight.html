@@ -2001,13 +2001,12 @@ monumentdx[i]=dx*dy/1.3;
 var xx=eval(varname+"x"),yy=eval(varname+"y"),zz=eval(varname+"z");
 if(varname=="gizah"){zz-=40;}
 monumentx[i]=xx;monumenty[i]=yy;monumentz[i]=zz;
-monument[i].myposition= new myCesium.Cartesian3.fromDegrees(xx,yy,zz,myellipsoid);
 monument[i]=myviewer.entities.add({
-  position : monument[i].myposition,
+  position : new myCesium.Cartesian3.fromDegrees(xx,yy,zz),
   billboard :{
             image : eval(varname+"png"),
             //heightReference: myCesium.HeightReference.CLAMP_TO_GROUND,
-            position :monument[i].myposition,
+            position : new myCesium.Cartesian3.fromDegrees(xx,yy,zz),
             scale : 1.0, // default: 1.0
             //imageIndex : 0, // default: -1
             show : true, // default
@@ -2020,6 +2019,7 @@ monument[i]=myviewer.entities.add({
             height : dx*dy*1.3 // default: undefined
      }
  });
+monument[i].myposition= new myCesium.Cartesian3.fromDegrees(xx,yy,zz);
 }
 function updatemonument(){
 for(var i=0;i<nmonument;i++){
@@ -2036,7 +2036,7 @@ for(var i=0;i<nmonument;i++){
 		//xxx+=50*sin3*sin3*cos1*sin2*klon/scale;yyy+=50*sin3*sin3*sin1*sin2/scale;
 		var zzz=zz-sin2*sin3*sin3*s60;
 		var o33=o3;if(tourelle==1){o33=0;}
-	    monument[i].myposition=myCesium.Cartesian3.fromDegrees(xxx,yyy,zzz,myellipsoid,monument[i].myposition);
+	    monument[i].myposition=myCesium.Cartesian3.fromDegrees(xxx,yyy,zzz);
 	    monument[i].position=monument[i].myposition;
 	    monument[i].billboard.position=monument[i].myposition;
 	    monument[i].billboard.show=true;
