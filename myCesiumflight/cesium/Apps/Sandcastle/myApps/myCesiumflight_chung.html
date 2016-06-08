@@ -2,8 +2,6 @@
 <html lang="en">
 <head>
 <!-- myCesiumflight a program by NGUYEN.Chung (freeware 2016) -->
-<base href="https://cesiumjs.org/Cesium/Apps/Sandcastle/gallery/"
- >
 <!--script>
 var myurl=document.location.href;//autolaunch as localhost:8080 if in local mode
 //http://localhost:8080/  file:///D:/cesium/Apps/Sandcastle/gallery/Camera_.html
@@ -13,6 +11,8 @@ if(myurl.indexOf("localhost:8080")<0 && myurl.indexOf("file:")>=0){
    document.location.href="http://localhost:8080/"+myurl.substr(i,999);
 }
 </script-->
+<base href="https://cesiumjs.org/Cesium/Apps/Sandcastle/gallery/"
+ >
 <script src="http://chungkn1400.github.io/myCesiumflight/myCesiumflight/cesium/Apps/Sandcastle/myApps/myCesiumheader.js"></script>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -621,11 +621,13 @@ msg+="R => radar / shift+R => radio off/on"+crlf;
 msg+="C => change cockpit"+crlf;
 msg+="shift+Q => terrain quality"+crlf;
 msg+="shift+B => osm buildings on/off"+crlf;
+msg+="shift+T => change time of day"+crlf;
 alert(msg);
 resetkeys();
 }
 if(keys[vk_escape]){quit=1;subquit();}
 if(keys[vk_9]){subtest();resetkeys();}
+if(keys[vk_t] && keys[vk_shift]){thour+=3.125;if(thour>24){thour-=24;};setsun();resetkeys();}
 if(keys[vk_b] && keys[vk_shift]){subbuilding();resetkeys();}
 if(keys[vk_q] && keys[vk_shift]){subterrainquality();resetkeys();}
 if(keys[vk_c] && iview==1){subcockpit();resetkeys();}
@@ -2126,12 +2128,14 @@ function updateairporttower2(){
 		//airporttower2.billboard.height=25*1.3;
 	 }else{airporttower2.billboard.show=false;}
 }
-var buildimage;
+var buildimage,builcolor1,buildcolor2,buildh0=50*3.0*1.3;
 var nbuildtower=490,buildtower=[],showbuild=[];//buildtower[i].x=0,buildtower[i].y=0,buildtower[i].zsol=0,buildtower[i].dx=0;
 function addbuildtower(){
 nbuildtower=Math.min(nbuildtower,nbuild);
 buildimage=new Image();
 buildimage.src= building128png;
+buildcolor1=new myCesium.Color(1.0,1.0,1.0,1.0);
+buildcolor2=new myCesium.Color(0.8,1.0,0.9,1.0);
 for(var i=0;i<nbuildtower;i++){
 var dx=50,dy=3.0;//dx*=towerportwidth;dy=dy/towerportwidth;
 var xx=x+i*0.1*360/40000,yy=y-1,zz=zsol;
@@ -2146,7 +2150,7 @@ buildtower[i]=myviewer.entities.add({
             show : false, // default
             horizontalOrigin : myCesium.HorizontalOrigin.CENTER, // default
             //verticalOrigin : myCesium.VerticalOrigin.BOTTOM, // default: CENTER
-            //color : myCesium.Color.LIME, // default: WHITE
+			color : new myCesium.Color(1.0,1.0,1.0,1.0),
             //rotation : 45, // default: 0.0
             alignedAxis : myCesium.Cartesian3.ZERO, // default
             //sizeInMeters : true,
@@ -2154,6 +2158,7 @@ buildtower[i]=myviewer.entities.add({
             height : dx*dy*1.3 // default: undefined
      }
  });
+buildh0=dx*dy*1.3;
 buildtower[i].iimage=0;
 buildtower[i].dx=dx*dy/1.3;
 buildtower[i].x=xx;buildtower[i].y=yy;buildtower[i].z=zz;
@@ -2171,6 +2176,8 @@ if(tloading2<tframe){
 	   buildtower[i].iimage=1;buildtower[i].billboard.image=buildimage;}
     else if(buildtower[i].h>=12 && buildtower[i].iimage==1){
 	   buildtower[i].iimage=0;buildtower[i].billboard.image=buildimage;}*/
+	if(buildtower[i].h>19.1){buildtower[i].billboard.color=buildcolor1;}
+	else{buildtower[i].billboard.color=buildcolor2;}
     buildtower[i].x=buildx[i];buildtower[i].y=buildy[i];buildtower[i].z=buildz[i];
     buildtower[i].w=buildw[i];
   }}}
@@ -2204,7 +2211,8 @@ for(var i=parseInt(0.001+ki*nbuildtower/2);i<parseInt(0.001+(ki+1)*nbuildtower/2
 		buildtower[i].billboard.scale=sc;
 		var kh=Math.max(1,Math.min(2.5,(buildtower[i].w/35)*Math.min(1,70/buildh[i])));
 		buildtower[i].billboard.width=50*kh;
-		//buildtower[i].billboard.height=25*1.3;
+		if(buildtower[i].h>19.1){buildtower[i].billboard.height=buildh0;}
+		else{buildtower[i].billboard.height=buildh0*buildtower[i].h/50.0;}
 	 }else{buildtower[i].billboard.show=false;showbuild[i]=0;}
 }}}
 /*if(tourelle==0){
