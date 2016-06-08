@@ -361,12 +361,13 @@ canvas.onclick = function() {
     canvas.focus();
 };
 var ellipsoid = scene.globe.ellipsoid;
+//var ellipsoid = viewer.scene.mapProjection.ellipsoid;
 myellipsoid=ellipsoid;
     /*if(scene.skyBox){scene.skyBox.destroy();}
-    scene.skyBox = undefined;
+    scene.skyBox = undefined;*/
     if(scene.sun){scene.sun.destroy();}
-    scene.sun = undefined;*/
-    //scene.backgroundColor = new Cesium.Color(0.8,0.8,1.0,1.0);
+    scene.sun = undefined;
+    scene.backgroundColor = new Cesium.Color(0.4,0.5,1.0,1.0);
 	scene.skyAtmosphere.show=false;
 
 
@@ -562,6 +563,7 @@ viewer.clock.onTick.addEventListener(function(clock) {
 	addairporttower2();
 	loadstorage('tbuilding','tbuilding');
 	addbuildtower();
+	initvars();
 	setTimeout("okinit=1;",8000);
 	
 	loadstorage('terrainquality','terrainquality')
@@ -1008,6 +1010,12 @@ klon=Math.sqrt((dx2*dx2+dy2*dy2+dz2*dz2)/Math.max(0.00001,dx1*dx1+dy1*dy1+dz1*dz
 var o1=30,o2=-14,o3=0,o10=0,o20=0,o30=0,x=0,y=0,z=0,x0=0,y0=0,z0=0;
 var to1=170,to2=-20;
 var zsol=0,aircraftzsol=0,aircraft2zsol=0;
+var mydestination,myposition,myposition2;
+function initvars(){
+  mydestination=new myCesium.Cartesian3.fromDegrees(x,y,z,myellipsoid);
+  myposition=new myCesium.Cartesian3.fromDegrees(x,y,z,myellipsoid);
+  myposition2=new myCesium.Cartesian3.fromDegrees(x,y,z,myellipsoid);
+}
 function myview(){//return;
 //o1=-45;o2=30;o3=45;
     var camera=myviewer.camera;
@@ -1050,7 +1058,7 @@ if(1 || Math.abs(o10-o1)+Math.abs(o20-o2)+Math.abs(o30-o3)>0.01){
 	var o11=o1,o22=o2,o33=o3;if(tourelle==1){o11+=to1;o22+=to2;o33=0;}
     camera.setView({
         //destination : myCesium.Cartesian3(300770.50872389384, 5634912.131394585, 2978152.2865545116),
-        destination : myCesium.Cartesian3.fromDegrees(x,y,z),
+        destination : myCesium.Cartesian3.fromDegrees(x,y,z,myellipsoid,mydestination),
         //positionCartographic: myCesium.Cartographic(x,y,z),
 		orientation: {
             heading : degtorad(-o11+90),
@@ -1087,7 +1095,7 @@ else{myentity2.show=true;
 	aircraft2o1=-o11-sin3*12;
 	aircraft2o2=o2+10+sin2*20;
 	aircraft2o3=o3;
-    var position = myCesium.Cartesian3.fromDegrees(aircraft2x,aircraft2y,aircraft2z);
+    var position = myCesium.Cartesian3.fromDegrees(aircraft2x,aircraft2y,aircraft2z,myellipsoid,myposition);
     //var position = myCesium.Cartesian3.fromDegrees(x,y,z-1);
     var heading = degtorad(aircraft2o1);
     var pitch = degtorad(aircraft2o2);
@@ -1170,7 +1178,7 @@ if (combotext=="tajmahal"){lat=27.17015;lng=78.002155;o1=36.3920;}
 document.getElementById('combo').blur();
 o2=-4;o3=0;x=lng;y=lat;z=300.0;setsun();
 myviewer.camera.setView({
-    destination : myCesium.Cartesian3.fromDegrees(lng, lat, z),
+    destination : myCesium.Cartesian3.fromDegrees(lng, lat, z,myellipsoid,mydestination),
 	orientation: {
             heading : degtorad(-o1+90),
             pitch : degtorad(o2-6),
@@ -1188,7 +1196,7 @@ o2=-4;o3=0;x=lngx;y=latx;z=300.0;
 lat=latx;lng=lngx;setsun();
 //myviewer.camera.flyTo({
 myviewer.camera.setView({
-    destination : myCesium.Cartesian3.fromDegrees(lng, lat, z),
+    destination : myCesium.Cartesian3.fromDegrees(lng, lat, z,myellipsoid,mydestination),
 	orientation: {
             heading : degtorad(-o1+90),
             pitch : degtorad(o2-6),
@@ -1358,6 +1366,7 @@ var nbridgemesh=60,ibridgemesh=0,bridgemeshid=[];
 var bridgemeshx=[],bridgemeshy=[],bridgemeshz=[],bridgemeshdz=[],bridgemesho1=[];
 var bridgemeshscale=[],bridgemeshmatrix=[],bridgemeshzsol=[];	
 var bridgemeshscalex=[],bridgemeshscaley=[],bridgemeshscalez=[],bridgemeshcolor=[];
+var mybridgeposition=[];
 function createmymesh(){
 var scale=0.1;
 jetgeometry=loadmygeometry(alphajetobjtxt,scale);//addmygeometry(positions,textcoords);
@@ -1368,7 +1377,7 @@ f14geometry=loadmygeometry(f14objtxt,scale);//addmygeometry(positions,textcoords
 f14mesh=addmymesh(f14geometry,f14jpg);
 myviewer.scene.primitives.add(f14mesh);
 
-var position = myCesium.Cartesian3.fromDegrees(x,y,z+10);
+var position = myCesium.Cartesian3.fromDegrees(x,y,z+10,myellipsoid,myposition);
 var heading = degtorad(aircrafto1);
 var pitch = degtorad(aircrafto2);
 var roll = degtorad(-aircrafto3);
@@ -1397,7 +1406,8 @@ for(var i=0;i<nbridgemesh;i++){
  bridgemeshscaley[i]=1.0;
  bridgemeshscalez[i]=1.0;
  bridgemeshscale[i]=new myCesium.Cartesian3(bridgemeshscalex[i],bridgemeshscaley[i],bridgemeshscalez[i]);
- var position = new myCesium.Cartesian3.fromDegrees(bridgemeshx[i],bridgemeshy[i],bridgemeshz[i]);
+ mybridgeposition[i] = new myCesium.Cartesian3.fromDegrees(bridgemeshx[i],bridgemeshy[i],bridgemeshz[i],myellipsoid);
+ var position=mybridgeposition[i];
  var heading = degtorad(bridgemesho1[i]);
  var pitch = degtorad(0.0);
  var roll = degtorad(0.0);
@@ -1435,7 +1445,7 @@ for(var i=0;i<nbridgemesh;i++){
    if(Math.max(Math.abs(dx),Math.abs(dy))<360/40000){tnearbridge=1;}
    bridgemeshdz[i]=7.0;
    bridgemeshz[i]=bridgemeshzsol[i]+bridgemeshdz[i];
-   var position = myCesium.Cartesian3.fromDegrees(bridgemeshx[i],bridgemeshy[i],bridgemeshz[i]);
+   var position = myCesium.Cartesian3.fromDegrees(bridgemeshx[i],bridgemeshy[i],bridgemeshz[i],myellipsoid,mybridgeposition[i]);
    var heading = degtorad(bridgemesho1[i]);
    var do1=diro1(-dx,-dy)-bridgemesho1[i];
    while(do1>180){do1-=360;}
@@ -1482,7 +1492,7 @@ function createModel(url, height) {
     //myviewer.trackedEntity = entity;
 	myentity=entity;
 
-    var position2 = myCesium.Cartesian3.fromDegrees(x,y,z);
+    var position2 = myCesium.Cartesian3.fromDegrees(x,y,z,myellipsoid,myposition2);
     orientation = myCesium.Transforms.headingPitchRollQuaternion(position2, heading, pitch, roll);
     var entity2 = myviewer.entities.add({
         name : url,
@@ -1525,7 +1535,7 @@ aircraftz+=(Math.max(aircraftzsol+250.0,z-150.0)-aircraftz)*dtime*0.001;
 var vv=55,dx=vv*dtime*0.001/scale;
 aircraftx+=dx;
 aircrafto1=0;
-    var position = myCesium.Cartesian3.fromDegrees(aircraftx,aircrafty,aircraftz);
+    var position = myCesium.Cartesian3.fromDegrees(aircraftx,aircrafty,aircraftz,myellipsoid,myposition);
     //var position = myCesium.Cartesian3.fromDegrees(x,y,z-1);
     var heading = degtorad(-aircrafto1);
     var pitch = degtorad(aircrafto2);
@@ -1991,12 +2001,13 @@ monumentdx[i]=dx*dy/1.3;
 var xx=eval(varname+"x"),yy=eval(varname+"y"),zz=eval(varname+"z");
 if(varname=="gizah"){zz-=40;}
 monumentx[i]=xx;monumenty[i]=yy;monumentz[i]=zz;
+monument[i].myposition= new myCesium.Cartesian3.fromDegrees(xx,yy,zz,myellipsoid);
 monument[i]=myviewer.entities.add({
-  position : myCesium.Cartesian3.fromDegrees(xx,yy,zz),
+  position : monument[i].myposition,
   billboard :{
             image : eval(varname+"png"),
             //heightReference: myCesium.HeightReference.CLAMP_TO_GROUND,
-            position : myCesium.Cartesian3.fromDegrees(xx,yy,zz),
+            position :monument[i].myposition,
             scale : 1.0, // default: 1.0
             //imageIndex : 0, // default: -1
             show : true, // default
@@ -2012,6 +2023,7 @@ monument[i]=myviewer.entities.add({
 }
 function updatemonument(){
 for(var i=0;i<nmonument;i++){
+  if(monument[i]){
    var dx=Math.abs((monumentx[i]-x)*scale/klon);
    var dy=Math.abs((monumenty[i]-y)*scale);
    var dxmax=monumentdx[i]*25000/80;
@@ -2024,13 +2036,14 @@ for(var i=0;i<nmonument;i++){
 		//xxx+=50*sin3*sin3*cos1*sin2*klon/scale;yyy+=50*sin3*sin3*sin1*sin2/scale;
 		var zzz=zz-sin2*sin3*sin3*s60;
 		var o33=o3;if(tourelle==1){o33=0;}
-	    monument[i].position=myCesium.Cartesian3.fromDegrees(xxx,yyy,zzz);
-	    monument[i].billboard.position=myCesium.Cartesian3.fromDegrees(xxx,yyy,zzz);
+	    monument[i].myposition=myCesium.Cartesian3.fromDegrees(xxx,yyy,zzz,myellipsoid,monument[i].myposition);
+	    monument[i].position=monument[i].myposition;
+	    monument[i].billboard.position=monument[i].myposition;
 	    monument[i].billboard.show=true;
 		monument[i].billboard.rotation=degtorad(-o33);
 		monument[i].billboard.scale=sc;//}
 	 }else{monument[i].billboard.show=false;}
-   }
+   }}
 }
 var airporttower,airporttowerx=0,airporttowery=0,airporttowerzsol=0,airporttowerdx=0;
 var towerportx=0,towerporty=0,towerportwidth=1;
@@ -2140,7 +2153,7 @@ for(var i=0;i<nbuildtower;i++){
 var dx=50,dy=3.0;//dx*=towerportwidth;dy=dy/towerportwidth;
 var xx=x+i*0.1*360/40000,yy=y-1,zz=zsol;
 buildtower[i]=myviewer.entities.add({
-  position : myCesium.Cartesian3.fromDegrees(xx,yy),
+  position : new myCesium.Cartesian3.fromDegrees(xx,yy),
   billboard :{
             image : buildimage,//'building128.png' ,
             position : myCesium.Cartesian3.fromDegrees(xx,yy),
@@ -2158,6 +2171,7 @@ buildtower[i]=myviewer.entities.add({
             height : dx*dy*1.3 // default: undefined
      }
  });
+buildtower[i].myposition= new myCesium.Cartesian3.fromDegrees(xx,yy),
 buildh0=dx*dy*1.3;
 buildtower[i].iimage=0;
 buildtower[i].dx=dx*dy/1.3;
@@ -2204,8 +2218,9 @@ for(var i=parseInt(0.001+ki*nbuildtower/2);i<parseInt(0.001+(ki+1)*nbuildtower/2
 		//xxx+=50*sin3*sin3*cos1*sin2*klon/scale;yyy+=50*sin3*sin3*sin1*sin2/scale;
 		var zzz=zz-sin2*sin3*sin3*s60;
 		var o33=o3;if(tourelle==1){o33=0;}
-	    buildtower[i].position=myCesium.Cartesian3.fromDegrees(xx,yy,zz);
-	    buildtower[i].billboard.position=myCesium.Cartesian3.fromDegrees(xx,yy,zz);
+	    buildtower[i].myposition=myCesium.Cartesian3.fromDegrees(xx,yy,zz,myellipsoid,buildtower[i].myposition);
+	    buildtower[i].position=buildtower[i].myposition;
+	    buildtower[i].billboard.position=buildtower[i].myposition;
 	    buildtower[i].billboard.show=true;
 		buildtower[i].billboard.rotation=degtorad(-o33);
 		buildtower[i].billboard.scale=sc;
@@ -2243,7 +2258,7 @@ boeing=myviewer.entities.add({
   position : myCesium.Cartesian3.fromDegrees(boeingx,boeingy,boeingz),
   billboard :{
             image : boeing512png,
-            position : myCesium.Cartesian3.fromDegrees(boeingx,boeingy,boeingz),
+            position : new myCesium.Cartesian3.fromDegrees(boeingx,boeingy,boeingz),
             scale : 1.0, // default: 1.0
             imageIndex : -1, // default: -1
             show : true, // default
@@ -2256,6 +2271,7 @@ boeing=myviewer.entities.add({
             height : 100 // default: undefined
      }
  });
+boeing.myposition= new myCesium.Cartesian3.fromDegrees(boeingx,boeingy,boeingz);
 }
 function updateboeing(){
    var dx=Math.abs((boeingx-x)*scale/klon);
@@ -2266,8 +2282,9 @@ function updateboeing(){
 		var xxx=boeingx,yyy=boeingy;
 		var zzz=boeingz;
 		var o33=o3;if(tourelle==1){o33=0;}
-	    boeing.position=myCesium.Cartesian3.fromDegrees(xxx,yyy,zzz);
-	    boeing.billboard.position=myCesium.Cartesian3.fromDegrees(xxx,yyy,zzz);
+	    boeing.myposition=myCesium.Cartesian3.fromDegrees(xxx,yyy,zzz,myellipsoid,boeing.myposition);
+	    boeing.position=boeing.myposition;
+	    boeing.billboard.position=boeing.myposition;
 	    boeing.billboard.show=true;
 		boeing.billboard.rotation=degtorad(-o33);
 		if(boeingdo1>0){boeing.billboard.scale=sc;
@@ -2300,7 +2317,9 @@ for(var i=0;i<ncloud;i++){
 			color : new myCesium.Color(1,1,1,alpha),
             image : cloudimage//cloudpng
         }
-    });}
+    });
+    cloud[i].myposition= new myCesium.Cartesian3.fromDegrees(cloudx[i],cloudy[i],cloudz[i]);
+	}
 }
 var tseticloud=0,ticloud=[],dcloud=[];
 var cloudx2=[],cloudy2=[],cloudz2=[],cloudsc2=[];
@@ -2340,7 +2359,9 @@ for(var i=0;i<ncloud;i++){
    var yy=y+ki*Math.round((cloudy[i]-y)*d10000)/d10000;
    var zz=cloudz[i];
    //var xx=cloudx[i],yy=cloudy[i],zz=cloudz[i];
-   cloud[i].position= myCesium.Cartesian3.fromDegrees(xx,yy,zz);
+   cloud[i].myposition= myCesium.Cartesian3.fromDegrees(xx,yy,zz,myellipsoid,cloud[i].myposition);
+   cloud[i].position= cloud[i].myposition;
+   cloud[i].billboard.position= cloud[i].myposition;
    cloud[i].billboard.rotation=degtorad(-o3);
    cloud[i].show=true;
    cloud[i].billboard.scale=cloudsc[i]*28/(0.75+dist);
@@ -2358,7 +2379,7 @@ function addsky(){
   var yy=y+dr*sin1;
   var zz=0;
   sky=myviewer.entities.add({
-        position : myCesium.Cartesian3.fromDegrees(xx,yy,zz),
+        position : new myCesium.Cartesian3.fromDegrees(xx,yy,zz),
         billboard :{
             image : skydomejpg ,
                 position : myCesium.Cartesian3.fromDegrees(xx,yy),
@@ -2376,19 +2397,25 @@ function addsky(){
                 height :windy*2 // default: undefined
         }
     });
+    sky.myposition= new myCesium.Cartesian3.fromDegrees(xx,yy,zz);
 }
 function updatesky(){
 if(tourelle==0){
+  if(o2<50){myviewer.scene.skyBox.show=true;}
+  else{myviewer.scene.skyBox.show=false;}
   while(o1>180){o1-=360}
   while(o1<-180){o1+=360}
   var dr=90000/scale,dr2=-2*dr*o1/180;
   var xx=x+klon*dr*cos1-klon*dr2*sin1;
   var yy=y+dr*sin1+dr2*cos1;
   //var zz=0;if(sin2>0){zz=dr*sin2*sin2;}
-  sky.position= myCesium.Cartesian3.fromDegrees(xx,yy);
-  sky.billboard.position= myCesium.Cartesian3.fromDegrees(xx,yy);
+  sky.myposition= myCesium.Cartesian3.fromDegrees(xx,yy,0.0,myellipsoid,sky.myposition);
+  sky.position= sky.myposition;
+  sky.billboard.position= sky.myposition;
   sky.billboard.rotation=degtorad(-o3);
 }else{
+  if(o2+to2<50){myviewer.scene.skyBox.show=true;}
+  else{myviewer.scene.skyBox.show=false;}
   var do1=o1+to1;
   while(do1>180){do1-=360}
   while(do1<-180){do1+=360}
@@ -2397,8 +2424,9 @@ if(tourelle==0){
   var xx=x+klon*dr*co1-klon*dr2*si1;
   var yy=y+dr*si1+dr2*co1;
   //var zz=0;if(sin2>0){zz=dr*sin2*sin2;}
-  sky.position= myCesium.Cartesian3.fromDegrees(xx,yy);
-  sky.billboard.position= myCesium.Cartesian3.fromDegrees(xx,yy);
+  sky.myposition= myCesium.Cartesian3.fromDegrees(xx,yy,0.0,myellipsoid,sky.myposition);
+  sky.position= sky.myposition; 
+  sky.billboard.position= sky.myposition;
   sky.billboard.rotation=degtorad(0);
 }
 sky.billboard.width=windx*2;
@@ -2411,7 +2439,7 @@ function addsun(){
   var yy=y+dr*sin1;
   var zz=0;
   sun=myviewer.entities.add({
-        position : myCesium.Cartesian3.fromDegrees(xx,yy,zz),
+        position : new myCesium.Cartesian3.fromDegrees(xx,yy,zz),
         billboard :{
             image : sunpng ,
                 position : myCesium.Cartesian3.fromDegrees(xx,yy),
@@ -2429,6 +2457,7 @@ function addsun(){
                 height :windy*0.65 // default: undefined
         }
     });
+    sun.myposition= new myCesium.Cartesian3.fromDegrees(xx,yy,zz);
 }
 var tupdatesun=0,sunx=0,suny=0,sunz=0,o1sun=0,o2sun=0;
 var month=0,hour=0,thour=0,hour2=0;
@@ -2468,8 +2497,9 @@ if(tourelle==0){
   var xx=x+klon*dr*co1*co2;
   var yy=y+dr*si1*co2;
   //var zz=0;if(sin2>0){zz=dr*sin2*sin2;}
-  sun.position= myCesium.Cartesian3.fromDegrees(xx,yy,zz);
-  sun.billboard.position= myCesium.Cartesian3.fromDegrees(xx,yy,zz);
+  sun.myposition= myCesium.Cartesian3.fromDegrees(xx,yy,zz,myellipsoid,sun.myposition);
+  sun.position=sun.myposition;
+  sun.billboard.position=sun.myposition;
   sun.billboard.rotation=degtorad(-o3);
 }else{
   var dr=70000/scale;
@@ -2480,8 +2510,9 @@ if(tourelle==0){
   var xx=x+klon*dr*co1*co2;
   var yy=y+dr*si1*co2;
   //var zz=0;if(sin2>0){zz=dr*sin2*sin2;}
-  sun.position= myCesium.Cartesian3.fromDegrees(xx,yy,zz);
-  sun.billboard.position= myCesium.Cartesian3.fromDegrees(xx,yy,zz);
+  sun.myposition= myCesium.Cartesian3.fromDegrees(xx,yy,zz,myellipsoid,sun.myposition);
+  sun.position=sun.myposition;
+  sun.billboard.position=sun.myposition;
   sun.billboard.rotation=degtorad(0);
 }
 sun.billboard.width=windx*0.4;
