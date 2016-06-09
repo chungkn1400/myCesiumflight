@@ -313,7 +313,7 @@ var cssx0=cssscale,cssy0=cssscaley;
   }else{cssscale=cssx0;cssscaley=cssy0;}
 subfocus();  
 }
-var myviewer,myCesium,myellipsoid,okinit=0;
+var myviewer,myCesium,myellipsoid,shadowmap,myclock,mydate,okinit=0;
 function startup(Cesium) {
     'use strict';
 //Sandcastle_Begin
@@ -330,6 +330,8 @@ var viewer = new Cesium.Viewer('cesiumContainer',{
     sceneModePicker:false,
     timeline:false,
 	creditContainer: document.getElementById("credit"),
+    shadows : true,
+    terrainShadows : false,
     contextOptions:{ webgl : { alpha : false, depth : true, stencil : false, antialias : true, premultipliedAlpha : true, preserveDrawingBuffer : false, failIfMajorPerformanceCaveat : false }, allowTextureFilterAnisotropic : true } 
 							   }							   
 							   );
@@ -345,6 +347,20 @@ var cesiumTerrainProviderMeshes = new Cesium.CesiumTerrainProvider({
 viewer.terrainProvider = cesiumTerrainProviderMeshes;
 viewer.scene.globe.enableLighting = false;
 viewer.scene.fog.enabled = false;
+
+shadowmap = viewer.shadowMap;
+shadowmap.maxmimumDistance = 4000.0;
+shadowmap.size=1024;
+shadowmap.cascadesEnabled=false;
+shadowmap.darkness=0.33;
+//shadowmap.isPointLight=true;
+tshadow=0;loadstorage('tshadow','tshadow');
+if(tshadow==1){shadowmap.enabled=true;}else{shadowmap.enabled=false;}
+mydate=new Date();
+myclock = new myCesium.JulianDate.fromDate(mydate);
+//mydate.setHours(17);mydate.setMinutes(45);
+myclock=myCesium.JulianDate.fromDate(mydate);
+viewer.clock.currentTime=myclock;
 
 Sandcastle.addToolbarButton('Lighting', function() {
     viewer.scene.globe.enableLighting = !viewer.scene.globe.enableLighting;
@@ -365,8 +381,8 @@ var ellipsoid = scene.globe.ellipsoid;
 myellipsoid=ellipsoid;
     /*if(scene.skyBox){scene.skyBox.destroy();}
     scene.skyBox = undefined;*/
-    if(scene.sun){scene.sun.destroy();}
-    scene.sun = undefined;
+    //if(scene.sun){scene.sun.destroy();}
+    //scene.sun = undefined;
     scene.backgroundColor = new Cesium.Color(0.4,0.5,1.0,1.0);
 	scene.skyAtmosphere.show=false;
 
@@ -624,11 +640,13 @@ msg+="C => change cockpit"+crlf;
 msg+="shift+Q => terrain quality"+crlf;
 msg+="shift+B => osm buildings on/off"+crlf;
 msg+="shift+T => change time of day"+crlf;
+msg+="shift+S => shadows on/off"+crlf;
 alert(msg);
 resetkeys();
 }
 if(keys[vk_escape]){quit=1;subquit();}
 if(keys[vk_9]){subtest();resetkeys();}
+if(keys[vk_s] && keys[vk_shift]){subshadow();resetkeys();}
 if(keys[vk_t] && keys[vk_shift]){thour+=3.125;if(thour>24){thour-=24;};setsun();resetkeys();}
 if(keys[vk_b] && keys[vk_shift]){subbuilding();resetkeys();}
 if(keys[vk_q] && keys[vk_shift]){subterrainquality();resetkeys();}
@@ -985,6 +1003,7 @@ function subquit(){
   savestorage('aircrafto1',aircrafto1);
   savestorage('terrainquality',terrainquality);
   savestorage('tbuilding',tbuilding);
+  savestorage('tshadow',tshadow);
   bridgesave="";for(var i=0;i<nbridgemesh;i++){
    bridgesave+=bridgemeshx[i]+"?"+bridgemeshy[i]+"?"+bridgemesho1[i]+"?"+bridgemeshscalex[i]+"?";}
   savestorage('bridgesave',bridgesave);
@@ -1219,7 +1238,7 @@ function geolocate(){
 geolocation = "paris france";
 geolocation=window.prompt("flyto : enter address or location");
 //alert("geolocation="+geolocation);
-if (geolocation.length>0){
+if (geolocation){
   var geocoder = new google.maps.Geocoder();
   geocoder.geocode( { 'address': geolocation}, function(results, status) {
     if (status == google.maps.GeocoderStatus.OK) {
@@ -1322,6 +1341,8 @@ var mymesh=new myCesium.Primitive({
         asynchronous: false,
 		cull : false,
 		show : true,
+		castShadows : true,
+		receiveShadows : false,
 		appearance : new myCesium.MaterialAppearance({
 		   //translucent : false,
 		   material : new myCesium.Material({
@@ -1391,6 +1412,7 @@ var scale=1.0;
 bridgegeometry=loadmygeometry(mybridgeobjtxt,scale);
 for(var i=0;i<nbridgemesh;i++){
   bridgemesh[i]=addmymesh(bridgegeometry, mybridgepng);
+  bridgemesh[i].castShadows=false;
   myviewer.scene.primitives.add(bridgemesh[i]);  
  }
 initmyappearance();
@@ -1489,6 +1511,8 @@ function createModel(url, height) {
             maximumScale : 200000
         }
     });
+	entity.model.castShadows = true;
+	entity.model.receiveShadows = false;
     //myviewer.trackedEntity = entity;
 	myentity=entity;
 
@@ -1504,6 +1528,8 @@ function createModel(url, height) {
             maximumScale : 200000
         }
     });
+	entity2.model.castShadows = true;
+	entity2.model.receiveShadows = false;
     //myviewer.trackedEntity = entity2;
 	myentity2=entity2;
 }
@@ -2458,6 +2484,7 @@ function addsun(){
         }
     });
     sun.myposition= new myCesium.Cartesian3.fromDegrees(xx,yy,zz);
+	sun.camera= new myCesium.Camera(myviewer.scene);
 }
 var tupdatesun=0,sunx=0,suny=0,sunz=0,o1sun=0,o2sun=0;
 var month=0,hour=0,thour=0,hour2=0;
@@ -2480,11 +2507,43 @@ function setsun(){
 		suny=-1000*Math.cos((12-hour2)*3.44/24);
 		sunz=800*Math.cos((12-hour2)*3.14/24)*Math.cos((12-hour2)*3.14/24)+40;
 		o1sun=(12-hour2)*180/24;
-		o2sun=diro1(1000,sunz);
+		o2sun=Math.max(5,diro1(1000,sunz));
 		var alpha=Math.min(1.0,Math.max(0.25,Math.abs(hour2-12)/6.2-0.35));
 		if(sun){sun.billboard.color=new myCesium.Color(1,1,1,alpha);}
 		alpha=Math.min(1.0,Math.max(0.25,0.25+(12-Math.abs(hour2-12))/5.5));
 		if(sky){sky.billboard.color=new myCesium.Color(1,1,1,alpha);}
+		//if(sun){setcamerasun();shadowmap.lightCamera=sun.camera;}
+var hour3=14+(hour-14)*8/14;
+//if(mydate.getHours()>hour3){mydate.setDate(mydate.getDate()+1);} 
+mydate.setHours(parseInt(hour3));
+mydate.setMinutes(parseInt((hour3-parseInt(hour3))*60));
+myclock=myCesium.JulianDate.fromDate(mydate);
+myviewer.clock.currentTime=myclock;		
+}
+var tshadow=0;
+function subshadow(){
+if(tshadow==0){if(confirm("set shadow on ?")){tshadow=1;shadowmap.enabled=true;}}
+else{if(confirm("set shadow off ?")){tshadow=0;shadowmap.enabled=false;}}
+}
+function setcamerasun(){
+  var dr=70000/scale;
+  var zz=sunz*30-3000;
+  var co2=1-Math.abs(zz)/60000;
+  var co1=Math.cos(degtorad(o1sun-90));
+  var si1=Math.sin(degtorad(o1sun-90));
+  var xx=x+klon*dr*co1*co2;
+  var yy=y+dr*si1*co2;
+  //var zz=0;if(sin2>0){zz=dr*sin2*sin2;}
+  sun.myposition= myCesium.Cartesian3.fromDegrees(xx,yy,zz,myellipsoid,sun.myposition);
+  sun.camera.position=sun.myposition;
+  sun.camera.setView({
+        //destination : sun.myposition,
+        orientation: {
+            heading : degtorad(o1sun-90+180),
+            pitch : degtorad(o2sun-180),
+            roll : degtorad(0.0)
+        }
+  });
 }
 function updatesun(){
 if(tframe>tupdatesun+60000){tupdatesun=tframe;setsun();}
