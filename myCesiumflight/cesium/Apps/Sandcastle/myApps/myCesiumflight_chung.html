@@ -731,6 +731,7 @@ v=200*vplane/2;//vplane:-0.5 .. 4.5 -100..900km/h
 movexyz=v*dtime*0.0005;
 if(okinit>=1 && spotb){okinit=2;
    auxvar=parseInt(Math.max(-1000,(tloading2-tframe)/1000));
+   auxvar4=parseInt(Math.max(-1000,(tloading-tframe)/1000));
    auxvar2=iicomm;
    myview();moveaircraft();
    if(taskgetterrainheightbridge==1){getterrainheightbridge();}
@@ -1537,10 +1538,10 @@ for(var i=0;i<nbridgemesh;i++){
 function updatebridge(){
 if(tgetterrainheightbridge>tframe-20000 || okinit<2 || tframe<tloading){return;}
 tgetterrainheightbridge=tframe;
-tloading=tframe+20000;
+tloading=tframe+40000;
 updatebridge0();
 tgetterrainheightbridge=0;
-setTimeout("tloading=0;",300);
+tloading=0;
 }
 function updatebridge0(){
 var distmax=18*360/40000;
@@ -2426,7 +2427,7 @@ if(tloading2<tframe){
     buildmeshscalex[i]=ww;buildmeshscaley[i]=ww;buildmeshscalez[i]=sc;
     if(Math.abs(buildmeshscalex[i]-scx)+
        Math.abs(buildmeshscaley[i]-scy)+
-	   Math.abs(buildmeshscalez[i]-scz)>0.0001){buildmeshchanged[i]=1;auxvar4+=1;}
+	   Math.abs(buildmeshscalez[i]-scz)>0.0001){buildmeshchanged[i]=1;}
 	if(buildh[i]>19.1){buildmeshcolor[i]=1;}
 	else{buildmeshcolor[i]=2;}
     if(buildmeshcolor[i]==1){buildmesh[i].appearance=mybuildappearance;}
@@ -2495,7 +2496,7 @@ for(var i=0;i<Math.min(nbuildtower,nbuildmesh);i++){
  buildmeshscalex[i]=ww;buildmeshscaley[i]=ww;buildmeshscalez[i]=sc;
  if(Math.abs(buildmeshscalex[i]-scx)+
     Math.abs(buildmeshscaley[i]-scy)+
-	Math.abs(buildmeshscalez[i]-scz)>0.0001){buildmeshchanged[i]=1;auxvar4+=1;}
+	Math.abs(buildmeshscalez[i]-scz)>0.0001){buildmeshchanged[i]=1;}
 }
 //tgetterrainheightbuild=0;
 }
@@ -2998,10 +2999,10 @@ function httpGet(url,callback)
   }
 	xmlhttp.onreadystatechange=function()
     {
-		if(xmlhttp.readyState>=1){httpstatus=xmlhttp.status;
-		    if(httpstatus>400){alert("http "+httpstatus);
+		if(xmlhttp.readyState==4){httpstatus=xmlhttp.status;
+		    if(httpstatus>400){//alert("http "+httpstatus);alert(xmlhttp.responseText);
 			   if(tloading>0.1){
-			      setTimeout("if(tloading>0.1 && httpstatus>400){tloading=0;};",8000);}}}
+			      setTimeout("if(tloading>0.1 && httpstatus>400){tloading=0;};",18000);}}}
         if(xmlhttp.readyState==4 && xmlhttp.status==200){callback(xmlhttp.responseText);}
     }	
     //xmlhttp.open("GET", theUrl, false);
@@ -3031,7 +3032,7 @@ function httpGet2(url,callback)
   }
 	xmlhttp2.onreadystatechange=function()
     {
-		if(xmlhttp2.readyState>=1){httpstatus2=xmlhttp2.status*1;//alert(httpstatus2);
+		if(xmlhttp2.readyState==4){httpstatus2=xmlhttp2.status*1;//alert(httpstatus2);
 		    if(httpstatus2>400){alert("http2 "+httpstatus2);
 			   if(tloading2>0.1){
 			      setTimeout("if(tloading2>0.1 && httpstatus2>400){tloading2=0;};",8000);}}}
@@ -3474,7 +3475,7 @@ return 0;
 var tloading=0,tloading2=0,http="http:",overpass="",overpass2="";
 function getnodes(){
 //if(tframe<tloading){return;}
-tloading=tframe+40000;
+tloading=tframe+60000;
 var dx=18*360/40000;
 if(iport>3){dx=Math.min(dx,Math.max(Math.abs(port0x-lng)/klon,Math.abs(port0y-lat)));
             dx=Math.max(7*360/40000,dx);}
@@ -3500,7 +3501,7 @@ httpGet(nodeurl,nodecallback);
 }
 function getways(){
 if(tframe<tloading){return;}
-tloading=tframe+40000;
+tloading=tframe+70000;
 var dx=18*360/40000;
 lng=x;lat=y;
 var lat1=lat-dx,lon1=lng-dx*klon;
@@ -3930,7 +3931,7 @@ function weathercallback(r){//alert(r);
 	      if(isky==2){sky.billboard.image= skydome2jpg;}
 		  }
 	}	  
-  setTimeout("tloading=0;",300);
+  setTimeout("tloading=0;",500);
 }
 var latweather=-91,lngweather=0;
 function testgetweather(){
@@ -3941,7 +3942,7 @@ if(Math.abs(lat-latweather)>0.5 || Math.abs(lng-lngweather)>klon*0.5){
 function getweather(){
 if(http!="http:"){return;}
 if(tloading>0.1){return;}
-tloading=timer()+20000;
+tloading=tframe+40000;
 var weatherurl="http://api.openweathermap.org/data/2.5/weather?lat="+lat+"&lon="+lng+"&APPID=4cd1de75fbc57d92794e74ec918593ca";
 try{		
 httpGet(weatherurl,weathercallback);
