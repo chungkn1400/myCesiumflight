@@ -3375,8 +3375,8 @@ function waycallback2(r){//alert(r);
   }
 }
 //alert(msg+" test="+test+" iibuild="+iibuild+" hbuild="+hbuild);
-if(iibuild>0){setTimeout("getnodes2();",3100);}
-else{setTimeout("tloading2=0;",3100);}
+if(iibuild>0){setTimeout("getnodes2();",300);}
+else{setTimeout("tloading2=0;",300);}
 }
 var nodejson2,nodes2=[],latnodes2=[],lonnodes2=[];
 function nodecallback2(r){//alert(r);
@@ -3392,7 +3392,7 @@ function nodecallback2(r){//alert(r);
      lonnodes2[inode]=nodes2[i].lon;
 	 }
 //alert(msg);	 
-setTimeout("getnodes22();",3100);
+setTimeout("getnodes22();",300);
 }
 var nodejson22,nodes22=[];
 function nodecallback22(r){//alert(r);
@@ -3417,7 +3417,7 @@ for(var i=1;i<=iibuild;i++){
                               lonnodes2[buildnodemid[i]],latnodes2[buildnodemid[i]]);}
 }}
 //alert("ok22");	 
-setTimeout("getterrainheightbuild();",3100);
+setTimeout("getterrainheightbuild();",300);
 }
 function testmonument(lonxx,latyy){
    var dlat=0.200*360/40000,dlon=dlat*klon;
