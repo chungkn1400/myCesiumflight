@@ -1468,7 +1468,7 @@ var bridgemeshscalex=[],bridgemeshscaley=[],bridgemeshscalez=[],bridgemeshcolor=
 var mybridgeposition=[];
 var carregeometry,carremesh;
 var buildgeometry,buildmesh=[];
-var nbuildmesh=950,ibuildmesh=0,buildmeshid=[],buildmeshh=[];
+var nbuildmesh=490,ibuildmesh=0,buildmeshid=[],buildmeshh=[];
 var buildmeshx=[],buildmeshy=[],buildmeshz=[],buildmeshdz=[],buildmesho1=[];
 var buildmeshscale=[],buildmeshmatrix=[],buildmeshzsol=[],buildmeshchanged=[];	
 var buildmeshscalex=[],buildmeshscaley=[],buildmeshscalez=[],buildmeshcolor=[];
@@ -1575,6 +1575,7 @@ for(var i=0;i<nbridgemesh;i++){
  }}
 }
 function addbuildmesh(){
+nbuildmesh=Math.min(nbuild,nbuildmesh);
 var scale=1.0;
 buildgeometry=carregeometry;//loadmygeometry(mybuildobjtxt,scale);
 for(var i=0;i<nbuildmesh;i++){
