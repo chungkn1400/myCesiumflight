@@ -29,10 +29,10 @@ if(myurl.indexOf("localhost:8080")<0 && myurl.indexOf("file:")>=0){
 </head>
 <body class="sandcastle-loading" data-sandcastle-bucket="bucket-requirejs.html" onunload="subunload();" >
 <!--style>
+    @import url(../Build/Cesium/Widgets/widgets.css);
 <-->
 <style>
     @import url(../templates/bucket.css);
-    @import url(../Build/Cesium/Widgets/widgets.css);
     #cesiumContainer {
           width: 98%;
 		 height: 98%;
@@ -579,6 +579,8 @@ viewer.clock.onTick.addEventListener(function(clock) {
 	addairporttower2();
 	loadstorage('tbuilding','tbuilding');
 	addbuildtower();
+	//addbuildtower2();
+	addbuildmesh();
 	initvars();
 	setTimeout("okinit=1;",8000);
 	
@@ -731,7 +733,7 @@ if(okinit>=1 && spotb){okinit=2;
    auxvar2=iicomm;
    myview();moveaircraft();
    if(taskgetterrainheightbridge==1){getterrainheightbridge();}
-   testupdatebuildtower();//before testgetways2()
+   testupdatebuildmesh();//before testgetways2()
    testgetways();testradio();
    testgetweather();testgetways2();
    if(tinitterrainheightvars==1){initterrainheightvars();}
@@ -751,12 +753,12 @@ if(tframe>waytime+8000){
  var xx=x+cos1*dx*klon,yy=y+sin1*dx;
  var d800=Math.min(800,200+z-zsol);
  if(Math.abs((wayx-xx)*scale/klon)>d800 || Math.abs((wayy-yy)*scale)>d800){
-   updatebridge();tupdatebridge=tframe;tnearbridge=0;
+   updatebridge();tupdatebridge=tframe;tnearbridge=0;updatebuildmesh();
    wayx=xx;wayy=yy;waytime=tframe;
    getways();}
 }else if(tframe>tupdatebridge+4000 && tnearbridge==1 && tframe>tloading){
    tupdatebridge=tframe;tnearbridge=0;
-   updatebridge();
+   updatebridge();updatebuildmesh();
 }
 }
 var button=[];for(var i=0;i<16;i++){button[i]=0;};
@@ -921,7 +923,7 @@ myCesium.when(promise, function(updatedPositions) {
 var tgetterrainheightbridge=0,taskgetterrainheightbridge=0;
 var hidebridgeid=[],nhidebridge=220,ihidebridge=0;
 for(var i=0;i<=nhidebridge;i++){hidebridgeid[i]=0;}
-function getterrainheightbridge(){auxvar4=ihidebridge;
+function getterrainheightbridge(){//auxvar4=ihidebridge;
 if(myviewer.terrainProvider.ready==false){return;}
 if(tgetterrainheightbridge>tframe-20000 || okinit<2 || tframe<tloading){return;}
 tgetterrainheightbridge=tframe;
@@ -1157,7 +1159,10 @@ updatemonument();
 if(boeing){moveboeing();updateboeing();}
 if(airporttower){updateairporttower();}
 if(airporttower2){updateairporttower2();}
-if(buildtower[0] && tbuilding==1){updatebuildtower();}
+if(buildtower[0] && tbuilding==1){//updatebuildtower();
+                                  //updatebuildtower2();
+								  }
+if(buildmesh[0] && tbuilding==1){updatebuildmesh();}
 }
 var icombo=3,combotext="deauville marinas";
 var lat=48.8261252,lng=2.35705595;
@@ -1267,7 +1272,7 @@ var myentity,myentity2,scale=40000.0*1000/360;
 var aircraftx=0,aircrafty=0,aircraftz=0,aircrafto1=0,aircrafto2=0,aircrafto3=0;
 var aircraft2x=0,aircraft2y=0,aircraft2z=0,aircraft2o1=0,aircraft2o2=0,aircraft2o3=0;
 var mymesh,mygeometry;
-var positions = new Float64Array([
+var carrepositions = new Float64Array([
   0.0, 50.0, 0.0,
   0.0, 50.0, 100.0,
   0.0, -50.0, 0.0,
@@ -1275,7 +1280,7 @@ var positions = new Float64Array([
   0.0, -50.0, 100.0,
   0.0, -50.0, 0.0
 ]);
-var textcoords = new Float32Array([
+var carretextcoords = new Float32Array([
   0.0, 0.0,
   0.0, 1.0,
   1.0, 0.0,
@@ -1364,6 +1369,7 @@ var mymesh=new myCesium.Primitive({
 return mymesh;
 }
 var mybridgeredappearance,mybridgeorangeappearance,mybridgegreenappearance;
+var mybuildappearance,mybuildappearance2;
 function initmyappearance(){
 		mybridgeredappearance = new myCesium.MaterialAppearance({
 		   //translucent : false,
@@ -1387,6 +1393,28 @@ function initmyappearance(){
 			   }
 			  })
 			});
+		mybuildappearance = new myCesium.MaterialAppearance({
+		   //translucent : false,
+		   material : new myCesium.Material({
+		       fabric : {
+                   type : 'Image',
+                   uniforms : {
+		              image : building128png
+                   }
+			   }
+			  })
+			});
+		mybuildappearance2 = new myCesium.MaterialAppearance({
+		   //translucent : false,
+		   material : new myCesium.Material({
+		       fabric : {
+                   type : 'Image',
+                   uniforms : {
+		              image : building128png
+                   }
+			   }
+			  })
+			});
 }
 var jetgeometry,jetmesh,f14geometry,f14mesh,bridgegeometry,bridgemesh=[];
 var nbridgemesh=60,ibridgemesh=0,bridgemeshid=[];
@@ -1394,6 +1422,13 @@ var bridgemeshx=[],bridgemeshy=[],bridgemeshz=[],bridgemeshdz=[],bridgemesho1=[]
 var bridgemeshscale=[],bridgemeshmatrix=[],bridgemeshzsol=[];	
 var bridgemeshscalex=[],bridgemeshscaley=[],bridgemeshscalez=[],bridgemeshcolor=[];
 var mybridgeposition=[];
+var carregeometry,carremesh;
+var buildgeometry,buildmesh=[];
+var nbuildmesh=950,ibuildmesh=0,buildmeshid=[],buildmeshh=[];
+var buildmeshx=[],buildmeshy=[],buildmeshz=[],buildmeshdz=[],buildmesho1=[];
+var buildmeshscale=[],buildmeshmatrix=[],buildmeshzsol=[],buildmeshchanged=[];	
+var buildmeshscalex=[],buildmeshscaley=[],buildmeshscalez=[],buildmeshcolor=[];
+var mybuildposition=[];
 function createmymesh(){
 var scale=0.1;
 jetgeometry=loadmygeometry(alphajetobjtxt,scale);//addmygeometry(positions,textcoords);
@@ -1403,6 +1438,10 @@ scale=0.09;
 f14geometry=loadmygeometry(f14objtxt,scale);//addmygeometry(positions,textcoords);
 f14mesh=addmymesh(f14geometry,f14jpg);
 myviewer.scene.primitives.add(f14mesh);
+scale=1;
+carregeometry=addmygeometry(carrepositions,carretextcoords);
+carremesh=addmymesh(carregeometry,building128png);
+myviewer.scene.primitives.add(carremesh);
 
 var position = myCesium.Cartesian3.fromDegrees(x,y,z+10,myellipsoid,myposition);
 var heading = degtorad(aircrafto1);
@@ -1411,7 +1450,7 @@ var roll = degtorad(-aircrafto3);
 var mymatrix=new myCesium.Transforms.headingPitchRollToFixedFrame(position, heading, pitch, roll);//myCesium.Matrix3.fromRotationY(degtorad(30));
 jetmesh.modelMatrix = mymatrix;
 f14mesh.modelMatrix = mymatrix;
-
+carremesh.modelMatrix= mymatrix;
 }
 function addbridgemesh(){
 var scale=1.0;
@@ -1487,6 +1526,94 @@ for(var i=0;i<nbridgemesh;i++){
 			 bridgemeshscale[i], bridgemeshmatrix[i]);
    bridgemesh[i].modelMatrix=bridgemeshmatrix[i];
    bridgemesh[i].show=true;
+  } 
+ }}
+}
+function addbuildmesh(){
+var scale=1.0;
+buildgeometry=carregeometry;//loadmygeometry(mybuildobjtxt,scale);
+for(var i=0;i<nbuildmesh;i++){
+  buildmesh[i]=addmymesh(buildgeometry, whitepng);
+  buildmesh[i].castShadows=true;
+  myviewer.scene.primitives.add(buildmesh[i]);  
+ }
+for(var i=0;i<nbuildmesh;i++){
+ buildmeshid[i]=0;
+ buildmeshh[i]=70;
+ buildmeshx[i]=-180;//x;
+ buildmeshy[i]=-89;//y+i*0.300*360/40000;
+ //buildmeshx[i]=x;
+ //buildmeshy[i]=y+i*0.300*360/40000;
+ buildmeshdz[i]=5.0;
+ buildmeshzsol[i]=zsol;
+ buildmeshz[i]=zsol+buildmeshdz[i];
+ buildmesho1[i]=-90.0;
+ buildmeshscalex[i]=1.0;
+ buildmeshscaley[i]=1.0;
+ buildmeshscalez[i]=1.0;
+ buildmeshchanged[i]=1;
+ buildmeshscale[i]=new myCesium.Cartesian3(buildmeshscalex[i],buildmeshscaley[i],buildmeshscalez[i]);
+ mybuildposition[i] = new myCesium.Cartesian3.fromDegrees(buildmeshx[i],buildmeshy[i],buildmeshz[i],myellipsoid);
+ var position=mybuildposition[i];
+ var heading = degtorad(buildmesho1[i]);
+ var pitch = degtorad(0.0);
+ var roll = degtorad(0.0);
+ buildmeshmatrix[i]=new myCesium.Transforms.headingPitchRollToFixedFrame(position, heading, pitch, roll);//myCesium.Matrix3.fromRotationY(degtorad(30));
+ myCesium.Matrix4.multiplyByScale(
+	         myCesium.Transforms.headingPitchRollToFixedFrame(position, heading, pitch, roll),
+			 buildmeshscale[i], buildmeshmatrix[i]);
+ buildmesh[i].modelMatrix=buildmeshmatrix[i];
+ buildmesh[i].show=false;
+ buildmesh[i].appearance=mybuildappearance;
+ buildmeshcolor[i]=1;
+ buildmesh[i].color=buildmeshcolor[i];
+ if(buildmeshcolor[i]==1){buildmesh[i].appearance=mybuildappearance;}
+ else if(buildmeshcolor[i]==2){buildmesh[i].appearance=mybuildappearance2;}
+ }
+}
+var tgetterrainheightbuild=0;
+function updatebuildmesh(){
+if(tgetterrainheightbuild>tframe-20000 || okinit<2){return;}
+tgetterrainheightbuild=tframe;
+//tloading=tframe+20000;
+updatebuildmesh0();
+tgetterrainheightbuild=0;
+//tloading=0;
+}
+function updatebuildmesh0(){
+var distmax=18*360/40000;
+for(var i=0;i<nbuildmesh;i++){
+ if(buildmeshx[i]<-179){buildmesh[i].show=false;}
+ else if(buildmeshh[i]<0.1){buildmesh[i].show=false;}
+ else{
+  var test=0,dx=(buildmeshx[i]-x)/klon,dy=buildmeshy[i]-y;
+  if(Math.abs(dx)>distmax){buildmesh[i].show=false;}
+  else{if(Math.abs(dy)>distmax){buildmesh[i].show=false;}
+       else{test=1;}
+   }
+  if(test==1){
+   //if(Math.max(Math.abs(dx),Math.abs(dy))<360/40000){tnearbuild=1;}
+   buildmeshdz[i]=0.0;
+   buildmeshz[i]=buildmeshzsol[i]+buildmeshdz[i];
+   var position = myCesium.Cartesian3.fromDegrees(buildmeshx[i],buildmeshy[i],buildmeshz[i],myellipsoid,mybuildposition[i]);
+   var do1=diro1(dx*scale,dy*scale);//-buildmesho1[i];
+   while(do1>180){do1-=360;}
+   while(do1<-180){do1+=360;}
+   var heading = degtorad(-do1);//+do1*0.2);
+   var pitch = degtorad(0.0);
+   var roll = degtorad(0.0);
+   if(buildmeshchanged[i]==1){
+      buildmeshchanged[i]=0;
+	  buildmeshscale[i]=new myCesium.Cartesian3(buildmeshscalex[i],buildmeshscaley[i],buildmeshscalez[i]);
+      buildmesh[i].color=buildmeshcolor[i];
+      if(buildmeshcolor[i]==1){buildmesh[i].appearance=mybuildappearance;}
+      else if(buildmeshcolor[i]==2){buildmesh[i].appearance=mybuildappearance2;}
+	  }
+   myCesium.Matrix4.multiplyByScale(
+	         myCesium.Transforms.headingPitchRollToFixedFrame(position, heading, pitch, roll),
+			 buildmeshscale[i], buildmeshmatrix[i]);
+   buildmesh[i].modelMatrix=buildmeshmatrix[i];
+   buildmesh[i].show=true;
   } 
  }}
 }
@@ -2179,12 +2306,17 @@ function addbuildtower(){
 nbuildtower=Math.min(nbuildtower,nbuild);
 buildimage=new Image();
 buildimage.src= building128png;
-buildcolor1=new myCesium.Color(1.0,1.0,1.0,1.0);
+buildcolor1=new myCesium.Color(1.0,0.0,1.0,1.0);
 buildcolor2=new myCesium.Color(0.8,1.0,0.9,1.0);
+
+return;
+
 for(var i=0;i<nbuildtower;i++){
 var dx=50,dy=3.0;//dx*=towerportwidth;dy=dy/towerportwidth;
 var xx=x+i*0.1*360/40000,yy=y-1,zz=zsol;
-buildtower[i]=myviewer.entities.add({
+buildtower[i]=new Object();
+buildtower[i].billboard=new Object();
+/*buildtower[i]=myviewer.entities.add({
   position : new myCesium.Cartesian3.fromDegrees(xx,yy),
   billboard :{
             image : buildimage,//'building128.png' ,
@@ -2202,14 +2334,15 @@ buildtower[i]=myviewer.entities.add({
 			width : dx, // default: undefined
             height : dx*dy*1.3 // default: undefined
      }
- });
+ });*/
 buildtower[i].myposition= new myCesium.Cartesian3.fromDegrees(xx,yy),
 buildh0=dx*dy*1.3;
 buildtower[i].iimage=0;
 buildtower[i].dx=dx*dy/1.3;
 buildtower[i].x=xx;buildtower[i].y=yy;buildtower[i].z=zz;
 buildtower[i].h=0;buildtower[i].w=0;showbuild[i]=0;
-}}
+}
+}
 var tupdatebuildtower=0;
 function testupdatebuildtower(){if(tbuilding==0){return;}
 if(tloading2<tframe){
@@ -2229,6 +2362,30 @@ if(tloading2<tframe){
   }}}
 }else{tupdatebuildtower=1;}
 }
+var tupdatebuildmesh=0;
+function testupdatebuildmesh(){if(tbuilding==0){return;}
+if(tloading2<tframe){
+ if(tupdatebuildmesh==1){
+  tupdatebuildmesh=0;
+  for(var i=0;i<Math.min(nbuildmesh,nbuild);i++){  
+   buildmeshh[i]=buildh[i];
+   if(buildh[i]>0.1){
+    buildmeshx[i]=buildx[i];buildmeshy[i]=buildy[i];buildmeshzsol[i]=buildz[i];
+    var scx=buildmeshscalex[i],scy=buildmeshscaley[i],scz=buildmeshscalez[i];
+    var kh=Math.max(1,Math.min(2.5,(buildw[i]/35)*Math.min(1,70/buildh[i])));
+    var ww=kh*0.3;
+    var sc=buildh[i]/70;
+    buildmeshscalex[i]=ww;buildmeshscaley[i]=ww;buildmeshscalez[i]=sc;
+    if(Math.abs(buildmeshscalex[i]-scx)+
+       Math.abs(buildmeshscaley[i]-scy)+
+	   Math.abs(buildmeshscalez[i]-scz)>0.0001){buildmeshchanged[i]=1;auxvar4+=1;}
+	if(buildh[i]>19.1){buildmeshcolor[i]=1;}
+	else{buildmeshcolor[i]=2;}
+    if(buildmeshcolor[i]==1){buildmesh[i].appearance=mybuildappearance;}
+    else if(buildmeshcolor[i]==2){buildmesh[i].appearance=mybuildappearance2;}
+ }}}
+}else{tupdatebuildmesh=1;}
+}
 function updatebuildtower(){
 //if(itime%3!=1){return;}
 var ki=itime%2,kii=itime%20;
@@ -2243,7 +2400,7 @@ for(var i=parseInt(0.001+ki*nbuildtower/2);i<parseInt(0.001+(ki+1)*nbuildtower/2
    if(Math.abs(dx)<dxmax && Math.abs(dy)<dxmax){
 		var dz=(buildtower[i].z-z);
         if(kii<=1){showbuild[i]=rotavion(dx,dy,dz,500);}
-        var sc=Math.max(0.1,Math.min(25,(buildtower[i].h*5/Math.sqrt(2500+dx*dx+dy*dy+dz*dz))*2/cssscale));
+        /*var sc=Math.max(0.1,Math.min(25,(buildtower[i].h*5/Math.sqrt(2500+dx*dx+dy*dy+dz*dz))*2/cssscale));
 		var s60=buildtower[i].dx*2;
         var xx=buildtower[i].x,yy=buildtower[i].y,zz=buildtower[i].z-8;
 		var xxx=xx+s60*sin3*sin1*cos2*klon/scale,yyy=yy-s60*sin3*cos1*cos2/scale;
@@ -2260,8 +2417,11 @@ for(var i=parseInt(0.001+ki*nbuildtower/2);i<parseInt(0.001+(ki+1)*nbuildtower/2
 		buildtower[i].billboard.width=50*kh;
 		if(buildtower[i].h>19.1){buildtower[i].billboard.height=buildh0;}
 		else{buildtower[i].billboard.height=buildh0*buildtower[i].h/50.0;}
+		*/
 	 }else{buildtower[i].billboard.show=false;showbuild[i]=0;}
-}}}
+}
+}
+}
 /*if(tourelle==0){
 var ki=itime%3;
 for(var i=parseInt(0.001+ki*nbuildtower/3);i<parseInt(0.001+(ki+1)*nbuildtower/3);i++){
@@ -2269,6 +2429,84 @@ for(var i=parseInt(0.001+ki*nbuildtower/3);i<parseInt(0.001+(ki+1)*nbuildtower/3
 		buildtower[i].billboard.rotation=degtorad(-o3);
 }}}*/
 }
+function addbuildtower2(){
+}
+function updatebuildtower2(){
+//if(tgetterrainheightbuild>tframe-20000 || okinit<2 || tframe<tloading){return;}
+//tgetterrainheightbuild=tframe;
+for(var i=0;i<Math.min(nbuildtower,nbuildmesh);i++){
+ /*buildmeshx[i]=buildtower[i].x;
+ buildmeshy[i]=buildtower[i].y;
+ buildmeshzsol[i]=buildtower[i].z;
+ buildmeshcolor[i]=buildtower[i].billboard.color;
+ */
+ var scx=buildmeshscalex[i],scy=buildmeshscaley[i],scz=buildmeshscalez[i];
+ var kh=Math.max(1,Math.min(2.5,(buildtower[i].w/35)*Math.min(1,70/buildtower[i].h)));
+ var ww=kh*0.6;
+ var sc=buildtower[i].h/70;
+ buildmeshscalex[i]=ww;buildmeshscaley[i]=ww;buildmeshscalez[i]=sc;
+ if(Math.abs(buildmeshscalex[i]-scx)+
+    Math.abs(buildmeshscaley[i]-scy)+
+	Math.abs(buildmeshscalez[i]-scz)>0.0001){buildmeshchanged[i]=1;auxvar4+=1;}
+}
+//tgetterrainheightbuild=0;
+}
+var buildmaterial;
+function addbuildtower20(){
+buildmaterial= new myCesium.ImageMaterialProperty({
+		           image : building128png,
+				   color : buildcolor1,//new myCesium.Color(0.8,1.0,0.9,1.0),//buildcolor2,
+                   transparent : true
+			   });
+for(var i=0;i<nbuildtower;i++){
+   var xx=buildtower[i].x,yy=buildtower[i].y,zz=buildtower[i].z,hh=buildtower[i].h;
+   var ww=Math.max(35,buildtower[i].w);
+   var co1=cos1*ww*0.5/scale,si1=sin1*ww*0.5*klon/scale;
+   //ww=100;
+   buildtower[i].mywallpositions=
+        new myCesium.Cartesian3.fromDegreesArrayHeights([
+		    xx-si1,yy+co1,zz+hh,
+            xx+si1,yy-co1,zz+hh
+                                                        ]);
+   buildtower[i].mywall = myviewer.entities.add({
+    wall : {
+        positions : buildtower[i].mywallpositions,
+        minimumHeights : [zz,zz],
+		show : true,
+		/*vertexformat :  new myCesium.VertexFormat({
+                            position : true,
+                            st : true
+                            }),*/
+		//fill : true,
+        material : buildmaterial // : myCesium.Color.GREEN
+        //material : buildcolor2 // myCesium.Color.GREEN
+    }
+});
+}
+}
+function updatebuildtower20(){
+for(var i=0;i<nbuildtower;i++){
+if(buildtower[i]){
+  if(showbuild[i]==1){
+   buildtower[i].billboard.show=false;
+   var xx=buildtower[i].x,yy=buildtower[i].y,zz=buildtower[i].z,hh=buildtower[i].h*2;
+   var ww=Math.max(35,buildtower[i].w);//billboard.width;//buildtower[i].w;
+   var co1=cos1*ww*0.5/scale,si1=sin1*ww*0.5*klon/scale;
+   //ww=100;
+   buildtower[i].mywallpositions=
+        myCesium.Cartesian3.fromDegreesArrayHeights([
+		    xx-si1,yy+co1,zz+hh,
+            xx+si1,yy-co1,zz+hh
+                                                        ]);
+   buildtower[i].mywall.wall.positions=buildtower[i].mywallpositions;
+   buildtower[i].mywall.wall.minimumHeights= [zz,zz];
+   buildtower[i].mywall.wall.show=true;
+  }
+  else{buildtower[i].mywall.wall.show=false;}
+}
+}
+}
+
 var x1=0,y1=0,z1=0,x2=0,y2=0,z2=0;
 function rotavion(xx,yy,zz,r){
 if(tourelle==1){return 1;}
@@ -2512,19 +2750,31 @@ function setsun(){
 		sunx=1000*Math.sin((12-hour2)*3.14/24);
 		suny=-1000*Math.cos((12-hour2)*3.44/24);
 		sunz=800*Math.cos((12-hour2)*3.14/24)*Math.cos((12-hour2)*3.14/24)+40;
-		o1sun=(12-hour2)*180/24;
+		//o1sun=(12-hour2)*180/24;
 		o2sun=Math.max(5,diro1(1000,sunz));
 		var alpha=Math.min(1.0,Math.max(0.25,Math.abs(hour2-12)/6.2-0.35));
 		if(sun){sun.billboard.color=new myCesium.Color(1,1,1,alpha);}
 		alpha=Math.min(1.0,Math.max(0.25,0.25+(12-Math.abs(hour2-12))/5.5));
 		if(sky){sky.billboard.color=new myCesium.Color(1,1,1,alpha);}
 		//if(sun){setcamerasun();shadowmap.lightCamera=sun.camera;}
-var hour3=14+(hour-14)*8/14;
+var hour3=13+(hour-13)*6/13;
 //if(mydate.getHours()>hour3){mydate.setDate(mydate.getDate()+1);} 
 mydate.setHours(parseInt(hour3));
 mydate.setMinutes(parseInt((hour3-parseInt(hour3))*60));
 myclock=myCesium.JulianDate.fromDate(mydate);
 myviewer.clock.currentTime=myclock;		
+setTimeout("setsundir();",500);
+}
+function setsundir(){
+        //var sunpos1 = myviewer.scene.context.uniformState.sunPositionWC;
+		var sc=20000000;
+		var sundirection= myviewer.scene.context.uniformState.sunDirectionWC;
+		//sunpos2= myCesium.Cartesian3.divideByScalar(sunpos1, sc,sunpos2) 
+		//var sunpos=new myCesium.Cartographic.fromCartesian(sunpos2);
+		sunx=sundirection.x*1000/klon;//*sc;
+		suny=sundirection.y*1000;//*sc;
+		o1sun=diro1(sunx,suny);
+		o1sun=((o1sun-90)+90)*1.13;
 }
 var tshadow=0;
 function subshadow(){
@@ -2542,8 +2792,13 @@ function setcamerasun(){
   //var zz=0;if(sin2>0){zz=dr*sin2*sin2;}
   sun.myposition= myCesium.Cartesian3.fromDegrees(xx,yy,zz,myellipsoid,sun.myposition);
   sun.camera.position=sun.myposition;
+  sun.camera.direction = myCesium.Cartesian3.negate(myCesium.Cartesian3.UNIT_Z, new myCesium.Cartesian3());
+  sun.camera.up = myCesium.Cartesian3.clone(myCesium.Cartesian3.UNIT_Y);
+  sun.camera.frustum.fov = myCesium.Math.PI_OVER_TWO;
+  sun.camera.frustum.near = 1.0;
+  sun.camera.frustum.far = 50000.0;
   sun.camera.setView({
-        //destination : sun.myposition,
+        destination : sun.myposition,
         orientation: {
             heading : degtorad(o1sun-90+180),
             pitch : degtorad(o2sun-180),
@@ -2695,8 +2950,8 @@ function httpGet(url,callback)
   }
 	xmlhttp.onreadystatechange=function()
     {
-		if(xmlhttp.readyState>=2){httpstatus=xmlhttp.status;
-		    if(httpstatus>400){
+		if(xmlhttp.readyState>=1){httpstatus=xmlhttp.status;
+		    if(httpstatus>400){alert("http "+httpstatus);
 			   if(tloading>0.1){
 			      setTimeout("if(tloading>0.1 && httpstatus>400){tloading=0;};",8000);}}}
         if(xmlhttp.readyState==4 && xmlhttp.status==200){callback(xmlhttp.responseText);}
@@ -2728,8 +2983,8 @@ function httpGet2(url,callback)
   }
 	xmlhttp2.onreadystatechange=function()
     {
-		if(xmlhttp2.readyState>=2){httpstatus2=xmlhttp2.status*1;//alert(httpstatus2);
-		    if(httpstatus2>400){alert(httpstatus2);
+		if(xmlhttp2.readyState>=1){httpstatus2=xmlhttp2.status*1;//alert(httpstatus2);
+		    if(httpstatus2>400){alert("http2 "+httpstatus2);
 			   if(tloading2>0.1){
 			      setTimeout("if(tloading2>0.1 && httpstatus2>400){tloading2=0;};",8000);}}}
         if(xmlhttp2.readyState==4 && xmlhttp2.status==200){callback(xmlhttp2.responseText);}
@@ -2836,7 +3091,7 @@ function nodecallback3(r){//alert(r);
   var msg="";
   nodes3=[];latnodes=[];lonnodes=[];
   if(nodejson3.elements){nodes3=nodejson3.elements;}
-  msg+="len3="+nodes3.length;auxvar3=nodes3.length;
+  msg+="len3="+nodes3.length;//auxvar3=nodes3.length;
   for(var i=0;i<nodes3.length;i++){
      /*if(i<5){
 	  msg+="/ nodeid3="+nodes3[i].id;
@@ -3266,7 +3521,7 @@ var dx=3*360/40000,dx1=dx*(0.7+(z-zsol)/500);
 var dxx=(xgetways2-x-dx1*cos1*klon)/klon;
 var dyy=(ygetways2-y-dx1*sin1);
 if(dxx*dxx+dyy*dyy<dx*dx*1.2){return;}
-tloading2=tframe+59000;
+tloading2=tframe+79000;
 xgetways2=x+dx1*cos1*klon;
 ygetways2=y+dx1*sin1;
 var lat1=y-dx+dx1*sin1,lon1=x-dx*klon+dx1*cos1*klon;
@@ -3285,7 +3540,7 @@ httpGet2(wayurl2,waycallback2);
 }
 var iibuild2=0;
 function getnodes2(){
-tloading2=tframe+50000;
+tloading2=tframe+70000;
 var nodeurl2=http+overpass2+"interpreter?data=[out:json];%28";
 iibuild2=0;
 for(var i=1;i<=iibuild;i++){
@@ -3311,7 +3566,7 @@ if(iibuild2>=iibuild){
   }}}
   setTimeout("getterrainheightbuild();",100);return;
 }
-tloading2=tframe+50000;
+tloading2=tframe+70000;
 var nodeurl22=http+overpass2+"interpreter?data=[out:json];%28";
 for(var i=iibuild2+1;i<=iibuild;i++){
     nodeurl22+="node("+buildnode[i]+")";
