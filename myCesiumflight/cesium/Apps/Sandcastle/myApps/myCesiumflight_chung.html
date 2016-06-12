@@ -583,6 +583,7 @@ viewer.clock.onTick.addEventListener(function(clock) {
 	addbuildmesh();
 	initvars();
 	setTimeout("okinit=1;",8000);
+	tloading2=timer()+14000;
 	
 	loadstorage('terrainquality','terrainquality')
 	if(terrainquality>=1 && terrainquality<=10){
@@ -1495,7 +1496,7 @@ tgetterrainheightbridge=tframe;
 tloading=tframe+20000;
 updatebridge0();
 tgetterrainheightbridge=0;
-tloading=0;
+setTimeout("tloading=0;",300);
 }
 function updatebridge0(){
 var distmax=18*360/40000;
@@ -2370,11 +2371,13 @@ if(tloading2<tframe){
   for(var i=0;i<Math.min(nbuildmesh,nbuild);i++){  
    buildmeshh[i]=buildh[i];
    if(buildh[i]>0.1){
-    buildmeshx[i]=buildx[i];buildmeshy[i]=buildy[i];buildmeshzsol[i]=buildz[i];
+    buildmeshx[i]=(buildx[i]+buildxmid[i])/2;
+	buildmeshy[i]=(buildy[i]+buildymid[i])/2;
+	buildmeshzsol[i]=buildz[i];
     var scx=buildmeshscalex[i],scy=buildmeshscaley[i],scz=buildmeshscalez[i];
     var kh=Math.max(1,Math.min(2.5,(buildw[i]/35)*Math.min(1,70/buildh[i])));
     var ww=kh*0.3;
-    var sc=buildh[i]/70;
+    var sc=buildh[i]/100;
     buildmeshscalex[i]=ww;buildmeshscaley[i]=ww;buildmeshscalez[i]=sc;
     if(Math.abs(buildmeshscalex[i]-scx)+
        Math.abs(buildmeshscaley[i]-scy)+
@@ -3041,7 +3044,7 @@ function nodecallback(r){//alert(r);
   if(iport<=1){port1x=-199;}
   if(iport<=2){port2x=-199;}
   if(iport<=3){port3x=-199;}
-  tloading=0;
+  setTimeout("tloading=0;",300);
 }
 function waycallback(r){//alert(r);
   wayjson=JSON.parse(r);
@@ -3203,7 +3206,7 @@ function nodecallback3(r){//alert(r);
   if(testbridgechanged==1){testbridgechanged=0;
                            taskgetterrainheightbridge=1;}
   if(iport<=399){setTimeout("getnodes();",300);}
-  else{tloading=0;}
+  else{setTimeout("tloading=0;",300);}
 }
 var testbridgechanged=0;
 function testaddbridgemesh(iid,xii,yii,o1ii,scalexii){
@@ -3882,7 +3885,7 @@ function weathercallback(r){//alert(r);
 	      if(isky==2){sky.billboard.image= skydome2jpg;}
 		  }
 	}	  
-  tloading=0;
+  setTimeout("tloading=0;",300);
 }
 var latweather=-91,lngweather=0;
 function testgetweather(){
