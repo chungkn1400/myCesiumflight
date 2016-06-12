@@ -1440,8 +1440,8 @@ f14mesh=addmymesh(f14geometry,f14jpg);
 myviewer.scene.primitives.add(f14mesh);
 scale=1;
 carregeometry=addmygeometry(carrepositions,carretextcoords);
-carremesh=addmymesh(carregeometry,building128png);
-myviewer.scene.primitives.add(carremesh);
+//carremesh=addmymesh(carregeometry,building128png);
+//myviewer.scene.primitives.add(carremesh);
 
 var position = myCesium.Cartesian3.fromDegrees(x,y,z+10,myellipsoid,myposition);
 var heading = degtorad(aircrafto1);
@@ -1450,7 +1450,7 @@ var roll = degtorad(-aircrafto3);
 var mymatrix=new myCesium.Transforms.headingPitchRollToFixedFrame(position, heading, pitch, roll);//myCesium.Matrix3.fromRotationY(degtorad(30));
 jetmesh.modelMatrix = mymatrix;
 f14mesh.modelMatrix = mymatrix;
-carremesh.modelMatrix= mymatrix;
+//carremesh.modelMatrix= mymatrix;
 }
 function addbridgemesh(){
 var scale=1.0;
