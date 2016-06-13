@@ -586,6 +586,7 @@ viewer.clock.onTick.addEventListener(function(clock) {
 	loadstoragebuild();
 	initvars();
 	setTimeout("okinit=1;",8000);
+    setTimeout("setsun();",12000);
 	tloading2=timer()+14000;
 	
 	loadstorage('terrainquality','terrainquality')
@@ -1233,7 +1234,7 @@ if (combotext=="le caire"){lat=30.04441959;lng=31.23571160;o1=36.3920;}
 if (combotext=="washington"){lat=38.8850399;lng=-77.08054296;o1=36.3920;}
 if (combotext=="tajmahal"){lat=27.17015;lng=78.002155;o1=36.3920;}
 document.getElementById('combo').blur();
-o2=-4;o3=0;x=lng;y=lat;z=300.0;setsun();
+o2=-4;o3=0;x=lng;y=lat;z=300.0;setTimeout("setsun();",4000);
 myviewer.camera.setView({
     destination : myCesium.Cartesian3.fromDegrees(lng, lat, z,myellipsoid,mydestination),
 	orientation: {
@@ -1250,7 +1251,7 @@ myviewer.canvas.focus();
 }
 function subflyto(lngx,latx){
 o2=-4;o3=0;x=lngx;y=latx;z=300.0;
-lat=latx;lng=lngx;setsun();
+lat=latx;lng=lngx;setTimeout("setsun();",4000);
 //myviewer.camera.flyTo({
 myviewer.camera.setView({
     destination : myCesium.Cartesian3.fromDegrees(lng, lat, z,myellipsoid,mydestination),
@@ -2831,7 +2832,9 @@ function setsun(){
 		alpha=Math.min(1.0,Math.max(0.25,0.25+(12-Math.abs(hour2-12))/5.5));
 		if(sky){sky.billboard.color=new myCesium.Color(1,1,1,alpha);}
 		//if(sun){setcamerasun();shadowmap.lightCamera=sun.camera;}
-var hour3=13+(hour-13)*6/13;
+var hour3=13+(hour-13)*6/13;//-12*x/180;
+while(hour3>24){hour3-=24;}
+while(hour3<0){hour3+=24;}
 //if(mydate.getHours()>hour3){mydate.setDate(mydate.getDate()+1);} 
 mydate.setHours(parseInt(hour3));
 mydate.setMinutes(parseInt((hour3-parseInt(hour3))*60));
@@ -2849,6 +2852,15 @@ function setsundir(){
 		suny=sundirection.y*1000;//*sc;
 		o1sun=diro1(sunx,suny);
 		o1sun=((o1sun-90)+90)*1.13;
+		if(y<0){o1sun=90-(o1sun-90);}
+var hour3=13+(hour-13)*6/13-12*x/180;
+while(hour3>24){hour3-=24;}
+while(hour3<0){hour3+=24;}
+//if(mydate.getHours()>hour3){mydate.setDate(mydate.getDate()+1);} 
+mydate.setHours(parseInt(hour3));
+mydate.setMinutes(parseInt((hour3-parseInt(hour3))*60));
+myclock=myCesium.JulianDate.fromDate(mydate);
+myviewer.clock.currentTime=myclock;		
 }
 var tshadow=0;
 function subshadow(){
