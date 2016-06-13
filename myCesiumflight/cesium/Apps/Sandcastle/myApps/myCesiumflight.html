@@ -51,6 +51,8 @@ if(myurl.indexOf("localhost:8080")<0 && myurl.indexOf("file:")>=0){
 <div id="msg">msg</div>
 <div id="msg2">msg2</div>
 <div id="msg3">msg3</div>
+<div id="msghttp">msghttp</div>
+<div id="msghttp2">msghttp2</div>
 <div>
 	<select id="combo" onChange="subcombo();" onblur="" onfocus="">
           <option id="flyto">flyto</option>
@@ -339,12 +341,12 @@ myviewer=viewer;
 myCesium=Cesium;
 //myviewer.Scene.contextOptions.webgl.alpha=true;
 //myviewer.Scene.creditContainer=document.getElementById("credit");
-/*var cesiumTerrainProviderMeshes = new Cesium.CesiumTerrainProvider({
+var cesiumTerrainProviderMeshes = new Cesium.CesiumTerrainProvider({
     url : 'https://assets.agi.com/stk-terrain/world',
     requestWaterMask : true,
     requestVertexNormals : true
-});*/
-//viewer.terrainProvider = cesiumTerrainProviderMeshes;
+});
+viewer.terrainProvider = cesiumTerrainProviderMeshes;
 viewer.scene.globe.enableLighting = false;
 viewer.scene.fog.enabled = false;
 
@@ -581,6 +583,7 @@ viewer.clock.onTick.addEventListener(function(clock) {
 	addbuildtower();
 	//addbuildtower2();
 	addbuildmesh();
+	loadstoragebuild();
 	initvars();
 	setTimeout("okinit=1;",8000);
 	tloading2=timer()+14000;
@@ -594,6 +597,7 @@ var quit=0,crlf=String.fromCharCode(10),auxvar=null,auxvar2=null,auxvar3=null,au
 var tframe=0,tframe0=0,tfps=30,fps=10,dtime=1,tmsg=0,tskip=0,itime=0,avgfps=10;
 var cos1=1,sin1=0,cos2=1,sin2=0,cos3=1,sin3=0,v=120/2,klon=1,movexyz=0,tourelle=0,iview=2;
 var flaps=0;
+var msghttp="",msghttp2="";
 function mytestkey(){
         if(quit==1){return;}
 		itime+=1;if(itime>10000){itime=0;}
@@ -622,6 +626,8 @@ if(auxvar3){msg3+=" aux3="+auxvar3;}
 if(auxvar4){msg3+=" aux4="+auxvar4;}
 document.getElementById('msg2').innerHTML=msg2;
 document.getElementById('msg3').innerHTML=msg3;
+document.getElementById('msghttp').innerHTML=msghttp;
+document.getElementById('msghttp2').innerHTML=msghttp2;
 if(twebaudio==1){setvolume();}
 }
 var d10=0.010*dtime;
@@ -866,6 +872,7 @@ function moveplane(){
     cos2=Math.cos(degtorad(o2));sin2=Math.sin(degtorad(o2));
     cos3=Math.cos(degtorad(o3));sin3=Math.sin(degtorad(o3));
 }
+function evaln(n){if(isNaN(eval(n))){return 0;}else{return eval(n);};}
 var positionheight=0,positionheight0=0;
 function getterrainheight(lngx,latx){
 if(myviewer.terrainProvider.ready==false){return positionheight0;}
@@ -887,13 +894,13 @@ var promise ;
 if(z<zsol+8){promise= myCesium.sampleTerrain(myviewer.terrainProvider, 14, positions);}
 else{promise= myCesium.sampleTerrain(myviewer.terrainProvider, 13, positions);}
 myCesium.when(promise, function(updatedPositions) {
-    positionheight=positions[0].height;// and positions[1].height have been updated.
-    positionheight0=positionheight;
-    aircraftzsol=positions[1].height;
-    aircraft2zsol=positions[2].height;
-    boeingzsol=positions[3].height;
-    airporttowerzsol=positions[4].height;
-    airporttower2zsol=positions[5].height;
+    positionheight=evaln(positions[0].height);// and positions[1].height have been updated.
+    positionheight0=evaln(positionheight);
+    aircraftzsol=evaln(positions[1].height);
+    aircraft2zsol=evaln(positions[2].height);
+    boeingzsol=evaln(positions[3].height);
+    airporttowerzsol=evaln(positions[4].height);
+    airporttower2zsol=evaln(positions[5].height);
 	// updatedPositions is just a reference to positions.
 });
 return positionheight0;
@@ -914,7 +921,7 @@ var promise ;
 promise= myCesium.sampleTerrain(myviewer.terrainProvider, 13, positions);
 myCesium.when(promise, function(updatedPositions) {
     for(var i=0;i<terrainbuildi.length;i++){
-		 buildz[terrainbuildi[i]]=positions[i].height;
+		 buildz[terrainbuildi[i]]=evaln(positions[i].height);
 		 buildchanged[terrainbuildi[i]]=0;}
 	// updatedPositions is just a reference to positions.
     //alert("terrainbuild ok "+terrainbuildi.length);
@@ -955,9 +962,9 @@ myCesium.when(promise, function(updatedPositions) {
 	     var i5=i*5;
 	     var h=(positions[i5].height+positions[i5+1].height)/2;
 	     bridgemeshzsol[i]=h;		 
-	     var h1=positions[i5+2].height;
-	     var h2=positions[i5+3].height;
-	     var h3=positions[i5+4].height;
+	     var h1=evaln(positions[i5+2].height);
+	     var h2=evaln(positions[i5+3].height);
+	     var h3=evaln(positions[i5+4].height);
 		 var dh=h-1.0,color0=bridgemeshcolor[i];
 		 if(h1<dh || h2<dh || h3<dh){bridgemeshcolor[i]=2;}
 		 else{dh=h+1.0;
@@ -976,6 +983,19 @@ myCesium.when(promise, function(updatedPositions) {
     tgetterrainheightbridge=0;
 });
 //return 0;
+}
+var buildsave="";
+function loadstoragebuild(){
+buildsave="";
+loadstoragetext('buildsave','buildsave');
+if(buildsave==""){return;}
+var aux = buildsave.split("?");
+for(var i=0;i<aux.length-6;i+=6){
+   var node0=aux[i]*1.0,h=aux[i+1]*1.0,xx=aux[i+2]*1.0,yy=aux[i+3]*1.0;
+   var xxmid=aux[i+4]*1.0,yymid=aux[i+5]*1.0;
+   if(h>0.1){addbuild(node0,h,xx,yy,xxmid,yymid);}
+}
+updatebuildmesh0();	 
 }
 var bridgesave="";
 function loadstoragebridge(){
@@ -1017,6 +1037,11 @@ function subquit(){
   bridgesave="";for(var i=0;i<nbridgemesh;i++){
    bridgesave+=bridgemeshx[i]+"?"+bridgemeshy[i]+"?"+bridgemesho1[i]+"?"+bridgemeshscalex[i]+"?";}
   savestorage('bridgesave',bridgesave);
+  setnearbuild();
+  buildsave="";for(var i=0;i<nnearbuild;i++){
+   buildsave+=nearbuild[i].node0+"?"+nearbuild[i].h+"?"+nearbuild[i].x+"?"+nearbuild[i].y+"?"+
+              nearbuild[i].xmid+"?"+nearbuild[i].ymid+"?";}
+  savestorage('buildsave',buildsave);
   sleep(300);//alert("bye !");
   document.location.href="http://chung.blogvie.com/links/";
 }
@@ -1589,7 +1614,7 @@ for(var i=0;i<nbuildmesh;i++){
  buildmeshh[i]=70;
  buildmeshx[i]=-180;//x;
  buildmeshy[i]=-89;//y+i*0.300*360/40000;
- buildmeshx[i]=x;
+ //buildmeshx[i]=x;
  buildmeshy[i]=y+i*0.300*360/40000;
  buildmeshdz[i]=5.0;
  buildmeshzsol[i]=zsol;
@@ -2999,11 +3024,15 @@ function httpGet(url,callback)
   }
 	xmlhttp.onreadystatechange=function()
     {
+		if(xmlhttp.readyState>=0){httpstatus=xmlhttp.status;
+		    if(httpstatus>400){msghttp="HTTP ERROR "+httpstatus;}}
 		if(xmlhttp.readyState==4){httpstatus=xmlhttp.status;
-		    if(httpstatus>400){//alert("http "+httpstatus);alert(xmlhttp.responseText);
+		    if(httpstatus>400){msghttp="HTTP ERROR "+httpstatus;
+			   //alert("http "+httpstatus);alert(xmlhttp.responseText);
 			   if(tloading>0.1){
 			      setTimeout("if(tloading>0.1 && httpstatus>400){tloading=0;};",18000);}}}
-        if(xmlhttp.readyState==4 && xmlhttp.status==200){callback(xmlhttp.responseText);}
+        if(xmlhttp.readyState==4 && xmlhttp.status==200){msghttp="";
+		                                                 callback(xmlhttp.responseText);}
     }	
     //xmlhttp.open("GET", theUrl, false);
     xmlhttp.send();    
@@ -3032,11 +3061,15 @@ function httpGet2(url,callback)
   }
 	xmlhttp2.onreadystatechange=function()
     {
-		if(xmlhttp2.readyState==4){httpstatus2=xmlhttp2.status*1;//alert(httpstatus2);
-		    if(httpstatus2>400){alert("http2 "+httpstatus2);
+		if(xmlhttp2.readyState>=0){httpstatus2=xmlhttp2.status;
+		    if(httpstatus2>400){msghttp2="HTTP2 ERROR "+httpstatus2;}}
+		if(xmlhttp2.readyState==4){httpstatus2=xmlhttp2.status;
+		    if(httpstatus2>400){msghttp2="HTTP2 ERROR "+httpstatus2;
+			   //alert("http2 "+httpstatus2);
 			   if(tloading2>0.1){
 			      setTimeout("if(tloading2>0.1 && httpstatus2>400){tloading2=0;};",8000);}}}
-        if(xmlhttp2.readyState==4 && xmlhttp2.status==200){callback(xmlhttp2.responseText);}
+        if(xmlhttp2.readyState==4 && xmlhttp2.status==200){msghttp2="";
+		                                                   callback(xmlhttp2.responseText);}
     }	
     //xmlhttp.open("GET", theUrl, false);
     xmlhttp2.send();    
@@ -3333,6 +3366,30 @@ ibuild0+=1;if(ibuild0>=nbuild0){ibuild0=0;}
 var build0j=build0[ibuild0];
 build0j.node0=node0;build0j.h=h;build0j.xx=xx;build0j.yy=yy;
 build0j.xxmid=xxmid;build0j.yymid=yymid;
+}
+var nearbuild=[],nnearbuild=250,distbuild=[];
+for(var i=0;i<nnearbuild;i++){nearbuild[i]=new Object();
+    nearbuild[i].node0=0;nearbuild[i].h=0;nearbuild[i].x=0;nearbuild[i].y=0;
+	nearbuild[i].xmid=0;nearbuild[i].ymid=0;
+}
+function setnearbuild(){
+for(var i=0;i<nbuild;i++){
+    distbuild[i]=Math.max(Math.abs(buildx[i]-x)/klon,Math.abs(buildy[i]-y));}
+var test=0;//99999;
+for(var i=0;i<nnearbuild;i++){
+    nearbuild[i].node0=0;nearbuild[i].h=0;nearbuild[i].x=0;nearbuild[i].y=0;
+	nearbuild[i].xmid=0;nearbuild[i].ymid=0;
+	var dist=9999,ii=-1;
+	for(var j=0;j<nbuild;j++){
+	   if(distbuild[j]<dist && buildh[j]>0.1){dist=distbuild[j];ii=j}
+	   }
+	if(ii>=0){distbuild[ii]=99999;test+=1;//=Math.min(test,dist);
+      nearbuild[i].node0=buildnode0[ii];nearbuild[i].h=buildh[ii];
+	  nearbuild[i].x=buildx[ii];nearbuild[i].y=buildy[ii];
+	  nearbuild[i].xmid=buildxmid[ii];nearbuild[i].ymid=buildymid[ii];
+	}else{break;}
+}
+//alert(test);
 }
 function addbuild(node0,h,xx,yy,xxmid,yymid){
 addbuild0(node0,h,xx,yy,xxmid,yymid);
@@ -3829,7 +3886,7 @@ var positions = [
 ];
 var promise = myCesium.sampleTerrain(myviewer.terrainProvider, 13, positions);
 myCesium.when(promise, function(updatedPositions) {
-    eval(varname+"z="+positions[0].height);// and positions[1].height have been updated.
+    eval(varname+"z="+evaln(positions[0].height));// and positions[1].height have been updated.
 	// updatedPositions is just a reference to positions.
 	addmonument(varname,dx,dy);
 });
