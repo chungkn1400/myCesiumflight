@@ -1488,7 +1488,7 @@ function initmyappearance(){
 			});
 }
 var jetgeometry,jetmesh,f14geometry,f14mesh,bridgegeometry,bridgemesh=[];
-var nbridgemesh=60,ibridgemesh=0,bridgemeshid=[];
+var nbridgemesh=90,ibridgemesh=0,bridgemeshid=[];
 var bridgemeshx=[],bridgemeshy=[],bridgemeshz=[],bridgemeshdz=[],bridgemesho1=[];
 var bridgemeshscale=[],bridgemeshmatrix=[],bridgemeshzsol=[];	
 var bridgemeshscalex=[],bridgemeshscaley=[],bridgemeshscalez=[],bridgemeshcolor=[];
@@ -2893,7 +2893,7 @@ function setcamerasun(){
   });
 }
 function updatesun(){
-if(tframe>tupdatesun+60000){tupdatesun=tframe;setsun();}
+if(tframe>tupdatesun+60000*5){tupdatesun=tframe;setsun();}
 if(tourelle==0){
   var dr=70000/scale;
   var zz=sunz*30-3000;
@@ -3334,11 +3334,11 @@ for(var i=0;i<nbridgemesh;i++){
     }   
   }
 }
-var dist=Math.max(Math.abs(xii-x)/klon,Math.abs(yii-y));
+var dist=Math.max(Math.abs(xii-x)/klon,Math.abs(yii-y))/(0.5+scalexii);
 for(var i=0;i<nbridgemesh;i++){
   ibridgemesh+=1;if(ibridgemesh>=nbridgemesh){ibridgemesh=0;}
   if(dist<Math.max(Math.abs(bridgemeshx[ibridgemesh]-x)/klon,
-                   Math.abs(bridgemeshy[ibridgemesh]-y))){
+                   Math.abs(bridgemeshy[ibridgemesh]-y))/(0.5+bridgemeshscalex[ibridgemesh])){
 	 bridgemeshx[ibridgemesh]=xii;
 	 bridgemeshy[ibridgemesh]=yii;
 	 bridgemesho1[ibridgemesh]=o1ii;
