@@ -3074,7 +3074,7 @@ function httpGet2(url,callback)
 	xmlhttp2.onreadystatechange=function()
     {
 		if(xmlhttp2.readyState>=0){httpstatus2=xmlhttp2.status;
-		    if(httpstatus2>400){msghttp2="HTTP2 ERROR "+httpstatus2;}}
+		    if(httpstatus2>400){msghttp2="HTTP2 ERROR "+httpstatus2;sethttp();}}
 		if(xmlhttp2.readyState==4){httpstatus2=xmlhttp2.status;
 		    if(httpstatus2>400){msghttp2="HTTP2 ERROR "+httpstatus2;
 			   //alert("http2 "+httpstatus2);
@@ -3541,7 +3541,24 @@ function testmonument(lonxx,latyy){
 	    if(Math.abs(monumenty[k]-latyy)<dlat){return 1;}}}
 return 0;
 }
-var tloading=0,tloading2=0,http="http:",overpass="",overpass2="";
+var http="http:",overpass="",overpass2="";
+function sethttp(){
+http="http:";
+if(document.location.href.indexOf("https")>=0){
+   http="https:";}
+//http="http:";
+overpass="//overpass-api.de/api/";
+if(overpass2==""){overpass2="//overpass.osm.rambler.ru/cgi/";}
+else if(overpass2=="//overpass.osm.rambler.ru/cgi/" && httpstatus2>400){
+   setTimeout('overpass2="//api.openstreetmap.fr/oapi/";httpstatus2=0;',1000);}
+else if(overpass2=="//api.openstreetmap.fr/oapi/" && httpstatus2>400){
+   setTimeout('overpass2="//overpass.osm.rambler.ru/cgi/";httpstatus2=0;',1000);
+}
+if(http=="https:"){overpass="//overpass-api.de/api/";}
+//alert(overpass2);
+}
+sethttp();
+var tloading=0,tloading2=0;
 function getnodes(){
 //if(tframe<tloading){return;}
 tloading=tframe+60000;
@@ -3555,10 +3572,10 @@ http="http:";
 if(document.location.href.indexOf("https")>=0){
    http="https:";}
 //http="http:";
-overpass2="//overpass.osm.rambler.ru/cgi/";
-overpass="//overpass-api.de/api/";
+//overpass2="//overpass.osm.rambler.ru/cgi/";
+//overpass="//overpass-api.de/api/";
 //overpass="//api.openstreetmap.fr/oapi/";
-if(http=="https:"){overpass="//overpass-api.de/api/";}
+//if(http=="https:"){overpass="//overpass-api.de/api/";}
 //var wayurl=http+overpass+"interpreter?data=[out:json];%28way[aeroway~'aerodrome|runway']"+latlon+";";
 //var wayurl=http+overpass+"interpreter?data=[out:json];%28way[aeroway~'aerodrome']"+latlon+";";
 var nodeurl=http+overpass+"interpreter?data=[out:json];%28node[aeroway~'aerodrome|runway']"+latlon+";";
@@ -3581,14 +3598,15 @@ var dx1=dx+(z-zsol)*0.0015*360/40000;
 var lat11=lat-dx+dx1*sin1,lon11=lng-dx*klon+dx1*klon*cos1;
 var lat21=lat+dx+dx1*sin1,lon21=lng+dx*klon+dx1*klon*cos1;
 var latlon1="%28"+lat11+"%2C"+lon11+"%2C"+lat21+"%2C"+lon21+"%29";
-http="http:";
+/*http="http:";
 if(document.location.href.indexOf("https")>=0){
    http="https:";}
 //http="http:";
-overpass2="//overpass.osm.rambler.ru/cgi/";
+//overpass2="//overpass.osm.rambler.ru/cgi/";
 overpass="//overpass-api.de/api/";
 //overpass="//api.openstreetmap.fr/oapi/";
 if(http=="https:"){overpass="//overpass-api.de/api/";}
+*/
 //var wayurl=http+overpass+"interpreter?data=[out:json];%28way[aeroway~'aerodrome|runway']"+latlon+";";
 var wayurl=http+overpass+"interpreter?data=[out:json];%28way[aeroway~'aerodrome|terminal']"+latlon+";";
 //var wayurl=http+overpass+"interpreter?data=[out:json];%28node[aeroway~'aerodrome']"+latlon+";";
@@ -3646,7 +3664,8 @@ var lat1=y-dx+dx1*sin1,lon1=x-dx*klon+dx1*cos1*klon;
 var lat2=y+dx+dx1*sin1,lon2=x+dx*klon+dx1*cos1*klon;
 var latlon2="%28"+lat1+"%2C"+lon1+"%2C"+lat2+"%2C"+lon2+"%29";
 //var keyway2="way['building:height']"+latlon2+";way['building']['height']"+latlon2+";way['building']['levels']"+latlon2+";way['building:levels']"+latlon2;
-overpass2="//overpass.osm.rambler.ru/cgi/";
+//overpass2="//overpass.osm.rambler.ru/cgi/";
+//overpass2="//api.openstreetmap.fr/oapi/";
 var keyway2="way['building:height']"+latlon2+";way['building']['height']"+latlon2+";way['building']['levels']"+latlon2+";way['building:levels']"+latlon2;
 //keyway2+=";way[building=commercial]"+latlon2;
 keyway2+=";way[shop~'mall|supermarket|general|department_store']"+latlon2;
