@@ -2447,7 +2447,8 @@ if(tloading2<tframe){
 	buildmeshy[i]=(buildy[i]+buildymid[i])/2;
 	buildmeshzsol[i]=buildz[i];
     var scx=buildmeshscalex[i],scy=buildmeshscaley[i],scz=buildmeshscalez[i];
-    var kh=Math.max(1,Math.min(2.5,(buildw[i]/35)*Math.min(1,70/buildh[i])));
+    //var kh=Math.max(1,Math.min(2.5,(buildw[i]/35)));//*Math.min(1,70/buildh[i])));
+    var kh=Math.max(1,Math.min(2.85,Math.max(buildw[i]/35,buildh[i]/220)));
     var ww=kh*0.3;
     var sc=buildh[i]/100;
     buildmeshscalex[i]=ww;buildmeshscaley[i]=ww;buildmeshscalez[i]=sc;
