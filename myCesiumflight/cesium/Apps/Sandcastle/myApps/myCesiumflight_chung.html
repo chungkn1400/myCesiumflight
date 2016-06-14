@@ -3037,7 +3037,7 @@ function httpGet(url,callback)
 	xmlhttp.onreadystatechange=function()
     {
 		if(xmlhttp.readyState>=0){httpstatus=xmlhttp.status;
-		    if(httpstatus>400){msghttp="HTTP ERROR "+httpstatus;}}
+		    if(httpstatus>400){msghttp="HTTP ERROR "+httpstatus;sethttp();}}
 		if(xmlhttp.readyState==4){httpstatus=xmlhttp.status;
 		    if(httpstatus>400){msghttp="HTTP ERROR "+httpstatus;
 			   //alert("http "+httpstatus);alert(xmlhttp.responseText);
@@ -3334,11 +3334,11 @@ for(var i=0;i<nbridgemesh;i++){
     }   
   }
 }
-var dist=Math.max(Math.abs(xii-x)/klon,Math.abs(yii-y))/(0.5+scalexii);
+var dist=Math.max(Math.abs(xii-x)/klon,Math.abs(yii-y))/(1+scalexii);
 for(var i=0;i<nbridgemesh;i++){
   ibridgemesh+=1;if(ibridgemesh>=nbridgemesh){ibridgemesh=0;}
   if(dist<Math.max(Math.abs(bridgemeshx[ibridgemesh]-x)/klon,
-                   Math.abs(bridgemeshy[ibridgemesh]-y))/(0.5+bridgemeshscalex[ibridgemesh])){
+                   Math.abs(bridgemeshy[ibridgemesh]-y))/(1+bridgemeshscalex[ibridgemesh])){
 	 bridgemeshx[ibridgemesh]=xii;
 	 bridgemeshy[ibridgemesh]=yii;
 	 bridgemesho1[ibridgemesh]=o1ii;
@@ -3541,21 +3541,35 @@ function testmonument(lonxx,latyy){
 	    if(Math.abs(monumenty[k]-latyy)<dlat){return 1;}}}
 return 0;
 }
-var http="http:",overpass="",overpass2="";
+var http="http:",overpass="",overpass2="",overpassurl=[],noverpassurl=3,ioverpassurl=0;
+overpassurl[0]="//overpass-api.de/api/";
+overpassurl[1]="//overpass.osm.rambler.ru/cgi/";
+overpassurl[2]="//api.openstreetmap.fr/oapi/";
+//overpassurl[3]="//overpass.osm.ch/api/"
+function getoverpassurl(){
+for(var i=0;i<noverpassurl;i++){
+   if(overpass!=overpassurl[ioverpassurl] && overpass2!=overpassurl[ioverpassurl]){
+      return overpassurl[ioverpassurl]}
+   ioverpassurl+=1;if(ioverpassurl>=noverpassurl){ioverpassurl=0;}
+}
+return overpassurl[ioverpassurl];
+}
+var tsethttp=0;
 function sethttp(){
+if(tframe<tsethttp){return;}
+tsethttp=tframe+2000;
 http="http:";
 if(document.location.href.indexOf("https")>=0){
    http="https:";}
 //http="http:";
-overpass="//overpass-api.de/api/";
-if(overpass2==""){overpass2="//overpass.osm.rambler.ru/cgi/";}
-else if(overpass2=="//overpass.osm.rambler.ru/cgi/" && httpstatus2>400){
-   setTimeout('overpass2="//api.openstreetmap.fr/oapi/";httpstatus2=0;',1000);}
-else if(overpass2=="//api.openstreetmap.fr/oapi/" && httpstatus2>400){
-   setTimeout('overpass2="//overpass.osm.rambler.ru/cgi/";httpstatus2=0;',1000);
-}
-if(http=="https:"){overpass="//overpass-api.de/api/";}
-//alert(overpass2);
+if(http=="https:"){overpass="//overpass-api.de/api/";
+                   overpass2="//overpass.osm.rambler.ru/cgi/";
+				   return;}
+if(overpass==""){overpass=getoverpassurl();}//"//overpass-api.de/api/";
+if(overpass2==""){overpass2=getoverpassurl();}//"//overpass.osm.rambler.ru/cgi/";}
+if(httpstatus>400){setTimeout('overpass=getoverpassurl();httpstatus=0;',1000);}
+if(httpstatus2>400){setTimeout('overpass2=getoverpassurl();httpstatus2=0;',1000);}
+//alert(overpass+" "+httpstatus+"  "+overpass2+" "+httpstatus2);
 }
 sethttp();
 var tloading=0,tloading2=0;
