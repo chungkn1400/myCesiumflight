@@ -253,6 +253,9 @@ function closewebaudio(){
 <script id="cesium_sandcastle_script">
 var cssscale=2,cssscaley=1.4,windx=1000,windy=700;
 var prefix="myCesiumflight_";
+if(document.location.href.indexOf("myCesiumflight1")>0){prefix="myCesiumflight1_";}
+if(document.location.href.indexOf("myCesiumflight2")>0){prefix="myCesiumflight2_";}
+if(document.location.href.indexOf("myCesiumflight3")>0){prefix="myCesiumflight3_";}
 function removestorage(key){
 if(localStorage){localStorage.removeItem(prefix+key);}
 }
@@ -1044,7 +1047,8 @@ function subquit(){
               nearbuild[i].xmid+"?"+nearbuild[i].ymid+"?";}
   savestorage('buildsave',buildsave);
   sleep(300);//alert("bye !");
-  document.location.href="http://chung.blogvie.com/links/";
+  document.location.href="http://chungswebsite.blogspot.fr/search/label/myCesiumflight";
+  //document.location.href="http://chung.blogvie.com/links/";
 }
 function subunload(){
   quit=1;
