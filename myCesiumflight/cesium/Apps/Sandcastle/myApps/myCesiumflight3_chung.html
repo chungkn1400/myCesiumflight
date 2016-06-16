@@ -924,7 +924,7 @@ tloading2=tframe+40000;
 var positions = [];
 terrainbuildi=[];
 for(var i=0;i<nbuild;i++){
-  if(buildchanged[i]==1 && buildh[i]>0){
+  if(buildchanged[i]==1 && buildh[i]>1){
     positions.push(myCesium.Cartographic.fromDegrees(buildx[i],buildy[i]));
 	terrainbuildi.push(i);
 }}
