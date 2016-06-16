@@ -1,0 +1,4090 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- myCesiumflight a program by NGUYEN.Chung (freeware 2016) -->
+<!--script>
+var myurl=document.location.href;//autolaunch as localhost:8080 if in local mode
+//http://localhost:8080/  file:///D:/cesium/Apps/Sandcastle/gallery/Camera_.html
+if(myurl.indexOf("localhost:8080")<0 && myurl.indexOf("file:")>=0){
+   var folder="/cesium/";
+   var i=myurl.indexOf(folder)+folder.length;
+   document.location.href="http://localhost:8080/"+myurl.substr(i,999);
+}
+</script-->
+<base href="https://cesiumjs.org/Cesium/Apps/Sandcastle/gallery/"
+ >
+<script src="http://chungkn1400.github.io/myCesiumflight/myCesiumflight/cesium/Apps/Sandcastle/myApps/myCesiumheader.js"></script>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+    <title>myCesiumflight</title>
+    <script type="text/javascript" src="../Sandcastle-header.js"></script>
+    <script type="text/javascript" src="../../../ThirdParty/requirejs-2.1.20/require.js"></script>
+    <script type="text/javascript">
+    require.config({
+        baseUrl : '../../../Source',
+        waitSeconds : 60
+    });
+    </script>
+</head>
+<body class="sandcastle-loading" data-sandcastle-bucket="bucket-requirejs.html" onunload="subunload();" >
+<!--style>
+<-->
+<style>
+    @import url(../Build/Cesium/Widgets/widgets.css);
+    @import url(../templates/bucket.css);
+    #cesiumContainer {
+          width: 98%;
+		 height: 98%;
+		 overflow: hidden;
+      }
+</style>
+<!--div id="cesiumContainer" class="fullSize"></div-->
+<div id="cesiumContainer" ></div>
+<div id="loadingOverlay"><h1>Loading...</h1></div>
+<div id="toolbar" style="position:absolute;top:0px;left:0px;z-index:300;" >
+<a id="toggleLighting"></a>
+<a id="fog"></a>
+<div>B,N => motor -/+</div>
+<div>arrows => turn / H => help</div>
+<div id="fps">fps</div>
+<div id="msg">msg</div>
+<div id="msg2">msg2</div>
+<div id="msg3">msg3</div>
+<div id="msghttp">msghttp</div>
+<div id="msghttp2">msghttp2</div>
+<div>
+	<select id="combo" onChange="subcombo();" onblur="" onfocus="">
+          <option id="flyto">flyto</option>
+          <option id="deauville marinas">deauville marinas</option>
+          <option id="deauville plage">deauville plage</option>
+          <option id="trouville plage">trouville plage</option>
+          <option id="nancy">nancy</option>
+          <option id="crickvenica">crickvenica</option>
+          <option id="paris tolbiac">paris tolbiac</option>
+          <option id="paris defense">paris defense</option>
+          <option id="ivry romain roland">ivry romain roland</option>
+          <option id="orsay">orsay</option>
+          <option id="le barcares">le barcares</option>
+          <option id="jerusalem">jerusalem</option>
+          <option id="marseille">marseille</option>
+          <option id="nice">nice</option>
+          <option id="arcachon">arcachon</option>
+          <option id="grenoble">grenoble</option>
+          <option id="san francisco">san francisco</option>
+          <option id="new york">new york</option>
+          <option id="atlanta">atlanta</option>
+          <option id="rio">rio</option>
+          <option id="hong kong">hong kong</option>
+          <option id="athenes">athenes</option>
+          <option id="perth">perth</option>
+          <option id="le caire">le caire</option>
+          <option id="washington">washington</option>
+          <option id="tajmahal">tajmahal</option>
+     </select>
+</div>
+	<div id="msgradio" style="width:220px;">msgradio</div>
+	<br />
+</div>
+	<div id="credit" style="position:absolute;top:400px;left:0px;width:420px;"></div>
+	<div id="mapdiv" style="position:absolute;top:4028px;left:0px;width:97%;height:95%;" >
+    </div>
+	<div id="mapdivmsg" style="position:absolute;top:4000px;left:0px;width:400px;height:20px;" >
+	<input type="text" id="msgmap" onKeyUp="quitmsgmap();" maxlength="80" size="80" />
+    </div>
+	<div id="north" style="position:absolute;top:3000px;left:0px;width:8px;height:8px;" >
+	<a>N</a>
+    </div>
+	<div id="speed" style="position:absolute;top:3000px;left:0px;width:30px;height:30px;" >
+	km/h
+    </div>
+<script>
+var apikey='&key=AIzaSyAH372ZH8QSQgRHsqdtqNxkLVpcp_XUUkE';
+//put here your google static map apikey (=> https://developers.google.com/maps/documentation/static-maps/get-api-key)
+//to get more than per ip apiusage quota (some thousands to 20 thousands per day) (its free)
+</script>
+<script src='https://code.responsivevoice.org/responsivevoice.js' type="text/javascript" ></script>
+<script src="https://maps.googleapis.com/maps/api/js?v=3" type="text/javascript" ></script>
+<script src="http://chungkn1400.github.io/myCesiumflight/myCesiumflight/cesium/Apps/Sandcastle/myApps/bousspng.js"></script>
+<script src="http://chungkn1400.github.io/mywebglflight/mywebglflight/base64binary.js"></script>
+<script src="http://chungkn1400.github.io/mywebglflight/mywebglflight/avion2mp3.js"></script>
+<script src="http://chungkn1400.github.io/mywebglflight/mywebglflight/pneump3.js"></script>
+<script src="http://chungkn1400.github.io/myCesiumflight/myCesiumflight/cesium/Apps/Sandcastle/myApps/cockpit1png.js"></script>
+<script src="http://chungkn1400.github.io/myCesiumflight/myCesiumflight/cesium/Apps/Sandcastle/myApps/compaspng.js"></script>
+<script src="http://chungkn1400.github.io/myCesiumflight/myCesiumflight/cesium/Apps/Sandcastle/myApps/compas2png.js"></script>
+<script src="http://chungkn1400.github.io/myCesiumflight/myCesiumflight/cesium/Apps/Sandcastle/myApps/skydomejpg.js" ></script>
+<script src="http://chungkn1400.github.io/mywebglflight/mywebglflight/skydome2jpg.js" ></script>
+<script src="http://chungkn1400.github.io/mywebglflight/mywebglflight/skydome3jpg.js" ></script>
+<script src="http://chungkn1400.github.io/myCesiumflight/myCesiumflight/cesium/Apps/Sandcastle/myApps/radar2png.js" ></script>
+<script src="http://chungkn1400.github.io/myCesiumflight/myCesiumflight/cesium/Apps/Sandcastle/myApps/whitepng.js" ></script>
+<script src="http://chungkn1400.github.io/mywebglflight/mywebglflight/alphajetobjtxt.js"></script>
+<script src="http://chungkn1400.github.io/mywebglflight/mywebglflight/alphajetjpg.js"></script>
+<script src="http://chungkn1400.github.io/mywebglflight/mywebglflight/jet4mp3.js"></script>
+<script src="http://chungkn1400.github.io/myCesiumflight/myCesiumflight/cesium/Apps/Sandcastle/myApps/models/f14objtxt.js" ></script>
+<script src="http://chungkn1400.github.io/myCesiumflight/myCesiumflight/cesium/Apps/Sandcastle/myApps/models/f14jpg.js" ></script>
+<script src="http://chungkn1400.github.io/myCesiumflight/myCesiumflight/cesium/Apps/Sandcastle/myApps/cockpit_f14bluepng.js"></script>
+<script src="http://chungkn1400.github.io/myCesiumflight/myCesiumflight/cesium/Apps/Sandcastle/myApps/cockpit_f14graypng.js"></script>
+<script src="http://chungkn1400.github.io/mywebglflight/mywebglflight/eiffeltowerpng.js"></script>
+<script src="http://chungkn1400.github.io/mywebglflight/mywebglflight/libertystatuepng.js"></script>
+<script src="http://chungkn1400.github.io/mywebglflight/mywebglflight/christriopng.js"></script>
+<script src="http://chungkn1400.github.io/mywebglflight/mywebglflight/domerockpng.js"></script>
+<script src="http://chungkn1400.github.io/mywebglflight/mywebglflight/gizahpng.js"></script>
+<script src="http://chungkn1400.github.io/mywebglflight/mywebglflight/capitolepng.js"></script>
+<script src="http://chungkn1400.github.io/mywebglflight/mywebglflight/tajmahalpng.js"></script>
+<script src="http://chungkn1400.github.io/mywebglflight/mywebglflight/buddahpng.js"></script>
+<script src="http://chungkn1400.github.io/mywebglflight/mywebglflight/airporttower256png.js"></script>
+<script src="http://chungkn1400.github.io/myCesiumflight/myCesiumflight/cesium/Apps/Sandcastle/myApps/boeing512png.js" ></script>
+<script src="http://chungkn1400.github.io/myCesiumflight/myCesiumflight/cesium/Apps/Sandcastle/myApps/models/mybridgeobjtxt.js" ></script>
+<script src="http://chungkn1400.github.io/myCesiumflight/myCesiumflight/cesium/Apps/Sandcastle/myApps/models/mybridgepng.js" ></script>
+<script src="http://chungkn1400.github.io/myCesiumflight/myCesiumflight/cesium/Apps/Sandcastle/myApps/models/mybridgeorangepng.js" ></script>
+<script src="http://chungkn1400.github.io/myCesiumflight/myCesiumflight/cesium/Apps/Sandcastle/myApps/sunpng.js" ></script>
+<script src="http://chungkn1400.github.io/mywebglflight/mywebglflight/cloudpng.js"></script>
+<script src="http://chungkn1400.github.io/myCesiumflight/myCesiumflight/cesium/Apps/Sandcastle/myApps/building128png.js" ></script>
+<script src="http://chungkn1400.github.io/myCesiumflight/myCesiumflight/cesium/Apps/Sandcastle/myApps/models/ballonobjtxt.js" ></script>
+<script src="http://chungkn1400.github.io/myCesiumflight/myCesiumflight/cesium/Apps/Sandcastle/myApps/models/ballonjpg.js" ></script>
+<!--script src="http://localhost:8080/Apps/Sandcastle/gallery/models/ballonobjtxt.js" ></script>
+<script src="http://localhost:8080/Apps/Sandcastle/gallery/models/ballonjpg.js" ></script-->
+<script id="webaudio" >
+try{if(localStorage){};}catch(e){localStorage=null;alert("localStorage is not supported");};
+var twebaudio=1;
+try{
+var audioctx = new (window.AudioContext || window.webkitAudioContext)();
+var songlength;
+function loadsound(source,url){
+source.request = new XMLHttpRequest();
+source.request.open('GET', url, true);
+source.request.responseType = 'arraybuffer';
+source.request.onload = function() {
+var audioData = source.request.response;
+audioctx.decodeAudioData(audioData, function(buffer) {
+//myBuffer = buffer;
+songlength = buffer.duration;
+source.buffer = buffer;
+source.playbackRate.value = 1.0;
+//source.connect(audioctx.destination);
+source.loopStart=0.5;
+source.loopEnd=songlength-0.5;
+source.gainNode = audioctx.createGain();
+source.connect(source.gainNode);
+source.gainNode.connect(audioctx.destination);
+source.gainNode.gain.value = 1.0;
+if(source.onload){source.onload();}
+},
+function(e){alert("Error with decoding audio data" + e.err);});
+}
+source.request.send();
+}
+function loadsound64(source,data){
+var audioData = Base64Binary.decodeArrayBuffer(data.split(",")[1]);
+audioctx.decodeAudioData(audioData, function(buffer) {
+//myBuffer = buffer;
+songlength = buffer.duration;
+source.buffer = buffer;
+source.playbackRate.value = 1.0;
+//source.connect(audioctx.destination);
+source.loopStart=0.5;
+source.loopEnd=songlength-0.5;
+source.gainNode = audioctx.createGain();
+source.connect(source.gainNode);
+source.gainNode.connect(audioctx.destination);
+source.gainNode.gain.value = 1.0;
+if(source.onload){source.onload();}
+audioData=null;
+},
+function(e){alert("Error with decoding audio data" + e.err);});
+}
+function setvol(source,vol){
+  if(source.gainNode){source.gainNode.gain.value = vol;}
+}
+function setspeed(source,speed){
+  if(source.playbackRate){source.playbackRate.value=speed;}
+}
+function playloop(source){source.loop=true;source.start(0);}
+function playsound(source) {if(!source.gainNode){return;}
+  var sourcex = audioctx.createBufferSource(); // creates a sound source
+  sourcex.buffer = source.buffer;  // tell the source which sound to play
+  sourcex.loop=false;
+  if(source.playbackRate){
+     if(sourcex.playbackRate){sourcex.playbackRate.value=source.playbackRate.value;}
+  }	 
+  sourcex.connect(source.gainNode);       // connect the source to the audioctx's destination (the speakers)
+  sourcex.start(0);                           // play the source now                                           // note: on older systems, may have to use deprecated noteOn(time);
+}
+//var wav="mp3",browser="";
+//if(navigator.userAgent.toLowerCase().indexOf('firefox') > -1){wav="ogg";browser="firefox";};
+//if(navigator.userAgent.toLowerCase().indexOf('chrome') > -1){wav="wav";};
+//alert(navigator.userAgent+" "+wav);
+var audiosrc="";
+var myaudio = audioctx.createBufferSource();
+myaudio.volume=0;
+loadsound64(myaudio,avion2mp3);
+myaudio.onload=function(){
+ setTimeout("playloop(myaudio);",300);
+ setTimeout("setvol(myaudio,0.3);",300);
+ setTimeout("setspeed(myaudio,1.0);",300);
+ }
+var myaudiojet = audioctx.createBufferSource();
+myaudiojet.volume=0;
+loadsound64(myaudiojet,jet4mp3);
+myaudiojet.onload=function(){
+ setTimeout("playloop(myaudiojet);",320);
+ setTimeout("setvol(myaudiojet,0.003);",320);
+ setTimeout("setspeed(myaudiojet,1.0);",320);
+ }
+var myaudiopneu = audioctx.createBufferSource();
+//audiosrc=folder+"pneu."+wav;
+myaudiopneu.volume=0;
+loadsound64(myaudiopneu,pneump3);
+myaudiopneu.onload=function(){
+ setTimeout("playsound(myaudiopneu);",500);
+ setTimeout("setvol(myaudiopneu,0.4);",500);
+ setTimeout("setspeed(myaudiopneu,1.0);",500);
+ }
+var tpneu=0,tsoundpneu=0;
+function soundpneu(){
+ if(tframe>tsoundpneu+1000){
+   tsoundpneu=tframe;
+   playsound(myaudiopneu);
+   }
+}
+function closewebaudio(){
+  myaudio.buffer=null;
+  myaudiojet.buffer=null;
+  myaudiopneu.buffer=null;
+}
+}catch(e){twebaudio=0;};
+//if(twebaudio==1){alert(tpneu);soundpneu();}
+</script>   
+<script id="cesium_sandcastle_script">
+var cssscale=2,cssscaley=1.4,windx=1000,windy=700;
+var prefix="myCesiumflight_";
+if(document.location.href.indexOf("myCesiumflight1")>0){prefix="myCesiumflight1_";}
+if(document.location.href.indexOf("myCesiumflight2")>0){prefix="myCesiumflight2_";}
+if(document.location.href.indexOf("myCesiumflight3")>0){prefix="myCesiumflight3_";}
+function removestorage(key){
+if(localStorage){localStorage.removeItem(prefix+key);}
+}
+function loadstorage(key,namexx){
+if(localStorage){var aux=localStorage.getItem(prefix+key);
+	             if(aux){eval(namexx+"="+aux+";");}
+}}
+function loadstoragetext(key,namexx){
+if(localStorage){var aux=localStorage.getItem(prefix+key);
+	             if(aux){eval(namexx+"='"+formatname(aux)+"';");}
+}}
+function savestorage(key,xx){
+    if(localStorage){
+	   localStorage.setItem(prefix+key,xx);
+}}
+//var xxxx=1;
+//savestorage('xxxx',0);
+//removestorage('xxxx');
+//loadstorage('xxxx','xxxx');alert(xxxx);
+loadstorage('cssscale','cssscale');//alert(cssscale);
+loadstorage('cssscaley','cssscaley');//alert(cssscaley);
+function sizescreen(){
+var cssscale1=0.99/cssscale,cssscaley1=0.99/cssscaley;
+var wx=parseInt(100/cssscale)+"%";
+var wy=parseInt(100/cssscaley)+"%";
+windx=parseInt(window.innerWidth/cssscale);
+windy=parseInt(window.innerHeight/cssscaley);
+document.getElementById("cesiumContainer").setAttribute("style",
+  "border: none;top:0px;left:0px;width:"+wx+";height:"+wy+";-ms-transform: scale("+cssscale1+","+cssscaley1+"); /* IE 9 */-webkit-transform: scale("+cssscale+","+cssscaley+"); /* Chrome, Safari, Opera */transform: scale("+cssscale+","+cssscaley+");-ms-transform-origin: 0 0;-webkit-transform-origin: 0 0;transform-origin: 0 0;");
+document.getElementById("credit").setAttribute("style",
+  "border: none;position:absolute;top:"+parseInt(window.innerHeight-39)+"px;left:0px;width:95%;height:35px;");
+if(cockpit){updatecockpit();}
+}
+sizescreen();
+function subcssscale(){ 
+var crlf=String.fromCharCode(10),msg="";
+var cssx0=cssscale,cssy0=cssscaley;  
+  if(cssscale<=1){cssscale=1.4;
+  }else if(cssscale<=1.4+0.01){cssscale=2.0;
+  }else if(cssscaley<=1){cssscaley=1.2;
+  }else if(cssscaley<=1.2+0.01){cssscaley=1.4;
+  }else if(cssscaley<=1.4+0.01){cssscaley=1.7;
+  }else if(cssscaley<=1.7+0.01){cssscaley=2.0;
+  }else if(cssscale<=2.0+0.01){cssscale=2.5;
+  }else{cssscale=1;cssscaley=1;}
+  msg="cssscalex="+cssscale;
+  if(cssscale==1){msg+=" normal";}
+  if(Math.abs(cssscale-1.4)<0.01){msg+=" lowerres,faster";}
+  if(Math.abs(cssscale-2.0)<0.01){msg+=" more lowerres,faster";}
+  if(Math.abs(cssscale-2.5)<0.01){msg+=" more lowerres,faster";}
+  msg+=crlf+"cssscaley="+cssscaley;
+  if(cssscaley==1){msg+=" normal";}
+  if(Math.abs(cssscaley-1.2)<0.01){msg+=" lowerres,faster";}
+  if(Math.abs(cssscaley-1.4)<0.01){msg+=" more lowerres,faster";}
+  if(Math.abs(cssscaley-1.7)<0.01){msg+=" more lowerres,faster";}
+  if(Math.abs(cssscaley-2.0)<0.01){msg+=" more lowerres,faster";}
+  
+  if(confirm("set cssscale to "+crlf+crlf+msg+crlf+"?")){
+     sizescreen();
+  }else{cssscale=cssx0;cssscaley=cssy0;}
+subfocus();  
+}
+var myviewer,myCesium,myellipsoid,shadowmap,myclock,mydate,okinit=0;
+function startup(Cesium) {
+    'use strict';
+//Sandcastle_Begin
+//var viewer = new Cesium.CesiumWidget('cesiumContainer');//,{
+var viewer = new Cesium.Viewer('cesiumContainer',{
+    //scene3DOnly:true,
+	animation:false,
+    baseLayerPicker:false,
+    //CesiumWidget
+	geocoder:false,
+	navigationHelpButton:false,
+    fullscreenButton:false,
+    homeButton:false,
+    sceneModePicker:false,
+    timeline:false,
+	creditContainer: document.getElementById("credit"),
+    shadows : true,
+    terrainShadows : false,
+    contextOptions:{ webgl : { alpha : false, depth : true, stencil : false, antialias : true, premultipliedAlpha : true, preserveDrawingBuffer : false, failIfMajorPerformanceCaveat : false }, allowTextureFilterAnisotropic : true } 
+							   }							   
+							   );
+myviewer=viewer;
+myCesium=Cesium;
+//myviewer.Scene.contextOptions.webgl.alpha=true;
+//myviewer.Scene.creditContainer=document.getElementById("credit");
+var cesiumTerrainProviderMeshes = new Cesium.CesiumTerrainProvider({
+    url : 'https://assets.agi.com/stk-terrain/world',
+    requestWaterMask : true,
+    requestVertexNormals : true
+});
+viewer.terrainProvider = cesiumTerrainProviderMeshes;
+viewer.scene.globe.enableLighting = false;
+viewer.scene.fog.enabled = false;
+
+shadowmap = viewer.shadowMap;
+shadowmap.maxmimumDistance = 4000.0;
+shadowmap.size=1024;
+shadowmap.cascadesEnabled=false;
+shadowmap.darkness=0.33;
+//shadowmap.isPointLight=true;
+tshadow=0;loadstorage('tshadow','tshadow');
+if(tshadow==1){shadowmap.enabled=true;}else{shadowmap.enabled=false;}
+mydate=new Date();
+myclock = new myCesium.JulianDate.fromDate(mydate);
+//mydate.setHours(17);mydate.setMinutes(45);
+myclock=myCesium.JulianDate.fromDate(mydate);
+viewer.clock.currentTime=myclock;
+
+Sandcastle.addToolbarButton('Lighting', function() {
+    viewer.scene.globe.enableLighting = !viewer.scene.globe.enableLighting;
+}, 'toggleLighting');
+
+Sandcastle.addToolbarButton('fog', function() {
+    viewer.scene.fog.enabled = !viewer.scene.fog.enabled;
+}, 'fog');
+
+var scene = viewer.scene;
+var canvas = viewer.canvas;
+canvas.setAttribute('tabindex', '0'); // needed to put focus on the canvas
+canvas.onclick = function() {
+    canvas.focus();
+};
+var ellipsoid = scene.globe.ellipsoid;
+//var ellipsoid = viewer.scene.mapProjection.ellipsoid;
+myellipsoid=ellipsoid;
+    /*if(scene.skyBox){scene.skyBox.destroy();}
+    scene.skyBox = undefined;*/
+    //if(scene.sun){scene.sun.destroy();}
+    //scene.sun = undefined;
+    scene.backgroundColor = new Cesium.Color(0.4,0.5,1.0,1.0);
+	scene.skyAtmosphere.show=false;
+
+
+// disable the default event handlers
+scene.screenSpaceCameraController.enableRotate = false;
+scene.screenSpaceCameraController.enableTranslate = false;
+scene.screenSpaceCameraController.enableZoom = false;
+scene.screenSpaceCameraController.enableTilt = false;
+scene.screenSpaceCameraController.enableLook = false;
+/*
+var startMousePosition;
+var mousePosition;
+var flags = {
+    looking : false,
+    moveForward : false,
+    moveBackward : false,
+    moveUp : false,
+    moveDown : false,
+    moveLeft : false,
+    moveRight : false
+};
+
+var handler = new Cesium.ScreenSpaceEventHandler(canvas);
+
+handler.setInputAction(function(movement) {
+    flags.looking = true;
+    mousePosition = startMousePosition = Cesium.Cartesian3.clone(movement.position);
+}, Cesium.ScreenSpaceEventType.LEFT_DOWN);
+
+handler.setInputAction(function(movement) {
+    mousePosition = movement.endPosition;
+}, Cesium.ScreenSpaceEventType.MOUSE_MOVE);
+
+handler.setInputAction(function(position) {
+    flags.looking = false;
+}, Cesium.ScreenSpaceEventType.LEFT_UP);
+
+function getFlagForKeyCode(keyCode) {
+    switch (keyCode) {
+	case vk_left:
+	    return 'lookleft';
+	case vk_right:
+	    return 'lookright';
+	case vk_down:
+        return 'lookdown';
+	case vk_up:
+	    return 'lookup';		
+    case 'N'.charCodeAt(0):
+        return 'moveForward';
+    case 'B'.charCodeAt(0):
+        return 'moveBackward';
+    case 'W'.charCodeAt(0):
+        return 'moveForward';
+    case 'S'.charCodeAt(0):
+        return 'moveBackward';
+    case 'Q'.charCodeAt(0):
+        return 'moveUp';
+    case 'E'.charCodeAt(0):
+        return 'moveDown';
+    case 'D'.charCodeAt(0):
+        return 'moveRight';
+    case 'A'.charCodeAt(0):
+        return 'moveLeft';
+    default:
+        return undefined;
+    }
+}
+
+document.addEventListener('keydown', function(e) {
+    var flagName = getFlagForKeyCode(e.keyCode);
+    if (typeof flagName !== 'undefined') {
+        flags[flagName] = true;
+    }
+}, false);
+
+document.addEventListener('keyup', function(e) {
+    var flagName = getFlagForKeyCode(e.keyCode);
+    if (typeof flagName !== 'undefined') {
+        flags[flagName] = false;
+    }
+}, false);
+*/
+viewer.clock.onTick.addEventListener(function(clock) {
+    //var camera = viewer.camera;
+
+    /*if (flags.looking) {
+        var width = canvas.clientWidth;
+        var height = canvas.clientHeight;
+
+        // Coordinate (0.0, 0.0) will be where the mouse was clicked.
+        var x = (mousePosition.x - startMousePosition.x) / width;
+        var y = -(mousePosition.y - startMousePosition.y) / height;
+
+        var lookFactor = 0.05;
+        camera.lookRight(x * lookFactor);
+        camera.lookUp(y * lookFactor);
+    }*/
+
+    /*var lookFactor = 0.035;
+    if (flags.lookright) {
+         camera.lookRight(lookFactor);}
+    if (flags.lookleft) {
+        camera.lookRight(-lookFactor);}
+    if (flags.lookup) {
+         camera.lookUp(lookFactor);}
+    if (flags.lookdown) {
+        camera.lookUp(-lookFactor);}
+    
+    // Change movement speed based on the distance of the camera to the surface of the ellipsoid.
+    var cameraHeight = ellipsoid.cartesianToCartographic(camera.position).height;
+    var moveRate = cameraHeight / 100.0;
+
+    if (flags.moveForward) {
+        camera.moveForward(moveRate);
+    }
+    if (flags.moveBackward) {
+        camera.moveBackward(moveRate);
+    }
+    if (flags.moveUp) {
+        camera.moveUp(moveRate);
+    }
+    if (flags.moveDown) {
+        camera.moveDown(moveRate);
+    }
+    if (flags.moveLeft) {
+        camera.moveLeft(moveRate);
+    }
+    if (flags.moveRight) {
+        camera.moveRight(moveRate);
+    }
+	*/
+	mytestkey();
+});
+
+
+//Sandcastle_End
+    Sandcastle.finishedLoading();
+	//san francisco
+	/*var target = new Cesium.Cartesian3(-2708814.85583248, -4254159.450845907, 3891403.9457429945);
+    var offset = new Cesium.Cartesian3(7064.66030209465, -3166.517948317807, 3550.179997143336);
+    viewer.camera.lookAt(target, offset);
+    viewer.camera.lookAtTransform(Cesium.Matrix4.IDENTITY);
+	x=-2708814.85583248;y=-4254159.450845907;z=3891403.9457429945;
+    */
+	loadstoragetext('flytoname','flytoname');
+	loadstorage('flytolat','flytolat');
+	loadstorage('flytolng','flytolng');
+	document.getElementById('combo')[0].text=flytoname;
+	loadstorage('icombo','icombo');
+	document.getElementById('combo').selectedIndex=icombo;
+	subcombo();
+    //var positionxyz= myellipsoid.cartesianToCartographic(myviewer.camera.position);
+    /*var positionxyz= myviewer.camera.positionCartographic;
+    x=positionxyz.longitude;
+    y=positionxyz.latitude;
+    z=positionxyz.height;*/
+	loadstorage('x','x');
+	loadstorage('y','y');
+	loadstorage('z','z');
+	loadstorage('o1','o1');
+	loadstorage('o2','o2');
+	loadstorage('flaps','flaps');
+    loadstorage('iplane','iplane');iplane-=1;subplane();
+    loadstorage('vrun','vrun');
+    loadstorage('vplane','vplane');
+    lng=x;lat=y;
+    cos1=Math.cos(degtorad(o1));sin1=Math.sin(degtorad(o1));
+    cos2=Math.cos(degtorad(o2));sin2=Math.sin(degtorad(o2));
+    cos3=Math.cos(degtorad(o3));sin3=Math.sin(degtorad(o3));
+	addbridgemesh();
+	loadstoragebridge();
+	addaircraft();
+    loadstorage('aircraftx','aircraftx');
+    loadstorage('aircrafty','aircrafty');
+    loadstorage('aircraftz','aircraftz');
+    loadstorage('aircraftzsol','aircraftzsol');
+    loadstorage('aircrafto1','aircrafto1');
+	moveaircraft();
+	addcockpit();
+	addbouss();
+	addsky();
+	addsun();
+	addcloud();
+	/*var center = target;//Cesium.Cartesian3.fromDegrees(-72.0, 40.0);
+    var heading = Cesium.Math.toRadians(0.0);
+    var pitch = Cesium.Math.toRadians(-20.0);   
+    var range = 500.0;
+    viewer.camera.lookAt(center, new Cesium.HeadingPitchRange(heading, pitch, range));	
+    //viewer.camera.lookAtTransform(Cesium.Matrix4.IDENTITY);
+	*/
+	addboeing();
+	addairporttower();
+	addairporttower2();
+	loadstorage('tbuilding','tbuilding');
+	addbuildtower();
+	//addbuildtower2();
+	addbuildmesh();
+	loadstoragebuild();
+	initvars();
+	setTimeout("okinit=1;",8000);
+    setTimeout("setsun();",12000);
+	tloading2=timer()+14000;
+	
+	loadstorage('terrainquality','terrainquality')
+	if(terrainquality>=1 && terrainquality<=10){
+    	myCesium.TerrainProvider.heightmapTerrainQuality=terrainquality/10.0;}
+
+}
+var quit=0,crlf=String.fromCharCode(10),auxvar=null,auxvar2=null,auxvar3=null,auxvar4=null;
+var tframe=0,tframe0=0,tfps=30,fps=10,dtime=1,tmsg=0,tskip=0,itime=0,avgfps=10;
+var cos1=1,sin1=0,cos2=1,sin2=0,cos3=1,sin3=0,v=120/2,klon=1,movexyz=0,tourelle=0,iview=2;
+var flaps=0;
+var msghttp="",msghttp2="";
+function mytestkey(){
+        if(quit==1){return;}
+		itime+=1;if(itime>10000){itime=0;}
+		tframe0=tframe;
+		tframe=timer();
+		dtime=tframe-tframe0;
+		if(dtime>180){dtime=180;}
+		tfps+=(tframe-tframe0-tfps)*0.2;
+		if(tfps<1){tfps=1;}
+		if(tfps>1000){tfps=1000;}
+		fps=1000/tfps;
+		avgfps+=(fps-avgfps)*Math.min(1.0,dtime*0.001);
+if(tframe>tmsg+150){
+tmsg=tframe;
+document.getElementById('fps').innerHTML="fps "+parseInt(avgfps);
+var msg="x="+parseInt(x*100000)/100000+" y="+parseInt(y*100000)/100000+" z="+parseInt(z);
+document.getElementById('msg').innerHTML=msg;
+var msg2="v="+parseInt(v*20)/10+" prop="+parseInt(vrun*100);
+msg2+=" o1="+parseInt(o1)+" o2="+parseInt(o2)+" o3="+parseInt(o3);
+msg3="";
+if(flaps>0){msg3+="flaps+"+flaps+" ";}
+if(tourelle==1){msg3+="tourelle ";}
+if(auxvar){msg3+=" aux="+auxvar;}
+if(auxvar2){msg3+=" aux2="+auxvar2;}
+if(auxvar3){msg3+=" aux3="+auxvar3;}
+if(auxvar4){msg3+=" aux4="+auxvar4;}
+document.getElementById('msg2').innerHTML=msg2;
+document.getElementById('msg3').innerHTML=msg3;
+document.getElementById('msghttp').innerHTML=msghttp;
+document.getElementById('msghttp2').innerHTML=msghttp2;
+if(twebaudio==1){setvolume();}
+}
+var d10=0.010*dtime;
+if(keys[vk_h]){
+var msg="H => help"+crlf;
+msg+="escape => save + quit"+crlf;
+msg+="B,N => motor -/+"+crlf;
+msg+="arrows => turn"+crlf;
+msg+="F,G => flaps +/-"+crlf;
+msg+="T => tourelle view"+crlf;
+msg+="3 => cssscale (lowerres/faster)"+crlf;
+msg+="M => map+click"+crlf;
+msg+="shift+G => flyto geocoding"+crlf;
+msg+="combobox => presets locations"+crlf;
+msg+="V => view"+crlf;
+msg+="K => jet/plane"+crlf;
+msg+="R => radar / shift+R => radio off/on"+crlf;
+msg+="C => change cockpit"+crlf;
+msg+="shift+Q => terrain quality"+crlf;
+msg+="shift+B => osm buildings on/off"+crlf;
+msg+="shift+T => change time of day"+crlf;
+msg+="shift+S => shadows on/off"+crlf;
+alert(msg);
+resetkeys();
+}
+if(keys[vk_escape]){quit=1;subquit();}
+if(keys[vk_9]){subtest();resetkeys();}
+if(keys[vk_s] && keys[vk_shift]){subshadow();resetkeys();}
+if(keys[vk_t] && keys[vk_shift]){thour+=3.125;if(thour>24){thour-=24;};setsun();resetkeys();}
+if(keys[vk_b] && keys[vk_shift]){subbuilding();resetkeys();}
+if(keys[vk_q] && keys[vk_shift]){subterrainquality();resetkeys();}
+if(keys[vk_c] && iview==1){subcockpit();resetkeys();}
+if(keys[vk_r] && keys[vk_shift]){subradio();resetkeys();}
+if(keys[vk_r] && keys[vk_shift]==0){if(tradar==0){tradar=1;}else{tradar=0;};resetkeys();}
+if(keys[vk_k]){subplane();resetkeys();}
+if(keys[vk_v]){iview+=1;if(iview>2){iview=0;};resetkeys();}
+if(keys[vk_m] || (keys[vk_space] && tmap==1)){
+          if(tmap==0){tmap=1;showmap();subcentermap();}//map.setCenter(new google.maps.LatLng(latx,lngx));updatemarker();}
+          else{tmap=0;}
+          if(tmap!=1){hidemap();}
+		  var msgmap="lat="+parseInt(lat*10000)/10000+"  lng="+parseInt(lng*10000)/10000;
+		  msgmap+="  z="+parseInt(z)+"  clouds="+wclouds+"  wind="+parseInt(wind*10)/10+" km/h";
+		  msgmap+="  hour="+parseInt(hour*10)/10;
+          document.getElementById('msgmap').value=msgmap;
+		  resetkeys();
+} 
+if(keys[vk_t]){tourelle=(tourelle+1)%2;resetkeys();} 
+if(keys[vk_3]){subcssscale();resetkeys();} 
+if(keys[vk_g] && keys[vk_shift]){geolocate();resetkeys();}
+o10=o1;o20=o2;o30=o3;
+if(tourelle==0  && landing==0){
+ if(keys[vk_left]){o3+=d10*1.3;}
+ if(keys[vk_right]){o3-=d10*1.3;}
+ if(keys[vk_up]){o2-=d10*cos3;o1-=d10*sin3;}
+ if(keys[vk_down]){o2+=d10*cos3;o1+=d10*sin3;;}
+}else if(tourelle==0  && landing==1){
+ if(keys[vk_left]){o1+=d10;}
+ if(keys[vk_right]){o1-=d10;}
+ if(keys[vk_up]){o2-=d10*cos3;o1-=d10*sin3;}
+ if(keys[vk_down]){o2+=d10*cos3;o1+=d10*sin3;;}
+}else{
+ if(keys[vk_left]){to1+=d10*4;}
+ if(keys[vk_right]){to1-=d10*4;}
+ if(keys[vk_up]){to2+=d10*2;}
+ if(keys[vk_down]){to2-=d10*2;}
+}
+if(keys[vk_f] && keys[vk_shift]==0 && flaps<20){flaps+=1;resetkeys();}
+if(keys[vk_g] && keys[vk_shift]==0 && flaps>0){flaps-=1;resetkeys();}
+
+if(tmap==1){scrollTo(0,4000);}
+else{scrollTo(0,0);}
+if(okinit>1 && z>zsol+4){
+ var positionxyz= myviewer.camera.positionCartographic;
+ //x=positionxyz.longitude;
+ //y=positionxyz.latitude;
+ z=positionxyz.height;
+}
+moveplane();
+//cos1=Math.cos(degtorad(o1));sin1=Math.sin(degtorad(o1));
+//cos2=Math.cos(degtorad(o2));sin2=Math.sin(degtorad(o2));
+//cos3=Math.cos(degtorad(o3));sin3=Math.sin(degtorad(o3));
+/*if(o1>180){o1-=360;}
+if(o1<-180){o1+=360;}
+if(o2>180){o2-=360;}
+if(o2<-180){o2+=360;}
+if(o3>180){o3-=360;}
+if(o3<-180){o3+=360;}*/
+if(to1>180){to1-=360;}
+if(to1<-180){to1+=360;}
+if(to2>80){to2=79;}
+if(to2<-80){to2=-79;}
+//var camera=myviewer.camera;
+//x=camera.position.x;
+//y=camera.position.y;
+//z=camera.position.z;
+//var positionxyz= myellipsoid.cartesianToCartographic(myviewer.camera.position);
+////var positionxyz= myviewer.camera.positionCartographic;
+//x=positionxyz.longitude;
+//y=positionxyz.latitude;
+////z=positionxyz.height;
+if(itime%20==1){setklon();}
+//if(z<1){o2=Math.max(-6,o2);o3=0;}
+//if(Math.abs(o3)>20){o1+=(sin3-sign(sin3)*0.1)*dtime*0.007;}
+////if(keys[vk_n]){v=Math.min(200,v+dtime*0.025);}//x+=v*cos1*cos2/klon;y+=v*sin1*cos2;z+=v*sin2*500;}
+////if(keys[vk_b]){v=Math.max(-20,v-dtime*0.025);}//x-=v*cos1*cos2/klon;y-=v*sin1*cos2;z-=v*sin2*500;}
+v=200*vplane/2;//vplane:-0.5 .. 4.5 -100..900km/h
+movexyz=v*dtime*0.0005;
+if(okinit>=1 && spotb){okinit=2;
+   auxvar=parseInt(Math.max(-1000,(tloading2-tframe)/1000));
+   auxvar4=parseInt(Math.max(-1000,(tloading-tframe)/1000));
+   auxvar2=iicomm;
+   myview();moveaircraft();
+   if(taskgetterrainheightbridge==1){getterrainheightbridge();}
+   testupdatebuildmesh();//before testgetways2()
+   testgetways();testradio();
+   testgetweather();testgetways2();
+   if(tinitterrainheightvars==1){initterrainheightvars();}
+          
+			  }
+}
+function subtest(){
+getways2();return;
+thour+=3;if(thour>24){thour-=24;};setsun();return;
+//addaircraft();return;
+alert(port0name+"/ "+port1name+" /"+port2name+" /"+port3name);
+}
+var wayx=-199,wayy=0,waytime=0,tupdatebridge=0,tnearbridge=0;
+function testgetways(){
+if(tframe>waytime+8000){
+ var dx=1.5*360/40000;
+ var xx=x+cos1*dx*klon,yy=y+sin1*dx;
+ var d800=Math.min(800,200+z-zsol);
+ if(Math.abs((wayx-xx)*scale/klon)>d800 || Math.abs((wayy-yy)*scale)>d800){
+   updatebridge();tupdatebridge=tframe;tnearbridge=0;updatebuildmesh();
+   wayx=xx;wayy=yy;waytime=tframe;
+   getways();}
+}else if(tframe>tupdatebridge+4000 && tnearbridge==1 && tframe>tloading){
+   tupdatebridge=tframe;tnearbridge=0;
+   updatebridge();updatebuildmesh();
+}
+}
+var button=[];for(var i=0;i<16;i++){button[i]=0;};
+var vplane=0.5,vrun=1.3,vrunmax=1.7,tgaz=0,vplanez=0;
+var do1=0,do2=0,do3=0,plane="c150",landing=0,tpiste=0,iplane=0,landing0=0;
+function subplane(){
+iplane+=1;if(iplane>3){iplane=0;}
+var vrunmax0=vrunmax;
+if(iplane==0){plane="c150";vrunmax=1.7;vplane*=vrunmax/vrunmax0;vrun*=vrunmax/vrunmax0;}
+if(iplane==1){plane="alphajet";vrunmax=3;vplane*=vrunmax/vrunmax0;vrun*=vrunmax/vrunmax0;}
+if(iplane==2){plane="f14";vrunmax=6;vplane*=vrunmax/vrunmax0;vrun*=vrunmax/vrunmax0;}
+if(iplane==3){plane="ballon";vrunmax=0.4;vplane*=vrunmax/vrunmax0;vrun*=vrunmax/vrunmax0;}
+subcockpit0();
+}
+function subcockpit0(){
+if(plane=="c150"){icockpit=0;}
+if(plane=="alphajet"){icockpit=1;}
+if(plane=="f14"){icockpit=2;}
+if(plane=="ballon"){icockpit=0;}
+if(cockpit){icockpit-=1;subcockpit();}
+}
+function moveplane(){
+    var dt=dtime;
+	tgaz=0;
+	if (keys[vk_page_up] || keys[vk_n] || button[1]) {vrun+=dt*0.0003;tgaz=1;};
+    if (keys[vk_page_down] || keys[vk_b] || button[2]) {
+	    vrun-=dt*0.0003;if(vrun<0){vrun=0;if(landing==1){vplane-=vplane*dt*0.0001;}};};
+	if(tgaz==0){if(vrun>vrunmax){vrun=vrunmax;};
+	}else{if(vrun>vrunmax+0.3){vrun=vrunmax+0.3;}}
+	//var air=(5000-z)/(5000+z);if(air<0){air=0;};
+	var air=(10000-z)/(10000+z);if(air<0){air=0;};
+	//vplane+=0.4*((vrun-vplane)*0.0013*0.8*air*dt-dt*(air*0.0003*vplane+sin2*0.004));
+	var kair=vrunmax/1.3;
+	var vrun2=1;
+	if(vrunmax<2.01){
+	   vrun2=vrun*((3-1.4*vplane/kair)/2)*3*air*air/(2+air*air);
+	}else{
+	   vrun2=vrun*((3-1.4*vplane/kair)/2)*3*air*air*((2+kair)/3)/(2+air*air*kair);
+	}	
+	//vplane+=0.8*((vrun2)*0.0003*air*dt-dt*(air*0.0003*vplane+(sin2+0.03)*0.0024));
+	vplane+=0.8*((vrun2)*0.0003*air*dt-dt*(air*0.0005*vplane+(sin2+0.01)*0.0007));
+	if(vplane>4.5){vplane=4.5;}//max vv=900
+	if(vplane<-0.5){vplane=-0.5;}//min vv=-100
+    vcruise=0.75;
+	if(plane=="spitfire"){vcruise=0.85;}
+	else if(plane=="zero"){vcruise=0.84;}
+	else if(plane=="corsair"){vcruise=0.84;}
+	else if(plane=="alphajet"){vcruise=1.5;}
+	else if(plane=="f14"){vcruise=3.0;}
+	else if(plane=="ballon"){vcruise=0.20;}
+	vcruise*=20/(20+flaps);
+    if(Math.abs(o3)>10){o1+=(sin3-sign(sin3)*0.1)*dtime*0.007;}
+	//o1+=sin3*dt*0.010;
+	if(landing==0){o2-=Math.abs(Math.sin(degtorad(0.7*o3)))*dt*0.0015;}
+	//if(z<zsol+1.82){landing=1;}else{landing=0;}
+	if(landing==0){
+	 if(cos3>0){o2+=(vplane*air-vcruise)*air*cos2*cos3*dt*0.004;}
+	      else{o2+=(vplane*air+vcruise)*air*cos2*cos3*dt*0.004;}
+	}
+	if(o3>0.1){o3-=dt*0.001;}
+	else if(o3<-0.1){o3+=dt*0.001;}
+	//else if(landing==1){o3=0;}
+	var dt1=(dt*0.002);
+	if(dt1>0.8){dt1=0.8;}
+	do3+=(o3-o30)-dt1*do3;
+	do2+=(o2-o20)-dt1*do2;
+	do1+=(o1-o10)-dt1*do1;
+	if(landing==1){
+	  //if(landing0==0){if(twebaudio==1){soundpneu();};}
+	  if(o2<-0.02){o2=-0.01;do2=0;sin2=0;};
+	  if(tpiste==1 && vplane<0.07){o2=0;do2=0;sin2=0;}
+	  if(o2>0.1 && vplane<0.05){do2-=dt*0.050;};
+	  if(keys[vk_shift]){vplane-=0.000145*dt*vplane;};
+	  vplane-=0.00003*dt*vplane;o3=0;if(vplane<0.003){vplane=0.000001;};}
+	var dt2=dt*0.5;
+	o1+=do1*dt2*0.001;
+	o2+=do2*dt2*0.0025;
+	o3+=do3*dt2*0.0025;
+	if(Math.abs(o3)<1){o3+=Math.cos(tframe*0.0015)*0.2*(1-Math.abs(o3));};
+	if(Math.abs(o2)<20 && z>zsol+4){o2+=Math.cos(tframe*0.0004)*0.02*Math.max(2,8-Math.abs(o2));};
+	//var vdt=dt*0.013*vplane;
+	//x+=vdt*cos1*cos2*klon/scale;
+	//y+=vdt*sin1*cos2/scale;
+	//z+=vdt*sin2;
+	vplanez=vplane*sin2;
+	if(Math.abs(vplane)<0.2 && vcruise>0.5 && landing==0 && z>zsol+0.6){z-=(0.2-Math.abs(vplane))*dt*0.013/3;vplanez-=(0.2-vplane)/3;
+	                                       o2-=dt*0.004*cos2};
+	if(o2>35){if(cos3>0){o1-=90*sin3*dt*0.004*sin2;o3-=90*sin3*dt*0.004*sin2;}else{
+	                     o1+=90*sin3*dt*0.004*sin2;o3+=90*sin3*dt*0.004*sin2;};}
+	if(o2<-35){if(cos3>0){o1-=90*sin3*dt*0.004*sin2;o3+=90*sin3*dt*0.004*sin2;}else{
+	                     o1+=90*sin3*dt*0.004*sin2;o3-=90*sin3*dt*0.004*sin2;};}
+    ////if(o2>85){o2=84;o1=180+o1;o3=o3+180;};
+    //if(o2>85){o2=84;o1=180+o1-o3;o3=180;};
+    //if(o2<-85){o2=-84;o1=180+o1+o3;o3=0;};
+    if(o2>179.9){o2=180-o2;o1=180+o1;o3=180+o3;do2=-do2;};
+    if(o2<-179.9){o2=-180-o2;o1=180+o1;o3=180+o3;do2=-do2;};
+	if(Math.abs(sin2)>0.99){var dt3=Math.min(1.0,dt*0.003);
+	                        o1-=o3*sign(sin2)*dt3;o3-=o3*dt3;}
+	while(o2>180){o2-=360;} 
+	while(o2<-180){o2+=360;}
+	while(o1>180){o1-=360;} 
+	while(o1<-180){o1+=360;}
+	while(o3>180){o3-=360;}
+	while(o3<-180){o3+=360;}
+    cos1=Math.cos(degtorad(o1));sin1=Math.sin(degtorad(o1));
+    cos2=Math.cos(degtorad(o2));sin2=Math.sin(degtorad(o2));
+    cos3=Math.cos(degtorad(o3));sin3=Math.sin(degtorad(o3));
+}
+function evaln(n){if(isNaN(eval(n))){return 0;}else{return eval(n);};}
+var positionheight=0,positionheight0=0;
+function getterrainheight(lngx,latx){
+if(myviewer.terrainProvider.ready==false){return positionheight0;}
+//if(positionheight){positionheight = new myCesium.Cartographic(longitude, latitude);}
+//else{positionheight = new myCesium.Cartographic(longitude, latitude);}
+//positionheight=myCesium.Cartographic.fromDegrees(lngx,latx,-1000);
+var dz=positionheight;
+if(dz>-99998){positionheight0=positionheight;}else{return positionheight0;}
+positionheight=-99999;
+var positions = [
+    myCesium.Cartographic.fromDegrees(lngx,latx),
+    myCesium.Cartographic.fromDegrees(aircraftx,aircrafty),
+    myCesium.Cartographic.fromDegrees(aircraft2x,aircraft2y),
+    myCesium.Cartographic.fromDegrees(boeingx,boeingy),
+    myCesium.Cartographic.fromDegrees(airporttowerx,airporttowery),
+    myCesium.Cartographic.fromDegrees(airporttower2x,airporttower2y)
+];
+var promise ;
+if(z<zsol+8){promise= myCesium.sampleTerrain(myviewer.terrainProvider, 14, positions);}
+else{promise= myCesium.sampleTerrain(myviewer.terrainProvider, 13, positions);}
+myCesium.when(promise, function(updatedPositions) {
+    positionheight=evaln(positions[0].height);// and positions[1].height have been updated.
+    positionheight0=evaln(positionheight);
+    aircraftzsol=evaln(positions[1].height);
+    aircraft2zsol=evaln(positions[2].height);
+    boeingzsol=evaln(positions[3].height);
+    airporttowerzsol=evaln(positions[4].height);
+    airporttower2zsol=evaln(positions[5].height);
+	// updatedPositions is just a reference to positions.
+});
+return positionheight0;
+}
+var terrainbuildi=[];
+function getterrainheightbuild(){
+if(myviewer.terrainProvider.ready==false){setTimeout("getterrainheightbuild();",1000);return;}
+tloading2=tframe+40000;
+var positions = [];
+terrainbuildi=[];
+for(var i=0;i<nbuild;i++){
+  if(buildchanged[i]==1 && buildh[i]>0){
+    positions.push(myCesium.Cartographic.fromDegrees(buildx[i],buildy[i]));
+	terrainbuildi.push(i);
+}}
+    //alert("terrainbuild "+terrainbuildi.length);
+var promise ;
+promise= myCesium.sampleTerrain(myviewer.terrainProvider, 13, positions);
+myCesium.when(promise, function(updatedPositions) {
+    for(var i=0;i<terrainbuildi.length;i++){
+		 buildz[terrainbuildi[i]]=evaln(positions[i].height);
+		 buildchanged[terrainbuildi[i]]=0;}
+	// updatedPositions is just a reference to positions.
+    //alert("terrainbuild ok "+terrainbuildi.length);
+	tloading2=0;
+});
+//return 0;
+}
+var tgetterrainheightbridge=0,taskgetterrainheightbridge=0;
+var hidebridgeid=[],nhidebridge=220,ihidebridge=0;
+for(var i=0;i<=nhidebridge;i++){hidebridgeid[i]=0;}
+function getterrainheightbridge(){//auxvar4=ihidebridge;
+if(myviewer.terrainProvider.ready==false){return;}
+if(tgetterrainheightbridge>tframe-20000 || okinit<2 || tframe<tloading){return;}
+tgetterrainheightbridge=tframe;
+taskgetterrainheightbridge=0;
+var positions = [],dr=0,dx=0;dy=0;
+for(var i=0;i<nbridgemesh;i++){
+  if(bridgemeshx[i]<-178){
+                          positions.push(myCesium.Cartographic.fromDegrees(x,y));
+                          positions.push(myCesium.Cartographic.fromDegrees(x,y));
+                          positions.push(myCesium.Cartographic.fromDegrees(x,y));
+                          positions.push(myCesium.Cartographic.fromDegrees(x,y));
+                          positions.push(myCesium.Cartographic.fromDegrees(x,y));}
+  else{dr=Math.min(0.2,bridgemeshscalex[i]*0.300*360/40000);
+       dx=Math.cos(degtorad(bridgemesho1[i]))*dr*klon;
+       dy=Math.sin(degtorad(bridgemesho1[i]))*dr;
+       positions.push(myCesium.Cartographic.fromDegrees(bridgemeshx[i]-dx,bridgemeshy[i]-dy));
+       positions.push(myCesium.Cartographic.fromDegrees(bridgemeshx[i]+dx,bridgemeshy[i]+dy));
+       positions.push(myCesium.Cartographic.fromDegrees(bridgemeshx[i]-dx/2,bridgemeshy[i]-dy/2));
+       positions.push(myCesium.Cartographic.fromDegrees(bridgemeshx[i]+dx/2,bridgemeshy[i]+dy/2));
+       positions.push(myCesium.Cartographic.fromDegrees(bridgemeshx[i],bridgemeshy[i]));}
+}
+var promise ;
+promise= myCesium.sampleTerrain(myviewer.terrainProvider, 13, positions);
+myCesium.when(promise, function(updatedPositions) {
+    for(var i=0;i<nbridgemesh;i++){
+      if(bridgemeshx[i]>-178){
+	     var i5=i*5;
+	     var h=(positions[i5].height+positions[i5+1].height)/2;
+	     bridgemeshzsol[i]=h;		 
+	     var h1=evaln(positions[i5+2].height);
+	     var h2=evaln(positions[i5+3].height);
+	     var h3=evaln(positions[i5+4].height);
+		 var dh=h-1.0,color0=bridgemeshcolor[i];
+		 if(h1<dh || h2<dh || h3<dh){bridgemeshcolor[i]=2;}
+		 else{dh=h+1.0;
+		      if(h1>dh || h2>dh || h3>dh){bridgemeshcolor[i]=0;
+		                              ihidebridge+=1;if(ihidebridge>=nhidebridge){ihidebridge=0;}
+		                              hidebridgeid[ihidebridge]=bridgemeshid[i];
+									  bridgemeshx[i]=-179.1;}
+			  else{bridgemeshcolor[i]=1;}
+		 }
+		 if(color0!=bridgemeshcolor[i]){
+            if(bridgemeshcolor[i]==1){bridgemesh[i].appearance=mybridgeorangeappearance;}
+            else if(bridgemeshcolor[i]==2){bridgemesh[i].appearance=mybridgeredappearance;}
+		 }
+		 }}
+	// updatedPositions is just a reference to positions.
+    tgetterrainheightbridge=0;
+});
+//return 0;
+}
+var buildsave="";
+function loadstoragebuild(){
+buildsave="";
+loadstoragetext('buildsave','buildsave');
+if(buildsave==""){return;}
+var aux = buildsave.split("?");
+for(var i=0;i<aux.length-6;i+=6){
+   var node0=aux[i]*1.0,h=aux[i+1]*1.0,xx=aux[i+2]*1.0,yy=aux[i+3]*1.0;
+   var xxmid=aux[i+4]*1.0,yymid=aux[i+5]*1.0;
+   if(h>0.1){addbuild(node0,h,xx,yy,xxmid,yymid);}
+}
+updatebuildmesh0();	 
+}
+var bridgesave="";
+function loadstoragebridge(){
+bridgesave="";
+loadstoragetext('bridgesave','bridgesave');
+if(bridgesave==""){return;}
+var aux = bridgesave.split("?");
+for(var i=0;i<aux.length-4;i+=4){
+   var xii=aux[i]*1.0,yii=aux[i+1]*1.0,o1ii=aux[i+2]*1.0,scalexii=aux[i+3]*1.0;
+   testaddbridgemesh(1,xii,yii,o1ii,scalexii);
+}
+updatebridge0();	 
+}
+function subquit(){
+  quit=1;
+  savestorage('flytoname',flytoname);
+  savestorage('flytolat',flytolat);
+  savestorage('flytolng',flytolng);
+  savestorage('icombo',icombo);
+  savestorage('cssscale',cssscale);
+  savestorage('cssscaley',cssscaley);
+  savestorage('x',x);
+  savestorage('y',y);
+  savestorage('z',z);
+  savestorage('o1',o1);
+  savestorage('o2',o2);
+  savestorage('flaps',flaps);
+  savestorage('iplane',iplane);
+  savestorage('vrun',vrun);
+  savestorage('vplane',vplane);
+  savestorage('aircraftx',aircraftx);
+  savestorage('aircrafty',aircrafty);
+  savestorage('aircraftz',aircraftz);
+  savestorage('aircraftzsol',aircraftzsol);
+  savestorage('aircrafto1',aircrafto1);
+  savestorage('terrainquality',terrainquality);
+  savestorage('tbuilding',tbuilding);
+  savestorage('tshadow',tshadow);
+  bridgesave="";for(var i=0;i<nbridgemesh;i++){
+   bridgesave+=bridgemeshx[i]+"?"+bridgemeshy[i]+"?"+bridgemesho1[i]+"?"+bridgemeshscalex[i]+"?";}
+  savestorage('bridgesave',bridgesave);
+  setnearbuild();
+  buildsave="";for(var i=0;i<nnearbuild;i++){
+   buildsave+=nearbuild[i].node0+"?"+nearbuild[i].h+"?"+nearbuild[i].x+"?"+nearbuild[i].y+"?"+
+              nearbuild[i].xmid+"?"+nearbuild[i].ymid+"?";}
+  savestorage('buildsave',buildsave);
+  sleep(300);//alert("bye !");
+  document.location.href="http://chungswebsite.blogspot.fr/search/label/myCesiumflight";
+  //document.location.href="http://chung.blogvie.com/links/";
+}
+function subunload(){
+  quit=1;
+  if(twebaudio==1){try{closewebaudio();}catch(e){};}
+}
+function sleep(ms){
+var t=timer()+Math.min(10000,ms);
+while(timer()<t){}
+}
+function setklon(){
+var xyz0= myCesium.Cartesian3.fromDegrees(x,y,10000);
+var xyz1= myCesium.Cartesian3.fromDegrees(x+0.1,y,10000);
+var xyz2= myCesium.Cartesian3.fromDegrees(x,y+0.1,10000);
+var dx1=xyz1.x-xyz0.x, dy1=xyz1.y-xyz0.y, dz1=xyz1.z-xyz0.z;
+var dx2=xyz2.x-xyz0.x, dy2=xyz2.y-xyz0.y, dz2=xyz2.z-xyz0.z;
+klon=Math.sqrt((dx2*dx2+dy2*dy2+dz2*dz2)/Math.max(0.00001,dx1*dx1+dy1*dy1+dz1*dz1));
+}
+var o1=30,o2=-14,o3=0,o10=0,o20=0,o30=0,x=0,y=0,z=0,x0=0,y0=0,z0=0;
+var to1=170,to2=-20;
+var zsol=0,aircraftzsol=0,aircraft2zsol=0;
+var mydestination,myposition,myposition2;
+function initvars(){
+  mydestination=new myCesium.Cartesian3.fromDegrees(x,y,z,myellipsoid);
+  myposition=new myCesium.Cartesian3.fromDegrees(x,y,z,myellipsoid);
+  myposition2=new myCesium.Cartesian3.fromDegrees(x,y,z,myellipsoid);
+}
+function myview(){//return;
+//o1=-45;o2=30;o3=45;
+    var camera=myviewer.camera;
+	/*camera.setView({
+        //destination : myCesium.Cartesian3(300770.50872389384, 5634912.131394585, 2978152.2865545116),
+        //destination : myCesium.Cartesian3.fromDegrees(-75.5847, 40.0397, 1000.0),
+        orientation: {
+            heading : degtorad(-o1),
+            pitch : degtorad(o2),
+            roll : degtorad(-o3)
+        }
+    });*/
+
+//if(Math.abs(x0-x)+Math.abs(y0-y)+Math.abs((z0-z)/500)>0.000001){
+landing0=landing;landing=0;
+var zsol0=zsol;
+zsol=getterrainheight(x,y);
+if(z<zsol-20){z=zsol+300.0;if(twebaudio==1){soundpneu();};}	
+//if(Math.abs(movexyz)>0.0001){
+    //if(tourelle==1){movexyz=-movexyz;}
+    //camera.moveForward(movexyz);
+	movexyz/=scale;
+	x+=movexyz*klon*cos1*cos2;y+=movexyz*sin1*cos2;z+=movexyz*scale*sin2;
+    //z=camera.positionCartographic.height;
+	if(z<1.8+zsol){//camera.moveUp(movexyz*0.105);}
+	     landing=1;
+	     o2=Math.max(0,o2);o3=0;if(twebaudio==1 && landing0==0){soundpneu();};//landing=1;
+	     z=1.799+Math.max(zsol0,zsol);movexyz=-movexyz*0.3;
+	     x+=movexyz*klon*cos1*cos2;y+=movexyz*sin1*cos2;//z+=movexyz*scale*sin2;
+	     //camera.moveUp(4-z+movexyz);
+		 //camera.moveBackward(movexyz);
+		 }
+	movexyz=0;
+	//x0=x;y0=y;z0=z;
+//}
+if(1 || Math.abs(o10-o1)+Math.abs(o20-o2)+Math.abs(o30-o3)>0.01){
+	//var lookFactor = 0.005;
+    //camera.lookRight((o10-o1) * lookFactor);
+    //camera.lookUp((o2-o20) * lookFactor);
+	var o11=o1,o22=o2,o33=o3;if(tourelle==1){o11+=to1;o22+=to2;o33=0;}
+    camera.setView({
+        //destination : myCesium.Cartesian3(300770.50872389384, 5634912.131394585, 2978152.2865545116),
+        destination : myCesium.Cartesian3.fromDegrees(x,y,z,myellipsoid,mydestination),
+        //positionCartographic: myCesium.Cartographic(x,y,z),
+		orientation: {
+            heading : degtorad(-o11+90),
+            pitch : degtorad(o22-6),
+            roll : degtorad(-o33)
+        }});
+}
+if(iview!=1 || tourelle==1){
+           updatespot0();updatespot1();updatespot2();updatespot3();
+           cockpit.style.top='8000px';
+           compas.style.top='8000px';compas2.style.top='8000px';
+		   if(tradar==0){
+			 radar.style.top='8000px';spot.style.top='8000px';
+			 spot0.style.top='8000px';spot1.style.top='8000px';
+			 spot2.style.top='8000px';spot3.style.top='8000px';
+			 spotn.style.top='8000px';spotv.style.top='8000px';
+             spotb.style.top='0px';spotb.style.left='0px';//bypass css bug 
+           }else{updateradar();spotv.style.top='8000px';}
+		 }
+else{cockpit.style.top='0px';updatecompas();updateradar();}
+updatebouss();
+if(iview==0){myentity2.show=false;jetmesh.show=false;f14mesh.show=false;ballonmesh.show=false;}
+else if(iview==1){myentity2.show=false;jetmesh.show=false;f14mesh.show=false;ballonmesh.show=false;}
+else{myentity2.show=true;
+    var dr=51/scale,o11=o1-sin3*3;
+	var co1=Math.cos(degtorad(o11));
+	var si1=Math.sin(degtorad(o11));
+	aircraft2x=x+klon*dr*co1*cos2;
+	aircraft2y=y+dr*si1*cos2;
+	aircraft2z=z+scale*dr*sin2-3*cos3;
+	if(aircraft2z<aircraft2zsol+0.05){landing=1;aircraft2z=aircraft2zsol+0.0499;
+	                                 o2=Math.max(0,o2);o3=0;z=zsol+1.799;
+									 if(twebaudio==1 && landing0==0){soundpneu();}}
+	aircraft2o1=-o11-sin3*12;
+	aircraft2o2=o2+10+sin2*20;
+	aircraft2o3=o3;
+    var position = myCesium.Cartesian3.fromDegrees(aircraft2x,aircraft2y,aircraft2z,myellipsoid,myposition);
+    //var position = myCesium.Cartesian3.fromDegrees(x,y,z-1);
+    var heading = degtorad(aircraft2o1);
+    var pitch = degtorad(aircraft2o2);
+    var roll = degtorad(-aircraft2o3);
+    if(plane=="alphajet"){
+	   myentity2.show=false;
+	   jetmesh.show=true;
+	   f14mesh.show=false;
+	   ballonmesh.show=false;
+	   //var mymatrix=new myCesium.Transforms.headingPitchRollToFixedFrame(position, heading, pitch, roll);//myCesium.Matrix3.fromRotationY(degtorad(30));
+       jetmesh.modelMatrix = myCesium.Transforms.headingPitchRollToFixedFrame(position, heading, pitch, roll);
+    }else if(plane=="f14"){
+	   myentity2.show=false;
+	   jetmesh.show=false;
+	   f14mesh.show=true;
+	   ballonmesh.show=false;
+       f14mesh.modelMatrix = myCesium.Transforms.headingPitchRollToFixedFrame(position, heading, pitch, roll);
+	   /*var mymatrix=new  myCesium.Matrix4();//myCesium.Transforms.headingPitchRollToFixedFrame(position, heading, pitch, roll);//myCesium.Matrix3.fromRotationY(degtorad(30));
+       var myscalematrix=new myCesium.Cartesian3(1.0, 2.0, 1.0);
+	   f14mesh.modelMatrix = myCesium.Matrix4.multiplyByScale(
+	           myCesium.Transforms.headingPitchRollToFixedFrame(position, heading, pitch, roll),
+			   myscalematrix, mymatrix);*/
+    }else if(plane=="ballon"){
+	   myentity2.show=false;
+	   jetmesh.show=false;
+	   f14mesh.show=false;
+	   ballonmesh.show=true;
+       ballonmesh.modelMatrix = myCesium.Transforms.headingPitchRollToFixedFrame(position, heading, pitch, roll);
+	}else{
+	   myentity2.show=true;
+	   jetmesh.show=false;
+	   f14mesh.show=false;
+	   ballonmesh.show=false;
+       var orientation = myCesium.Transforms.headingPitchRollQuaternion(position, heading, pitch, roll);
+	   myentity2.orientation=orientation;
+       myentity2.position=position;
+	   }
+}
+if(sky){updatesky();}
+if(sun){updatesun();}
+if(cloud[ncloud-1]){updatecloud();}
+updatemonument();
+if(boeing){moveboeing();updateboeing();}
+if(airporttower){updateairporttower();}
+if(airporttower2){updateairporttower2();}
+if(buildtower[0] && tbuilding==1){//updatebuildtower();
+                                  //updatebuildtower2();
+								  }
+if(buildmesh[0] && tbuilding==1){updatebuildmesh();}
+}
+var icombo=3,combotext="deauville marinas";
+var lat=48.8261252,lng=2.35705595;
+var flytolat=48.8261252,flytolng=2.35705595;
+var flytoname="flyto",combolat=lat,combolng=lng;
+function formatname(text){
+var exclude='&",;?#'+"'",text1="",c="";
+for(var i=0;i<text.length;i++){c=text.substr(i,1);if(exclude.indexOf(c)<0){text1+=c;}else{text1+=" ";}}
+return text1;
+}
+function subcombo(){
+icombo=document.getElementById('combo').selectedIndex;
+combotext = document.getElementById('combo')[icombo].id ;
+//var o1=0;
+lat=flytolat;lng=flytolng;
+//if (combotext=="initial"){lat=48.826125  ;lng=2.357055   ;o1=120;}
+if (combotext=="flyto"){lat=flytolat  ;lng=flytolng   ;o1=10;}
+if (combotext=="deauville marinas"){lat=49.36198047661674   ;lng=0.07262960190958628   ;o1=120;}
+if (combotext=="deauville plage"){lat=49.35600551121942   ;lng=0.06075459446313726   ;o1=110;}
+if (combotext=="trouville plage"){lat=49.36663106706898   ;lng=0.07818353983048315   ;o1=130;}
+if (combotext=="nancy"){lat=48.69306979368741   ;lng=6.182922715725031   ;o1=70;}
+if (combotext=="crickvenica"){lat=45.1734569955986   ;lng=14.689314428610118   ;o1=-110;}
+if (combotext=="paris tolbiac"){lat=48.826125291730506   ;lng=2.3570559500472212   ;o1=0;}
+if (combotext=="paris defense"){lat=48.891977155490395   ;lng=2.237673523003608   ;o1=160;}
+if (combotext=="ivry romain roland"){lat=48.80346335679542   ;lng=2.3934673532940915   ;o1=-50;}
+if (combotext=="orsay"){lat=48.706787   ;lng=2.180894999999964   ;o1=-30;}
+if (combotext=="le barcares"){lat=42.78764305091493   ;lng=3.0338932951133533   ;o1=175;} 
+if (combotext=="jerusalem"){lat=31.776636707589287   ;lng=35.2337121963501   ;o1=36.3920;}
+if (combotext=="marseille"){lat=43.2803905;lng=5.405139   ;o1=36.3920;}
+if (combotext=="nice"){lat=43.7031905;lng=7.252817  ;o1=36.3920;}
+if (combotext=="arcachon"){lat=44.6514284;lng=-1.171656  ;o1=36.3920;}
+if (combotext=="grenoble"){lat=45.1841656;lng=5.7155425 ;o1=36.3920;}
+if (combotext=="san francisco"){lat=37.7577;lng=-122.4376 ;o1=36.3920;}
+if (combotext=="new york"){lat=40.7033121;lng=-73.97968 ;o1=36.3920;}
+if (combotext=="atlanta"){lat=33.7677129;lng=-84.42060 ;o1=36.3920;}
+if (combotext=="rio"){lat=-22.8650853;lng=-43.13109 ;o1=36.3920;}
+if (combotext=="hong kong"){lat=22.3700556;lng=114.153758 ;o1=36.3920;}
+if (combotext=="athenes"){lat=37.9908372;lng=23.7383394 ;o1=36.3920;}
+if (combotext=="perth"){lat=-31.9546529;lng=115.852662 ;o1=36.3920;}
+if (combotext=="le caire"){lat=30.04441959;lng=31.23571160;o1=36.3920;}
+if (combotext=="washington"){lat=38.8850399;lng=-77.08054296;o1=36.3920;}
+if (combotext=="tajmahal"){lat=27.17015;lng=78.002155;o1=36.3920;}
+document.getElementById('combo').blur();
+o2=-4;o3=0;x=lng;y=lat;z=300.0;setTimeout("setsun();",4000);
+myviewer.camera.setView({
+    destination : myCesium.Cartesian3.fromDegrees(lng, lat, z,myellipsoid,mydestination),
+	orientation: {
+            heading : degtorad(-o1+90),
+            pitch : degtorad(o2-6),
+            roll : degtorad(-o3)}
+});
+setklon();
+subfocus();
+}
+function subfocus(){
+//document.getElementById('msg').focus();
+myviewer.canvas.focus();
+}
+function subflyto(lngx,latx){
+o2=-4;o3=0;x=lngx;y=latx;z=300.0;
+lat=latx;lng=lngx;setTimeout("setsun();",4000);
+//myviewer.camera.flyTo({
+myviewer.camera.setView({
+    destination : myCesium.Cartesian3.fromDegrees(lng, lat, z,myellipsoid,mydestination),
+	orientation: {
+            heading : degtorad(-o1+90),
+            pitch : degtorad(o2-6),
+            roll : degtorad(-o3)}
+});
+setklon();
+}
+var terrainquality=5;
+function subterrainquality(){
+var aux=window.prompt("terrain quality : enter a number 1 .. 10 (last="+terrainquality+")");
+if(aux.length==0){return;}
+aux=Math.max(1,Math.min(10,parseInt(aux)));
+if(aux>=1 && aux<=10){
+  terrainquality=aux;
+  myCesium.TerrainProvider.heightmapTerrainQuality=aux/10.0;
+  }
+}
+var geolocation="";
+function geolocate(){
+geolocation = "paris france";
+geolocation=window.prompt("flyto : enter address or location");
+//alert("geolocation="+geolocation);
+if (geolocation){
+  var geocoder = new google.maps.Geocoder();
+  geocoder.geocode( { 'address': geolocation}, function(results, status) {
+    if (status == google.maps.GeocoderStatus.OK) {
+      var latlng=results[0].geometry.location;
+	  lat=latlng.lat();
+	  lng=latlng.lng();
+	  flytolat=lat;flytolng=lng;flytoname=formatname(geolocation);
+	  icombo=0;
+	  document.getElementById('combo')[icombo].text=flytoname;
+	  document.getElementById('combo').selectedIndex=icombo;
+	  subflyto(lng,lat);
+    } else {
+      alert('Geolocation not found ! ' + status);
+    }
+  });
+}
+subfocus();
+}
+var myentity,myentity2,scale=40000.0*1000/360;
+var aircraftx=0,aircrafty=0,aircraftz=0,aircrafto1=0,aircrafto2=0,aircrafto3=0;
+var aircraft2x=0,aircraft2y=0,aircraft2z=0,aircraft2o1=0,aircraft2o2=0,aircraft2o3=0;
+var mymesh,mygeometry;
+var carrepositions = new Float64Array([
+  1.0, 50.0, 0.0,
+  1.0, 50.0, 100.0,
+  1.0, -50.0, 0.0,
+  1.0, 50.0, 100.0,
+  1.0, -50.0, 100.0,
+  1.0, -50.0, 0.0
+]);
+var carretextcoords = new Float32Array([
+  0.0, 0.0,
+  0.0, 1.0,
+  1.0, 0.0,
+  0.0, 1.0,
+  1.0, 1.0,
+  1.0, 0.0
+]);
+var buildpositions = new Float64Array([
+  0.0, 50.0, 0.0,
+  0.0, 50.0, 100.0,
+  0.0, -50.0, 0.0,
+  0.0, 50.0, 100.0,
+  0.0, -50.0, 100.0,
+  0.0, -50.0, 0.0,
+  
+  /*0.0, 50.0, 100.0,
+  30.0, 50.0, 100.0,
+  0.0, -50.0, 100.0,
+  30.0, 50.0, 100.0,
+  30.0, -50.0, 100.0,
+  0.0, -50.0, 0.0*/
+  
+  1.0, 5.0, 0.0,
+  1.0, 5.0, 100.0,
+  30.0, 5.0, 0.0,
+  1.0, 5.0, 100.0,
+  30.0, 5.0, 100.0,
+  30.0, 5.0, 0.0 
+]);
+var buildtextcoords = new Float32Array([
+  0.0, 0.0,
+  0.0, 1.0,
+  1.0, 0.0,
+  0.0, 1.0,
+  1.0, 1.0,
+  1.0, 0.0,
+  
+  /*0.0, 0.0,
+  0.0, 1.0,
+  1.0, 0.0,
+  0.0, 1.0,
+  1.0, 1.0,
+  1.0, 0.0 */
+  0.98, 0.98,
+  0.98, 1.0,
+  1.0, 0.98,
+  0.98, 1.0,
+  1.0, 1.0,
+  1.0, 0.98 
+]);
+var vertexCount = 0;
+var vertexPositions = [];
+var vertexTextureCoords = [];
+function loadmygeometry(myobjtxt,scale){
+handleLoadedWorld(myobjtxt,scale);
+return addmygeometry(vertexPositions,vertexTextureCoords);
+}
+function handleLoadedWorld(data,scale){//,vertexposbuff,vertextextbuff) { 
+    var lines = data.split("\n");
+    vertexCount = 0;
+    vertexPositions = [];
+    vertexTextureCoords = [];
+    for (var i in lines) {
+      var vals = lines[i].replace(/^\s+/, "").split(/\s+/);
+      if (vals.length == 5 && vals[0] != "//") {
+        // It is a line describing a vertex; get X, Y and Z first
+        vertexPositions.push(parseFloat(vals[0])*scale);
+        vertexPositions.push(parseFloat(vals[1])*scale);
+        vertexPositions.push(parseFloat(vals[2])*scale);
+
+        // And then the texture coords
+        vertexTextureCoords.push(parseFloat(vals[3]));
+        vertexTextureCoords.push(parseFloat(vals[4]));
+
+        vertexCount += 1;
+      }
+    }
+}
+function addmygeometry(positions,textcoords){
+var mygeometry = new myCesium.Geometry({
+  attributes : {
+    position : new myCesium.GeometryAttribute({
+      componentDatatype : myCesium.ComponentDatatype.DOUBLE,
+	  componentsPerAttribute : 3,
+	  values : positions
+    }),
+    normal : new myCesium.GeometryAttribute({
+      componentDatatype : myCesium.ComponentDatatype.FLOAT,
+	  componentsPerAttribute : 3,
+	  values : positions
+    }),
+    st : new myCesium.GeometryAttribute({
+      componentDatatype : myCesium.ComponentDatatype.FLOAT,
+	  componentsPerAttribute : 2,
+	  values : textcoords
+    })
+  },
+  primitiveType : myCesium.PrimitiveType.TRIANGLES,
+  boundingSphere : myCesium.BoundingSphere.fromVertices(positions)
+});
+return mygeometry;
+}
+function addmymesh(mygeometry,imageurl){
+//var modelMatrix = myCesium.Transforms.eastNorthUpToFixedFrame(
+//    myCesium.Cartesian3.fromDegrees(x,y,z));
+var mymesh=new myCesium.Primitive({
+        geometryInstances : new myCesium.GeometryInstance({
+            geometry : mygeometry
+            }),
+        //modelMatrix : modelMatrix,
+		//debugShowBoundingVolume : true,
+        asynchronous: false,
+		cull : false,
+		show : true,
+		castShadows : true,
+		receiveShadows : false,
+		appearance : new myCesium.MaterialAppearance({
+		   //translucent : false,
+		   material : new myCesium.Material({
+		       fabric : {
+                   type : 'Image',
+                   uniforms : {
+		              image : imageurl//bousspng
+                   }
+			   }
+			  })
+			})
+    });
+return mymesh;
+}
+var mybridgeredappearance,mybridgeorangeappearance,mybridgegreenappearance;
+var mybuildappearance,mybuildappearance2;
+function initmyappearance(){
+		mybridgeredappearance = new myCesium.MaterialAppearance({
+		   //translucent : false,
+		   material : new myCesium.Material({
+		       fabric : {
+                   type : 'Image',
+                   uniforms : {
+		              image : mybridgepng
+                   }
+			   }
+			  })
+			});
+		mybridgeorangeappearance = new myCesium.MaterialAppearance({
+		   //translucent : false,
+		   material : new myCesium.Material({
+		       fabric : {
+                   type : 'Image',
+                   uniforms : {
+		              image : mybridgeorangepng
+                   }
+			   }
+			  })
+			});
+		mybuildappearance = new myCesium.MaterialAppearance({
+		   //translucent : false,
+		   material : new myCesium.Material({
+		       fabric : {
+                   type : 'Image',
+                   uniforms : {
+		              image : building128png
+                   }
+			   }
+			  })
+			});
+		mybuildappearance2 = new myCesium.MaterialAppearance({
+		   //translucent : false,
+		   material : new myCesium.Material({
+		       fabric : {
+                   type : 'Image',
+                   uniforms : {
+		              image : building128png
+                   }
+			   }
+			  })
+			});
+}
+var jetgeometry,jetmesh,f14geometry,f14mesh,ballongeometry,ballonmesh;
+var bridgegeometry,bridgemesh=[];
+var nbridgemesh=90,ibridgemesh=0,bridgemeshid=[];
+var bridgemeshx=[],bridgemeshy=[],bridgemeshz=[],bridgemeshdz=[],bridgemesho1=[];
+var bridgemeshscale=[],bridgemeshmatrix=[],bridgemeshzsol=[];	
+var bridgemeshscalex=[],bridgemeshscaley=[],bridgemeshscalez=[],bridgemeshcolor=[];
+var mybridgeposition=[];
+var carregeometry,carremesh;
+var buildgeometry,buildmesh=[];
+var nbuildmesh=490,ibuildmesh=0,buildmeshid=[],buildmeshh=[];
+var buildmeshx=[],buildmeshy=[],buildmeshz=[],buildmeshdz=[],buildmesho1=[];
+var buildmeshscale=[],buildmeshmatrix=[],buildmeshzsol=[],buildmeshchanged=[];	
+var buildmeshscalex=[],buildmeshscaley=[],buildmeshscalez=[],buildmeshcolor=[];
+var mybuildposition=[];
+function createmymesh(){
+var scale=0.1;
+jetgeometry=loadmygeometry(alphajetobjtxt,scale);//addmygeometry(positions,textcoords);
+jetmesh=addmymesh(jetgeometry,alphajetjpg);
+myviewer.scene.primitives.add(jetmesh);
+scale=0.09;
+f14geometry=loadmygeometry(f14objtxt,scale);//addmygeometry(positions,textcoords);
+f14mesh=addmymesh(f14geometry,f14jpg);
+myviewer.scene.primitives.add(f14mesh);
+scale=0.16;
+ballongeometry=loadmygeometry(ballonobjtxt,scale);//addmygeometry(positions,textcoords);
+ballonmesh=addmymesh(ballongeometry,ballonjpg);
+myviewer.scene.primitives.add(ballonmesh);
+scale=1;
+carregeometry=addmygeometry(carrepositions,carretextcoords);
+buildgeometry=addmygeometry(buildpositions,buildtextcoords);
+//carremesh=addmymesh(carregeometry,building128png);
+//myviewer.scene.primitives.add(carremesh);
+
+var position = myCesium.Cartesian3.fromDegrees(x,y,z+10,myellipsoid,myposition);
+var heading = degtorad(aircrafto1);
+var pitch = degtorad(aircrafto2);
+var roll = degtorad(-aircrafto3);
+var mymatrix=new myCesium.Transforms.headingPitchRollToFixedFrame(position, heading, pitch, roll);//myCesium.Matrix3.fromRotationY(degtorad(30));
+jetmesh.modelMatrix = mymatrix;
+f14mesh.modelMatrix = mymatrix;
+//carremesh.modelMatrix= mymatrix;
+}
+function addbridgemesh(){
+var scale=1.0;
+bridgegeometry=loadmygeometry(mybridgeobjtxt,scale);
+for(var i=0;i<nbridgemesh;i++){
+  bridgemesh[i]=addmymesh(bridgegeometry, mybridgepng);
+  bridgemesh[i].castShadows=false;
+  myviewer.scene.primitives.add(bridgemesh[i]);  
+ }
+initmyappearance();
+for(var i=0;i<nbridgemesh;i++){
+ bridgemeshid[i]=0;
+ bridgemeshx[i]=-180;//x;
+ bridgemeshy[i]=-89;//y+i*0.300*360/40000;
+ bridgemeshdz[i]=5.0;
+ bridgemeshzsol[i]=zsol;
+ bridgemeshz[i]=zsol+bridgemeshdz[i];
+ bridgemesho1[i]=-90.0;
+ bridgemeshscalex[i]=1.0;
+ bridgemeshscaley[i]=1.0;
+ bridgemeshscalez[i]=1.0;
+ bridgemeshscale[i]=new myCesium.Cartesian3(bridgemeshscalex[i],bridgemeshscaley[i],bridgemeshscalez[i]);
+ mybridgeposition[i] = new myCesium.Cartesian3.fromDegrees(bridgemeshx[i],bridgemeshy[i],bridgemeshz[i],myellipsoid);
+ var position=mybridgeposition[i];
+ var heading = degtorad(bridgemesho1[i]);
+ var pitch = degtorad(0.0);
+ var roll = degtorad(0.0);
+ bridgemeshmatrix[i]=new myCesium.Transforms.headingPitchRollToFixedFrame(position, heading, pitch, roll);//myCesium.Matrix3.fromRotationY(degtorad(30));
+ myCesium.Matrix4.multiplyByScale(
+	         myCesium.Transforms.headingPitchRollToFixedFrame(position, heading, pitch, roll),
+			 bridgemeshscale[i], bridgemeshmatrix[i]);
+ bridgemesh[i].modelMatrix=bridgemeshmatrix[i];
+ bridgemesh[i].show=false;
+ bridgemeshcolor[i]=1;
+ if(bridgemeshcolor[i]==1){bridgemesh[i].appearance=mybridgeorangeappearance;}
+ else if(bridgemeshcolor[i]==2){bridgemesh[i].appearance=mybridgeredappearance;}
+ }
+}
+function updatebridge(){
+if(tgetterrainheightbridge>tframe-20000 || okinit<2 || tframe<tloading){return;}
+tgetterrainheightbridge=tframe;
+tloading=tframe+40000;
+updatebridge0();
+tgetterrainheightbridge=0;
+tloading=0;
+}
+function updatebridge0(){
+var distmax=18*360/40000;
+for(var i=0;i<nbridgemesh;i++){
+ if(bridgemeshx[i]<-179){bridgemesh[i].show=false;}
+ else if(bridgemeshcolor[i]<=0){bridgemesh[i].show=false;}
+ else{
+  var test=0,dx=(bridgemeshx[i]-x)/klon,dy=bridgemeshy[i]-y;
+  if(Math.abs(dx)>distmax){bridgemesh[i].show=false;}
+  else{if(Math.abs(dy)>distmax){bridgemesh[i].show=false;}
+       else{test=1;bridgemesh[i].show=true;}
+   }
+  if(test==1){
+   if(Math.max(Math.abs(dx),Math.abs(dy))<360/40000){tnearbridge=1;}
+   bridgemeshdz[i]=7.0;
+   bridgemeshz[i]=bridgemeshzsol[i]+bridgemeshdz[i];
+   var position = myCesium.Cartesian3.fromDegrees(bridgemeshx[i],bridgemeshy[i],bridgemeshz[i],myellipsoid,mybridgeposition[i]);
+   var heading = degtorad(bridgemesho1[i]);
+   var do1=diro1(-dx,-dy)-bridgemesho1[i];
+   while(do1>180){do1-=360;}
+   while(do1<-180){do1+=360;}
+   if(do1>0){heading+=degtorad(180);}
+   var pitch = degtorad(0.0);
+   var roll = degtorad(0.0);
+   bridgemeshscale[i]=new myCesium.Cartesian3(bridgemeshscalex[i],bridgemeshscaley[i],bridgemeshscalez[i]);
+   myCesium.Matrix4.multiplyByScale(
+	         myCesium.Transforms.headingPitchRollToFixedFrame(position, heading, pitch, roll),
+			 bridgemeshscale[i], bridgemeshmatrix[i]);
+   bridgemesh[i].modelMatrix=bridgemeshmatrix[i];
+   bridgemesh[i].show=true;
+  } 
+ }}
+}
+function addbuildmesh(){
+nbuildmesh=Math.min(nbuild,nbuildmesh);
+var scale=1.0;
+buildgeometry=carregeometry;//loadmygeometry(mybuildobjtxt,scale);
+for(var i=0;i<nbuildmesh;i++){
+  buildmesh[i]=addmymesh(buildgeometry, whitepng);
+  buildmesh[i].castShadows=true;
+  myviewer.scene.primitives.add(buildmesh[i]);  
+ }
+for(var i=0;i<nbuildmesh;i++){
+ buildmeshid[i]=0;
+ buildmeshh[i]=70;
+ buildmeshx[i]=-180;//x;
+ buildmeshy[i]=-89;//y+i*0.300*360/40000;
+ //buildmeshx[i]=x;
+ buildmeshy[i]=y+i*0.300*360/40000;
+ buildmeshdz[i]=-5.0;
+ buildmeshzsol[i]=0;
+ buildmeshz[i]=0+buildmeshdz[i];
+ buildmesho1[i]=-90.0;
+ buildmeshscalex[i]=1.0;
+ buildmeshscaley[i]=1.0;
+ buildmeshscalez[i]=1.0;
+ buildmeshchanged[i]=1;
+ buildmeshscale[i]=new myCesium.Cartesian3(buildmeshscalex[i],buildmeshscaley[i],buildmeshscalez[i]);
+ mybuildposition[i] = new myCesium.Cartesian3.fromDegrees(buildmeshx[i],buildmeshy[i],buildmeshz[i],myellipsoid);
+ var position=mybuildposition[i];
+ var heading = degtorad(buildmesho1[i]);
+ var pitch = degtorad(0.0);
+ var roll = degtorad(0.0);
+ buildmeshmatrix[i]=new myCesium.Transforms.headingPitchRollToFixedFrame(position, heading, pitch, roll);//myCesium.Matrix3.fromRotationY(degtorad(30));
+ myCesium.Matrix4.multiplyByScale(
+	         myCesium.Transforms.headingPitchRollToFixedFrame(position, heading, pitch, roll),
+			 buildmeshscale[i], buildmeshmatrix[i]);
+ buildmesh[i].modelMatrix=buildmeshmatrix[i];
+ buildmesh[i].show=false;
+ buildmesh[i].appearance=mybuildappearance;
+ buildmeshcolor[i]=1;
+ buildmesh[i].color=buildmeshcolor[i];
+ if(buildmeshcolor[i]==1){buildmesh[i].appearance=mybuildappearance;}
+ else if(buildmeshcolor[i]==2){buildmesh[i].appearance=mybuildappearance2;}
+ }
+}
+var tgetterrainheightbuild=0;
+function updatebuildmesh(){
+if(tgetterrainheightbuild>tframe-20000 || okinit<2){return;}
+tgetterrainheightbuild=tframe;
+//tloading=tframe+20000;
+updatebuildmesh0();
+tgetterrainheightbuild=0;
+//tloading=0;
+}
+function updatebuildmesh0(){
+var distmax=18*360/40000;
+for(var i=0;i<nbuildmesh;i++){
+ if(buildmeshx[i]<-179){buildmesh[i].show=false;}
+ else if(buildmeshh[i]<=1){buildmesh[i].show=false;}
+ else{
+  var test=0,dx=(buildmeshx[i]-x)/klon,dy=buildmeshy[i]-y;
+  if(Math.abs(dx)>distmax){buildmesh[i].show=false;}
+  else{if(Math.abs(dy)>distmax){buildmesh[i].show=false;}
+       else{test=1;}
+   }
+  if(test==1){
+   //if(Math.max(Math.abs(dx),Math.abs(dy))<360/40000){tnearbuild=1;}
+   buildmeshdz[i]=-5.0;
+   buildmeshz[i]=buildmeshzsol[i]+buildmeshdz[i];
+   var position = myCesium.Cartesian3.fromDegrees(buildmeshx[i],buildmeshy[i],buildmeshz[i],myellipsoid,mybuildposition[i]);
+   var do1=diro1(dx*scale,dy*scale);//-buildmesho1[i];
+   while(do1>180){do1-=360;}
+   while(do1<-180){do1+=360;}
+   var heading = degtorad(-do1);//+do1*0.2);
+   var pitch = degtorad(0.0);
+   var roll = degtorad(0.0);
+   if(buildmeshchanged[i]==1){
+      buildmeshchanged[i]=0;
+	  buildmeshscale[i]=new myCesium.Cartesian3(buildmeshscalex[i],buildmeshscaley[i],buildmeshscalez[i]);
+      buildmesh[i].color=buildmeshcolor[i];
+      if(buildmeshcolor[i]==1){buildmesh[i].appearance=mybuildappearance;}
+      else if(buildmeshcolor[i]==2){buildmesh[i].appearance=mybuildappearance2;}
+	  }
+   myCesium.Matrix4.multiplyByScale(
+	         myCesium.Transforms.headingPitchRollToFixedFrame(position, heading, pitch, roll),
+			 buildmeshscale[i], buildmeshmatrix[i]);
+   buildmesh[i].modelMatrix=buildmeshmatrix[i];
+   buildmesh[i].show=true;
+  } 
+ }}
+}
+function createModel(url, height) {
+    myviewer.entities.removeAll();
+	
+	createmymesh();
+
+    var dr=200/scale;
+	aircraftx=x+klon*dr*cos1*cos2;
+	aircrafty=y+dr*sin1*cos2;
+	aircraftz=z+scale*dr*sin2;
+	aircrafto1=0;
+    var position = myCesium.Cartesian3.fromDegrees(aircraftx,aircrafty,aircraftz);
+    //var position = myCesium.Cartesian3.fromDegrees(x,y,z-1);
+    var heading = degtorad(aircrafto1);
+    var pitch = degtorad(aircrafto2);
+    var roll = degtorad(-aircrafto3);
+    var orientation = myCesium.Transforms.headingPitchRollQuaternion(position, heading, pitch, roll);
+
+    var entity = myviewer.entities.add({
+        name : url,
+        position : position,
+        orientation : orientation,
+        model : {
+            uri : url,
+            minimumPixelSize : 20,
+            maximumScale : 200000
+        }
+    });
+	entity.model.castShadows = true;
+	entity.model.receiveShadows = false;
+    //myviewer.trackedEntity = entity;
+	myentity=entity;
+
+    var position2 = myCesium.Cartesian3.fromDegrees(x,y,z,myellipsoid,myposition2);
+    orientation = myCesium.Transforms.headingPitchRollQuaternion(position2, heading, pitch, roll);
+    var entity2 = myviewer.entities.add({
+        name : url,
+        position : position2,
+        orientation : orientation,
+        model : {
+            uri : url,
+            minimumPixelSize : 200,
+            maximumScale : 200000
+        }
+    });
+	entity2.model.castShadows = true;
+	entity2.model.receiveShadows = false;
+    //myviewer.trackedEntity = entity2;
+	myentity2=entity2;
+}
+function addaircraft(){
+   //createModel('../../SampleData/models/CesiumAir/Cesium_Air.glb', 300);
+   createModel('https://chungkn1400.github.io/myCesiumflight/myCesiumflight/cesium/Apps/Sandcastle/myApps/models/Cesium_Air.glb', 300);
+   //createModel('../../Sandcastle/myApps/SC001jet.glb', 300);
+   //createModel('../../Sandcastle/myApps/c150.glb', 300);
+}
+function moveaircraft(){
+//alert(myviewer.trackedEntity);
+//if(myviewer.trackedEntity){myviewer.trackedEntity=null;alert(myviewer.trackedEntity);}
+//else{myviewer.trackedEntity = myentity;}
+//var dr=10.0/scale;
+//var zz=Math.max(10,z+scale*dr*sin2);auxvar=zz;
+//var position = myCesium.Cartesian3.fromDegrees(x+dr*cos1*cos2,y+klon*dr*sin1*cos2,zz);
+/*var heading = myCesium.Math.toRadians(0);
+var pitch = o2;
+var roll = -o3;
+// create an orientation based on the new position
+var orientation = myCesium.Transforms.headingPitchRollQuaternion(position, heading, pitch, roll);
+*/
+var dxmax=klon*10000/scale,dymax=10000/scale,test=0;//10km
+if(aircraftx>x+dxmax){aircraftx=x-0.99*dxmax;test=1;}
+if(aircraftx<x-dxmax){aircraftx=x+0.99*dxmax;test=1;}
+if(aircrafty>y+dymax){aircrafty=y-0.99*dymax;test=1;}
+if(aircrafty<y-dymax){aircrafty=y+0.99*dymax;test=1;}
+aircraftz+=(Math.max(aircraftzsol+250.0,z-150.0)-aircraftz)*dtime*0.001;
+var vv=55,dx=vv*dtime*0.001/scale;
+aircraftx+=dx;
+aircrafto1=0;
+    var position = myCesium.Cartesian3.fromDegrees(aircraftx,aircrafty,aircraftz,myellipsoid,myposition);
+    //var position = myCesium.Cartesian3.fromDegrees(x,y,z-1);
+    var heading = degtorad(-aircrafto1);
+    var pitch = degtorad(aircrafto2);
+    var roll = degtorad(-aircrafto3);
+    var orientation = myCesium.Transforms.headingPitchRollQuaternion(position, heading, pitch, roll);
+myentity.orientation=orientation;
+myentity.position=position;
+}
+var bouss;
+function addbouss() {
+            //Add overlay by creating an HTML element
+            bouss = document.createElement('img');
+            bouss.src = bousspng;//'_bouss.png';
+            myviewer.container.appendChild(bouss);
+			updatebouss();
+}
+function updatebouss(){
+            bouss.style.zIndex='390';
+			var rotation = parseInt(o1-90) + 'deg';
+            if(tourelle==1){rotation=parseInt(o1+to1-90) + 'deg';}
+            //var topOffset = 10;
+            //var leftOffset = parseInt(windx-110/cssscale);
+            var topOffset = parseInt(-15/cssscale) ;//10
+            var leftOffset = parseInt(120/cssscale);//parseInt(windx-110/cssscale);
+            //Position overlay with CSS styling
+            bouss.style.width = parseInt(100/cssscale)+'px';
+            //bouss.style.height = '60px';
+            bouss.style.position = 'absolute';
+            bouss.style.top = 'calc('+topOffset + 'px)';
+            bouss.style.left = 'calc('+leftOffset + 'px)';
+            bouss.style['pointer-events'] = 'none';
+            //bouss.style.zIndex='1000';
+            //bouss.style['-ms-transform'] = 'rotate(' + rotation + ')'; /* IE 9 */
+            //bouss.style['-webkit-transform'] = 'rotate(' + rotation + ')'; /* Chrome, Safari, Opera */
+            //bouss.style.transform = 'rotate(' + rotation + ')';
+            var cssscale1=0.99/cssscale,cssscaley1=0.99/cssscaley;
+            //bouss.style['-ms-transform'] =  "scale("+1+","+(cssscale1/cssscaley1)+") rotate("+rotation+")"; /* IE 9 */
+            //bouss.style['-webkit-transform'] = "scale("+1+","+(cssscale/cssscaley)+") rotate("+rotation+")"; /* Chrome, Safari, Opera */
+            //bouss.style.transform = "scale("+1+","+(cssscale/cssscaley)+") rotate("+rotation+")";
+            bouss.style['-ms-transform'] =  "scale("+0.375+","+(0.375*cssscale1/cssscaley1)+") rotate("+rotation+")"; /* IE 9 */
+            bouss.style['-webkit-transform'] = "scale("+0.375+","+(0.375*cssscale/cssscaley)+") rotate("+rotation+")"; /* Chrome, Safari, Opera */
+            bouss.style.transform = "scale("+0.375+","+(0.375*cssscale/cssscaley)+") rotate("+rotation+")";
+}
+function updatebouss0(){
+var topOffset = 10;
+var leftOffset = parseInt(windx-110/cssscale);
+bouss.style.width = parseInt(100/cssscale)+'px';
+//bouss.style.height = '60px';
+bouss.style.top =  topOffset+ 'px';
+bouss.style.left = leftOffset + 'px';
+var rotation=parseInt(o1-90) + 'deg';
+if(tourelle==1){rotation=parseInt(o1+to1-90) + 'deg';}
+//bouss.style['-ms-transform'] = 'rotate(' + rotation + ')'; /* IE 9 */
+//bouss.style['-webkit-transform'] = 'rotate(' + rotation + ')'; /* Chrome, Safari, Opera */
+//bouss.style.transform = 'rotate(' + rotation + ')';
+var cssscale1=0.99/cssscale,cssscaley1=0.99/cssscaley;
+bouss.style['-ms-transform'] =  "scale("+1+","+(cssscale1/cssscaley1)+") rotate("+rotation+")"; /* IE 9 */
+bouss.style['-webkit-transform'] = "scale("+1+","+(cssscale/cssscaley)+") rotate("+rotation+")"; /* Chrome, Safari, Opera */
+bouss.style.transform = "scale("+1+","+(cssscale/cssscaley)+") rotate("+rotation+")";
+}
+var cockpit;
+function addcockpit() {
+            //Add overlay by creating an HTML element
+            cockpit = document.createElement('img');
+            subcockpit0();//cockpit.src = cockpit1png;//'cockpit1.png';
+            myviewer.container.appendChild(cockpit);
+            updatecockpit();
+			addcompas();
+			updatecompas();
+			addradar();
+            port0x=-199;port1x=-199;port2x=-199;port3x=-199;
+			updateradar();
+            cockpit.style.zIndex='300';
+            compas.style.zIndex='400';
+            compas2.style.zIndex='410';
+            radar.style.zIndex='400';
+            spot.style.zIndex='500';
+            spot0.style.zIndex='500';
+            spot1.style.zIndex='500';
+            spot2.style.zIndex='500';
+            spot3.style.zIndex='500';
+            spotn.style.zIndex='500';
+            spotv.style.zIndex='500';
+            spotb.style.zIndex='405';
+}
+var icockpit=0;
+function subcockpit(){
+icockpit+=1;if(icockpit>2){icockpit=0;}
+if(icockpit==0){cockpit.src=cockpit1png;}
+if(icockpit==1){cockpit.src=cockpit_f14bluepng;}
+//if(icockpit==2){cockpit.src='cockpit_f14yellow.png';}
+if(icockpit==2){cockpit.src=cockpit_f14graypng;}
+}
+function updatecockpit(){
+            if(!cockpit){return;}
+			var rotation = parseInt(0) + 'deg';
+            var topOffset = 0;
+            var leftOffset = 0;
+            var cssscale1=0.99/cssscale,cssscaley1=0.99/cssscaley;
+            //Position overlay with CSS styling
+            cockpit.style.width = parseInt(windx)+'px';
+            //cockpit.style.height = '60px';
+            cockpit.style.position = 'absolute';
+            cockpit.style.top = 'calc('+topOffset + 'px)';
+            cockpit.style.left = 'calc('+leftOffset + 'px)';
+            //cockpit.style.zIndex='100';
+            cockpit.style['pointer-events'] = 'none';
+            cockpit.style['-ms-transform'] =  "scale("+1+","+(cssscale1/cssscaley1)+")"; /* IE 9 */
+            cockpit.style['-webkit-transform'] = "scale("+1+","+(cssscale/cssscaley)+")"; /* Chrome, Safari, Opera */
+            cockpit.style.transform = "scale("+1+","+(cssscale/cssscaley)+")";
+            cockpit.style['-ms-transform-origin'] =  "0 0"; /* IE 9 */
+            cockpit.style['-webkit-transform-origin'] = "0 0"; /* Chrome, Safari, Opera */
+            cockpit.style['transform-origin'] = "0 0";
+            //cockpit.setAttribute("style",
+  //"border: none;top:0px;left:0px;width:"+wx+";height:"+wy+";-ms-transform: scale("+cssscale1+","+cssscaley1+"); /* IE 9 */-webkit-transform: scale("+cssscale+","+cssscaley+"); /* Chrome, Safari, Opera */transform: scale("+cssscale+","+cssscaley+");-ms-transform-origin: 0 0;-webkit-transform-origin: 0 0;transform-origin: 0 0;");
+// scale("+cssscale1+","+cssscaley1+"); /* IE 9 */-webkit-transform: scale("+cssscale+","+cssscaley+"); /* Chrome, Safari, Opera */transform: scale("+cssscale+","+cssscaley+");-ms-transform-origin: 0 0;-webkit-transform-origin: 0 0;transform-origin: 0 0;");
+}
+var compas;
+function addcompas() {
+            //Add overlay by creating an HTML element
+            compas = document.createElement('img');
+            compas.src = compaspng;//'compas.png';
+            myviewer.container.appendChild(compas);
+            updatecompas();
+			addcompas2();
+}
+function updatecompas(){
+            if(!compas){return;}
+			var rotation = parseInt(o3) + 'deg';
+            var topOffset = windy-150/cssscaley;
+            var leftOffset = windx*0.28;
+            var cssscale1=0.99/cssscale,cssscaley1=0.99/cssscaley;
+            var wx=parseInt(145/cssscale);
+            //var wy=parseInt(100/cssscaley)+"%";
+            //Position overlay with CSS styling
+            compas.style.width = parseInt(wx)+'px';
+            //compas.style.height = '60px';
+            compas.style.position = 'absolute';
+            compas.style.top = 'calc('+topOffset + 'px)';
+            compas.style.left = 'calc('+leftOffset + 'px)';
+            compas.style['pointer-events'] = 'none';
+            compas.style['-ms-transform'] =  "scale("+1+","+(cssscale1/cssscaley1)+") rotate("+rotation+")"; /* IE 9 */
+            compas.style['-webkit-transform'] = "scale("+1+","+(cssscale/cssscaley)+") rotate("+rotation+")"; /* Chrome, Safari, Opera */
+            compas.style.transform = "scale("+1+","+(cssscale/cssscaley)+") rotate("+rotation+")";
+updatecompas2();
+}
+var compas2;
+function addcompas2() {
+            //Add overlay by creating an HTML element
+            compas2 = document.createElement('img');
+            compas2.src = compas2png;//'compas2.png';
+            myviewer.container.appendChild(compas2);
+            updatecompas2();
+}
+function updatecompas2(){
+            if(!compas2){return;}
+			var rotation = parseInt(o3) + 'deg';
+            var topOffset = windy-150/cssscaley;
+            var leftOffset = windx*0.28;
+            var cssscale1=0.99/cssscale,cssscaley1=0.99/cssscaley;
+            var wx=parseInt(145/cssscale);
+			var co2=cos2*(1-Math.abs(sin2))*0.95;
+            //var wy=parseInt(100/cssscaley)+"%";
+            //Position overlay with CSS styling
+            compas2.style.width = parseInt(wx)+'px';
+            //compas2.style.height = '60px';
+            compas2.style.position = 'absolute';
+            compas2.style.top = 'calc('+topOffset + 'px)';
+            compas2.style.left = 'calc('+leftOffset + 'px)';
+            compas2.style['pointer-events'] = 'none';
+            compas2.style['-ms-transform'] =  "scale("+1+","+(cssscale1/cssscaley1)+") rotate("+rotation+") scale(1,"+co2+")"; /* IE 9 */
+            compas2.style['-webkit-transform'] = "scale("+1+","+(cssscale/cssscaley)+") rotate("+rotation+") scale(1,"+co2+")"; /* Chrome, Safari, Opera */
+            compas2.style.transform = "scale("+1+","+(cssscale/cssscaley)+") rotate("+rotation+") scale(1,"+co2+")";
+}
+var radar,spot,spot0,spot1,spot2,spot3,spotn,spotb,msgradio,tradar=0;
+function addradar() {
+            //Add overlay by creating an HTML element
+            radar = document.createElement('img');
+            radar.src = radar2png;//'radar2.png';
+            myviewer.container.appendChild(radar);
+            spot = document.createElement('img');
+            spot.src = whitepng;//'white.png';
+            myviewer.container.appendChild(spot);
+            spot0 = document.createElement('img');
+            spot0.src = whitepng;//'white.png';
+            myviewer.container.appendChild(spot0);
+            spot1 = document.createElement('img');
+            spot1.src = whitepng;//'white.png';
+            myviewer.container.appendChild(spot1);
+            spot2 = document.createElement('img');
+            spot2.src = whitepng;//'white.png';
+            myviewer.container.appendChild(spot2);
+            spot3 = document.createElement('img');
+            spot3.src = whitepng;//'white.png';
+            myviewer.container.appendChild(spot3);
+            spotn = document.getElementById('north');
+            myviewer.container.appendChild(spotn);
+            msgradio = document.getElementById('msgradio');
+            //myviewer.container.appendChild(msgradio);
+            spotv=document.getElementById('speed');
+            myviewer.container.appendChild(spotv);
+            spotb = document.createElement('img');
+            spotb.src = compaspng;//'white.png';
+            myviewer.container.appendChild(spotb);
+            updateradar();
+			var dr=1000*klon/scale;
+			port0x=x;port0y=y;
+			port1x=x+dr;port1y=y;
+			port2x=x-dr;port2y=y;
+			port3x=x;port3y=y+dr;
+}
+var o1radar=0;
+function updateradar(){
+            if(!radar){return;}
+			o1radar+=30*dtime*0.002;if(o1radar>3600){o1radar-=3600;}
+			var rotation = parseInt(-o1radar) + 'deg';
+            var topOffset = windy-150/cssscaley;
+            var leftOffset = windx*(0.59);
+            var cssscale1=0.99/cssscale,cssscaley1=0.99/cssscaley;
+            var wx=parseInt(145/cssscale);
+            //var wy=parseInt(100/cssscaley)+"%";
+            //Position overlay with CSS styling
+            radar.style.width = parseInt(wx)+'px';
+            //radar.style.height = '60px';
+            radar.style.position = 'absolute';
+            radar.style.top = 'calc('+topOffset + 'px)';
+            radar.style.left = 'calc('+leftOffset + 'px)';
+            radar.style['pointer-events'] = 'none';
+            radar.style['-ms-transform'] =  "scale("+1+","+(cssscale1/cssscaley1)+") rotate("+rotation+")"; /* IE 9 */
+            radar.style['-webkit-transform'] = "scale("+1+","+(cssscale/cssscaley)+") rotate("+rotation+")"; /* Chrome, Safari, Opera */
+            radar.style.transform = "scale("+1+","+(cssscale/cssscaley)+") rotate("+rotation+")";
+        
+		updatespot();
+		updatespotb();
+}
+function updatespot(){
+            if(!spot){return;}
+			var dx=cos1,dy=cos1;
+			var dxx=(aircraftx-x)*scale/klon;
+			var dyy=(aircrafty-y)*scale;
+			var dmax=1900,dxy=Math.sqrt(dxx*dxx+dyy*dyy);
+			dxx=dxx/(dmax+dxy);
+			dyy=dyy/(dmax+dxy);
+			dx=dxx*sin1-dyy*cos1;
+			dy=dxx*cos1+dyy*sin1;
+            var wx0=parseInt(145/cssscale);
+			var rotation = parseInt(0) + 'deg';
+            var topOffset = windy-150/cssscaley+wx0*(0.5-dy*0.5*cssscale/cssscaley);
+            var leftOffset = windx*(0.59)+wx0*(0.5+dx*0.5);
+            var cssscale1=0.99/cssscale,cssscaley1=0.99/cssscaley;
+            var wx=parseInt(5/cssscale);//+"%";
+            //var wy=parseInt(100/cssscaley)+"%";
+            //Position overlay with CSS styling
+            spot.style.width = parseInt(wx)+'px';
+            //spot.style.height = '60px';
+            spot.style.position = 'absolute';
+            spot.style.top = 'calc('+topOffset + 'px)';
+            spot.style.left = 'calc('+leftOffset + 'px)';
+            spot.style['pointer-events'] = 'none';
+            spot.style['-ms-transform'] =  "scale("+1+","+(cssscale1/cssscaley1)+") rotate("+rotation+")"; /* IE 9 */
+            spot.style['-webkit-transform'] = "scale("+1+","+(cssscale/cssscaley)+") rotate("+rotation+")"; /* Chrome, Safari, Opera */
+            spot.style.transform = "scale("+1+","+(cssscale/cssscaley)+") rotate("+rotation+")";
+
+			updatespot0();
+			updatespot1();
+			updatespot2();
+			updatespot3();
+			updatespotn();
+			updatespotv();
+}
+function updatespotb(){
+            if(!spotb){return;}
+			var dx=cos1,dy=cos1;
+			var dxx=(boeingx-x)*scale/klon;
+			var dyy=(boeingy-y)*scale;
+			var dmax=1900,dxy=Math.sqrt(dxx*dxx+dyy*dyy);
+			dxx=dxx/(dmax+dxy);
+			dyy=dyy/(dmax+dxy);
+			dx=dxx*sin1-dyy*cos1;
+			dy=dxx*cos1+dyy*sin1;
+            var wx0=parseInt(145/cssscale);
+			var rotation = parseInt(0) + 'deg';
+            var topOffset = windy-150/cssscaley+wx0*(0.5-dy*0.5*cssscale/cssscaley);
+            var leftOffset = windx*(0.59)+wx0*(0.5+dx*0.5);
+            var cssscale1=0.99/cssscale,cssscaley1=0.99/cssscaley;
+            var wx=parseInt(5/cssscale);//+"%";
+            //var wy=parseInt(100/cssscaley)+"%";
+            //Position overlay with CSS styling
+            spotb.style.width = parseInt(wx)+'px';
+            //spotb.style.height = '60px';
+            spotb.style.position = 'absolute';
+            spotb.style.top = 'calc('+topOffset + 'px)';
+            spotb.style.left = 'calc('+leftOffset + 'px)';
+            spotb.style['color'] = 'rgb(255,0,0)';	
+            spotb.style['pointer-events'] = 'none';
+            spotb.style['-ms-transform'] =  "scale("+1+","+(cssscale1/cssscaley1)+") rotate("+rotation+")"; /* IE 9 */
+            spotb.style['-webkit-transform'] = "scale("+1+","+(cssscale/cssscaley)+") rotate("+rotation+")"; /* Chrome, Safari, Opera */
+            spotb.style.transform = "scale("+1+","+(cssscale/cssscaley)+") rotate("+rotation+")";
+}
+var port0x=0,port0y=0,port0dist=0,port1dist=0,port2dist=0,port3dist=0;
+var port0name="",port1name="",port2name="",port3name="";
+function updatespot0(){
+            if(port0x<-191){
+			   port0dist=99999;
+               spot0.style.top = 3000 + 'px';return;
+			}
+			var dxx=(port0x-x)*scale/klon;
+			var dyy=(port0y-y)*scale;
+			var dmax=1900,dxy=Math.sqrt(dxx*dxx+dyy*dyy);
+			port0dist=dxy;
+			if(dxy>20000){
+               spot0.style.top = 3000 + 'px';return;
+			}
+			dxx=dxx/(dmax+dxy);
+			dyy=dyy/(dmax+dxy);
+			var dx=dxx*sin1-dyy*cos1;
+			var dy=dxx*cos1+dyy*sin1;
+            var wx0=parseInt(145/cssscale);
+			var rotation = parseInt(0) + 'deg';
+            var topOffset = windy-150/cssscaley+wx0*(0.5-dy*0.5*cssscale/cssscaley);
+            var leftOffset = windx*(0.59)+wx0*(0.5+dx*0.5);
+            var cssscale1=0.99/cssscale,cssscaley1=0.99/cssscaley;
+            var wx=parseInt(2/cssscale);if(wx<1){wx=1;}
+            spot0.style.width = parseInt(wx)+'px';
+            spot0.style['pointer-events'] = 'none';
+            spot0.style['-ms-transform'] =  "scale("+3.5+","+(cssscale1/cssscaley1)+") rotate("+rotation+")"; /* IE 9 */
+            spot0.style['-webkit-transform'] = "scale("+3.5+","+(cssscale/cssscaley)+") rotate("+rotation+")"; /* Chrome, Safari, Opera */
+            spot0.style.transform = "scale("+3.5+","+(cssscale/cssscaley)+") rotate("+rotation+")";
+            spot0.style.position = 'absolute';
+            spot0.style.top = 'calc('+topOffset + 'px)';
+            spot0.style.left = 'calc('+leftOffset + 'px)';
+}
+var port1x=0,port1y=0;
+function updatespot1(){
+            if(port1x<-191){
+			   port1dist=99999;
+               spot1.style.top = 3000 + 'px';return;
+			}
+			var dxx=(port1x-x)*scale/klon;
+			var dyy=(port1y-y)*scale;
+			var dmax=1900,dxy=Math.sqrt(dxx*dxx+dyy*dyy);
+			port1dist=dxy;
+			if(dxy>20000){
+               spot1.style.top = 3000 + 'px';return;
+			}
+			dxx=dxx/(dmax+dxy);
+			dyy=dyy/(dmax+dxy);
+			var dx=dxx*sin1-dyy*cos1;
+			var dy=dxx*cos1+dyy*sin1;
+            var wx0=parseInt(145/cssscale);
+			var rotation = parseInt(0) + 'deg';
+            var topOffset = windy-150/cssscaley+wx0*(0.5-dy*0.5*cssscale/cssscaley);
+            var leftOffset = windx*(0.59)+wx0*(0.5+dx*0.5);
+            var cssscale1=0.99/cssscale,cssscaley1=0.99/cssscaley;
+            var wx=parseInt(2/cssscale);if(wx<1){wx=1;}
+            spot1.style.width = parseInt(wx)+'px';
+            spot1.style['pointer-events'] = 'none';
+            spot1.style['-ms-transform'] =  "scale("+3.5+","+(cssscale1/cssscaley1)+") rotate("+rotation+")"; /* IE 9 */
+            spot1.style['-webkit-transform'] = "scale("+3.5+","+(cssscale/cssscaley)+") rotate("+rotation+")"; /* Chrome, Safari, Opera */
+            spot1.style.transform = "scale("+3.5+","+(cssscale/cssscaley)+") rotate("+rotation+")";
+            spot1.style.position = 'absolute';
+            spot1.style.top = 'calc('+topOffset + 'px)';
+            spot1.style.left = 'calc('+leftOffset + 'px)';
+}
+var port2x=0,port2y=0;
+function updatespot2(){
+            if(port2x<-191){
+			   port2dist=99999;
+               spot2.style.top = 3000 + 'px';return;
+			}
+			var dxx=(port2x-x)*scale/klon;
+			var dyy=(port2y-y)*scale;
+			var dmax=1900,dxy=Math.sqrt(dxx*dxx+dyy*dyy);
+			port2dist=dxy;
+			if(dxy>20000){
+               spot2.style.top = 3000 + 'px';return;
+			}
+			dxx=dxx/(dmax+dxy);
+			dyy=dyy/(dmax+dxy);
+			var dx=dxx*sin1-dyy*cos1;
+			var dy=dxx*cos1+dyy*sin1;
+            var wx0=parseInt(145/cssscale);
+			var rotation = parseInt(0) + 'deg';
+            var topOffset = windy-150/cssscaley+wx0*(0.5-dy*0.5*cssscale/cssscaley);
+            var leftOffset = windx*(0.59)+wx0*(0.5+dx*0.5);
+            var cssscale1=0.99/cssscale,cssscaley1=0.99/cssscaley;
+            var wx=parseInt(2/cssscale);if(wx<1){wx=1;}
+            spot2.style.width = parseInt(wx)+'px';
+            spot2.style['pointer-events'] = 'none';
+            spot2.style['-ms-transform'] =  "scale("+3.5+","+(cssscale1/cssscaley1)+") rotate("+rotation+")"; /* IE 9 */
+            spot2.style['-webkit-transform'] = "scale("+3.5+","+(cssscale/cssscaley)+") rotate("+rotation+")"; /* Chrome, Safari, Opera */
+            spot2.style.transform = "scale("+3.5+","+(cssscale/cssscaley)+") rotate("+rotation+")";
+            spot2.style.position = 'absolute';
+            spot2.style.top = 'calc('+topOffset + 'px)';
+            spot2.style.left = 'calc('+leftOffset + 'px)';
+}
+var port3x=0,port3y=0;
+function updatespot3(){
+            if(port3x<-191){
+			   port3dist=99999;
+               spot3.style.top = 3000 + 'px';return;
+			}
+			var dxx=(port3x-x)*scale/klon;
+			var dyy=(port3y-y)*scale;
+			var dmax=1900,dxy=Math.sqrt(dxx*dxx+dyy*dyy);
+			port3dist=dxy;
+			if(dxy>20000){
+               spot3.style.top = 3000 + 'px';return;
+			}
+			dxx=dxx/(dmax+dxy);
+			dyy=dyy/(dmax+dxy);
+			var dx=dxx*sin1-dyy*cos1;
+			var dy=dxx*cos1+dyy*sin1;
+            var wx0=parseInt(145/cssscale);
+			var rotation = parseInt(0) + 'deg';
+            var topOffset = windy-150/cssscaley+wx0*(0.5-dy*0.5*cssscale/cssscaley);
+            var leftOffset = windx*(0.59)+wx0*(0.5+dx*0.5);
+            var cssscale1=0.99/cssscale,cssscaley1=0.99/cssscaley;
+            var wx=parseInt(2/cssscale);if(wx<1){wx=1;}
+            spot3.style.width = parseInt(wx)+'px';
+            spot3.style['pointer-events'] = 'none';
+            spot3.style['-ms-transform'] =  "scale("+3.5+","+(cssscale1/cssscaley1)+") rotate("+rotation+")"; /* IE 9 */
+            spot3.style['-webkit-transform'] = "scale("+3.5+","+(cssscale/cssscaley)+") rotate("+rotation+")"; /* Chrome, Safari, Opera */
+            spot3.style.transform = "scale("+3.5+","+(cssscale/cssscaley)+") rotate("+rotation+")";
+            spot3.style.position = 'absolute';
+            spot3.style.top = 'calc('+topOffset + 'px)';
+            spot3.style.left = 'calc('+leftOffset + 'px)';
+}
+function updatespotn(){
+			var dx=-cos1*1.05;
+			var dy=sin1*1.05;
+            var wx0=parseInt(145/cssscale);
+			var rotation = parseInt(0) + 'deg';
+            var topOffset = windy-150/cssscaley+wx0*(0.5-dy*0.5*cssscale/cssscaley)-8;
+            var leftOffset = windx*(0.59)+wx0*(0.5+dx*0.5)-4;
+            var cssscale1=0.99/cssscale,cssscaley1=0.99/cssscaley;
+            spotn.style['pointer-events'] = 'none';
+            spotn.style['-ms-transform'] =  "scale("+1+","+(cssscale1/cssscaley1)+") rotate("+rotation+")"; /* IE 9 */
+            spotn.style['-webkit-transform'] = "scale("+1+","+(cssscale/cssscaley)+") rotate("+rotation+")"; /* Chrome, Safari, Opera */
+            spotn.style.transform = "scale("+1+","+(cssscale/cssscaley)+") rotate("+rotation+")";
+            spotn.style.position = 'absolute';
+            spotn.style.top = topOffset + 'px';
+            spotn.style.left = leftOffset + 'px';
+}
+var spotv;
+function updatespotv(){
+            var topOffset = windy-30/cssscaley-8;
+            var leftOffset = windx*(0.40)-4;
+			var size=parseInt(26/Math.sqrt(cssscaley*cssscale));
+            spotv.style.position = 'absolute';
+            spotv.style.top = topOffset + 'px';
+            spotv.style.left = leftOffset + 'px';
+            spotv.style['font-size'] = size + 'px';	
+            spotv.style['color'] = 'rgb(95,255,255)';	
+            spotv.innerHTML=parseInt(v*2)+" ";			
+}
+var monument=[],monumentname=[],monumentx=[],monumenty=[],monumentz=[],nmonument=0;
+var monumentdx=[];
+function addmonument(varname,dx,dy){
+var i=nmonument;nmonument+=1;
+monumentname[i]=varname;
+monumentdx[i]=dx*dy/1.3;
+var xx=eval(varname+"x"),yy=eval(varname+"y"),zz=eval(varname+"z");
+if(varname=="gizah"){zz-=40;}
+monumentx[i]=xx;monumenty[i]=yy;monumentz[i]=zz;
+monument[i]=myviewer.entities.add({
+  position : new myCesium.Cartesian3.fromDegrees(xx,yy,zz),
+  billboard :{
+            image : eval(varname+"png"),
+            //heightReference: myCesium.HeightReference.CLAMP_TO_GROUND,
+            position : new myCesium.Cartesian3.fromDegrees(xx,yy,zz),
+            scale : 1.0, // default: 1.0
+            //imageIndex : 0, // default: -1
+            show : true, // default
+            horizontalOrigin : myCesium.HorizontalOrigin.CENTER, // default
+            verticalOrigin : myCesium.VerticalOrigin.BOTTOM, // default: CENTER
+            //color : myCesium.Color.LIME, // default: WHITE
+            //rotation : 45, // default: 0.0
+            alignedAxis : myCesium.Cartesian3.ZERO, // default
+            width : dx, // default: undefined
+            height : dx*dy*1.3 // default: undefined
+     }
+ });
+monument[i].myposition= new myCesium.Cartesian3.fromDegrees(xx,yy,zz);
+}
+function updatemonument(){
+for(var i=0;i<nmonument;i++){
+  if(monument[i]){
+   var dx=Math.abs((monumentx[i]-x)*scale/klon);
+   var dy=Math.abs((monumenty[i]-y)*scale);
+   var dxmax=monumentdx[i]*25000/80;
+   if(dx<dxmax && dy<dxmax){
+       //if(monument[i].billboard.show==false){  
+		var sc=(1400/Math.sqrt(100+dx*dx+dy*dy))*2/cssscale;
+		var s60=monumentdx[i]*2;
+        var xx=monumentx[i],yy=monumenty[i],zz=monumentz[i];
+		var xxx=xx+s60*sin3*sin1*cos2*klon/scale,yyy=yy-s60*sin3*cos1*cos2/scale;
+		//xxx+=50*sin3*sin3*cos1*sin2*klon/scale;yyy+=50*sin3*sin3*sin1*sin2/scale;
+		var zzz=zz-sin2*sin3*sin3*s60;
+		var o33=o3;if(tourelle==1){o33=0;}
+	    monument[i].myposition=myCesium.Cartesian3.fromDegrees(xxx,yyy,zzz);
+	    monument[i].position=monument[i].myposition;
+	    monument[i].billboard.position=monument[i].myposition;
+	    monument[i].billboard.show=true;
+		monument[i].billboard.rotation=degtorad(-o33);
+		monument[i].billboard.scale=sc;//}
+	 }else{monument[i].billboard.show=false;}
+   }}
+}
+var airporttower,airporttowerx=0,airporttowery=0,airporttowerzsol=0,airporttowerdx=0;
+var towerportx=0,towerporty=0,towerportwidth=1;
+function addairporttower(){
+var dx=25,dy=1.0;//dx*=towerportwidth;dy=dy/towerportwidth;
+airporttowerdx=dx*dy/1.3;
+var xx=x,yy=y,zz=zsol;
+airporttowerx=xx;airporttowery=yy;airporttowerzsol=zz;
+airporttower=myviewer.entities.add({
+  position : myCesium.Cartesian3.fromDegrees(xx,yy,zz),
+  billboard :{
+            image : airporttower256png,
+            position : myCesium.Cartesian3.fromDegrees(xx,yy,zz),
+            scale : 1.0, // default: 1.0
+            //imageIndex : 0, // default: -1
+            show : false, // default
+            horizontalOrigin : myCesium.HorizontalOrigin.CENTER, // default
+            verticalOrigin : myCesium.VerticalOrigin.BOTTOM, // default: CENTER
+            //color : myCesium.Color.LIME, // default: WHITE
+            //rotation : 45, // default: 0.0
+            alignedAxis : myCesium.Cartesian3.ZERO, // default
+            width : dx, // default: undefined
+            height : dx*dy*1.3 // default: undefined
+     }
+ });
+}
+function updateairporttower(){
+   if(towerportx<-191){airporttowerx=x;airporttowery=y-1;}
+   else{airporttowerx=towerportx;airporttowery=towerporty;}
+   var dx=Math.abs((airporttowerx-x)*scale/klon);
+   var dy=Math.abs((airporttowery-y)*scale);
+   var dxmax=airporttowerdx*25000/80;
+   if(dx<dxmax && dy<dxmax){
+        var sc=(1100/Math.sqrt(100+dx*dx+dy*dy))*2/cssscale;
+		var s60=airporttowerdx*2;
+        var xx=airporttowerx,yy=airporttowery,zz=airporttowerzsol-8;
+		var xxx=xx+s60*sin3*sin1*cos2*klon/scale,yyy=yy-s60*sin3*cos1*cos2/scale;
+		//xxx+=50*sin3*sin3*cos1*sin2*klon/scale;yyy+=50*sin3*sin3*sin1*sin2/scale;
+		var zzz=zz-sin2*sin3*sin3*s60;
+		var o33=o3;if(tourelle==1){o33=0;}
+	    airporttower.position=myCesium.Cartesian3.fromDegrees(xxx,yyy,zzz);
+	    airporttower.billboard.position=myCesium.Cartesian3.fromDegrees(xxx,yyy,zzz);
+	    airporttower.billboard.show=true;
+		airporttower.billboard.rotation=degtorad(-o33);
+		airporttower.billboard.scale=sc;
+		airporttower.billboard.width=25*towerportwidth;
+		//airporttower.billboard.height=25*1.3;
+	 }else{airporttower.billboard.show=false;}
+}
+var airporttower2,airporttower2x=0,airporttower2y=0,airporttower2zsol=0,airporttower2dx=0;
+var tower2portx=0,tower2porty=0,tower2portwidth=1;
+function addairporttower2(){
+var dx=25,dy=1.0;
+airporttower2dx=dx*dy/1.3;
+var xx=x,yy=y,zz=zsol;
+airporttower2x=xx;airporttower2y=yy;airporttower2zsol=zz;
+airporttower2=myviewer.entities.add({
+  position : myCesium.Cartesian3.fromDegrees(xx,yy,zz),
+  billboard :{
+            image : airporttower256png,
+            position : myCesium.Cartesian3.fromDegrees(xx,yy,zz),
+            scale : 1.0, // default: 1.0
+            //imageIndex : 0, // default: -1
+            show : false, // default
+            horizontalOrigin : myCesium.HorizontalOrigin.CENTER, // default
+            verticalOrigin : myCesium.VerticalOrigin.BOTTOM, // default: CENTER
+            //color : myCesium.Color.LIME, // default: WHITE
+            //rotation : 45, // default: 0.0
+            alignedAxis : myCesium.Cartesian3.ZERO, // default
+            width : dx, // default: undefined
+            height : dx*dy*1.3 // default: undefined
+     }
+ });
+}
+function updateairporttower2(){
+   if(tower2portx<-191){airporttower2x=x;airporttower2y=y-1;}
+   else{airporttower2x=tower2portx;airporttower2y=tower2porty;}
+   var dx=Math.abs((airporttower2x-x)*scale/klon);
+   var dy=Math.abs((airporttower2y-y)*scale);
+   var dxmax=airporttower2dx*25000/80;
+   if(dx<dxmax && dy<dxmax){
+        var sc=(1100/Math.sqrt(100+dx*dx+dy*dy))*2/cssscale;
+		var s60=airporttower2dx*2;
+        var xx=airporttower2x,yy=airporttower2y,zz=airporttower2zsol-8;
+		var xxx=xx+s60*sin3*sin1*cos2*klon/scale,yyy=yy-s60*sin3*cos1*cos2/scale;
+		//xxx+=50*sin3*sin3*cos1*sin2*klon/scale;yyy+=50*sin3*sin3*sin1*sin2/scale;
+		var zzz=zz-sin2*sin3*sin3*s60;
+		var o33=o3;if(tourelle==1){o33=0;}
+	    airporttower2.position=myCesium.Cartesian3.fromDegrees(xxx,yyy,zzz);
+	    airporttower2.billboard.position=myCesium.Cartesian3.fromDegrees(xxx,yyy,zzz);
+	    airporttower2.billboard.show=true;
+		airporttower2.billboard.rotation=degtorad(-o33);
+		airporttower2.billboard.scale=sc;
+		airporttower2.billboard.width=25*tower2portwidth;
+		//airporttower2.billboard.height=25*1.3;
+	 }else{airporttower2.billboard.show=false;}
+}
+var buildimage,builcolor1,buildcolor2,buildh0=50*3.0*1.3;
+var nbuildtower=490,buildtower=[],showbuild=[];//buildtower[i].x=0,buildtower[i].y=0,buildtower[i].zsol=0,buildtower[i].dx=0;
+function addbuildtower(){
+nbuildtower=Math.min(nbuildtower,nbuild);
+buildimage=new Image();
+buildimage.src= building128png;
+buildcolor1=new myCesium.Color(1.0,0.0,1.0,1.0);
+buildcolor2=new myCesium.Color(0.8,1.0,0.9,1.0);
+
+return;
+
+for(var i=0;i<nbuildtower;i++){
+var dx=50,dy=3.0;//dx*=towerportwidth;dy=dy/towerportwidth;
+var xx=x+i*0.1*360/40000,yy=y-1,zz=zsol;
+buildtower[i]=new Object();
+buildtower[i].billboard=new Object();
+/*buildtower[i]=myviewer.entities.add({
+  position : new myCesium.Cartesian3.fromDegrees(xx,yy),
+  billboard :{
+            image : buildimage,//'building128.png' ,
+            position : myCesium.Cartesian3.fromDegrees(xx,yy),
+            heightReference: myCesium.HeightReference.CLAMP_TO_GROUND,
+            scale : 1.0, // default: 1.0
+            //imageIndex : 0, // default: -1
+            show : false, // default
+            horizontalOrigin : myCesium.HorizontalOrigin.CENTER, // default
+            //verticalOrigin : myCesium.VerticalOrigin.BOTTOM, // default: CENTER
+			color : new myCesium.Color(1.0,1.0,1.0,1.0),
+            //rotation : 45, // default: 0.0
+            alignedAxis : myCesium.Cartesian3.ZERO, // default
+            //sizeInMeters : true,
+			width : dx, // default: undefined
+            height : dx*dy*1.3 // default: undefined
+     }
+ });*/
+buildtower[i].myposition= new myCesium.Cartesian3.fromDegrees(xx,yy),
+buildh0=dx*dy*1.3;
+buildtower[i].iimage=0;
+buildtower[i].dx=dx*dy/1.3;
+buildtower[i].x=xx;buildtower[i].y=yy;buildtower[i].z=zz;
+buildtower[i].h=0;buildtower[i].w=0;showbuild[i]=0;
+}
+}
+var tupdatebuildtower=0;
+function testupdatebuildtower(){if(tbuilding==0){return;}
+if(tloading2<tframe){
+ if(tupdatebuildtower==1){
+  tupdatebuildtower=0;
+  for(var i=0;i<Math.min(nbuildtower,nbuild);i++){  
+   buildtower[i].h=buildh[i];
+   if(buildh[i]>0.1){
+    /*if(buildtower[i].h<12 && buildtower[i].iimage==0){
+	   buildtower[i].iimage=1;buildtower[i].billboard.image=buildimage;}
+    else if(buildtower[i].h>=12 && buildtower[i].iimage==1){
+	   buildtower[i].iimage=0;buildtower[i].billboard.image=buildimage;}*/
+	if(buildtower[i].h>19.1){buildtower[i].billboard.color=buildcolor1;}
+	else{buildtower[i].billboard.color=buildcolor2;}
+    buildtower[i].x=buildx[i];buildtower[i].y=buildy[i];buildtower[i].z=buildz[i];
+    buildtower[i].w=buildw[i];
+  }}}
+}else{tupdatebuildtower=1;}
+}
+var tupdatebuildmesh=0;
+function testupdatebuildmesh(){if(tbuilding==0){return;}
+if(tloading2<tframe){
+ if(tupdatebuildmesh==1){
+  tupdatebuildmesh=0;
+  for(var i=0;i<Math.min(nbuildmesh,nbuild);i++){  
+   buildmeshh[i]=buildh[i];
+   if(buildh[i]>1){
+    buildmeshx[i]=(buildx[i]+buildxmid[i])/2;
+	buildmeshy[i]=(buildy[i]+buildymid[i])/2;
+	buildmeshzsol[i]=buildz[i];
+    var scx=buildmeshscalex[i],scy=buildmeshscaley[i],scz=buildmeshscalez[i];
+    //var kh=Math.max(1,Math.min(2.5,(buildw[i]/35)));//*Math.min(1,70/buildh[i])));
+    var kh=Math.max(1,Math.min(2.85,Math.max(buildw[i]/35,buildh[i]/220)));
+    var ww=kh*0.3;
+    var sc=buildh[i]/100;
+    buildmeshscalex[i]=ww;buildmeshscaley[i]=ww;buildmeshscalez[i]=sc;
+    if(Math.abs(buildmeshscalex[i]-scx)+
+       Math.abs(buildmeshscaley[i]-scy)+
+	   Math.abs(buildmeshscalez[i]-scz)>0.0001){buildmeshchanged[i]=1;}
+	if(buildh[i]>19.1){buildmeshcolor[i]=1;}
+	else{buildmeshcolor[i]=2;}
+    if(buildmeshcolor[i]==1){buildmesh[i].appearance=mybuildappearance;}
+    else if(buildmeshcolor[i]==2){buildmesh[i].appearance=mybuildappearance2;}
+ }}}
+}else{tupdatebuildmesh=1;}
+}
+function updatebuildtower(){
+//if(itime%3!=1){return;}
+var ki=itime%2,kii=itime%20;
+for(var i=parseInt(0.001+ki*nbuildtower/2);i<parseInt(0.001+(ki+1)*nbuildtower/2);i++){
+ if(showbuild[i]==1 || kii<=1){ 
+  if(buildtower[i].h<0.1){buildtower[i].x=0;buildtower[i].y=0;
+                    buildtower[i].billboard.show=false;showbuild[i]=0;}
+  else{
+   var dx=((buildtower[i].x-x)*scale/klon);
+   var dy=((buildtower[i].y-y)*scale);
+   var dxmax=buildtower[i].dx*25000/80;
+   if(Math.abs(dx)<dxmax && Math.abs(dy)<dxmax){
+		var dz=(buildtower[i].z-z);
+        if(kii<=1){showbuild[i]=rotavion(dx,dy,dz,500);}
+        /*var sc=Math.max(0.1,Math.min(25,(buildtower[i].h*5/Math.sqrt(2500+dx*dx+dy*dy+dz*dz))*2/cssscale));
+		var s60=buildtower[i].dx*2;
+        var xx=buildtower[i].x,yy=buildtower[i].y,zz=buildtower[i].z-8;
+		var xxx=xx+s60*sin3*sin1*cos2*klon/scale,yyy=yy-s60*sin3*cos1*cos2/scale;
+		//xxx+=50*sin3*sin3*cos1*sin2*klon/scale;yyy+=50*sin3*sin3*sin1*sin2/scale;
+		var zzz=zz-sin2*sin3*sin3*s60;
+		var o33=o3;if(tourelle==1){o33=0;}
+	    buildtower[i].myposition=myCesium.Cartesian3.fromDegrees(xx,yy,zz,myellipsoid,buildtower[i].myposition);
+	    buildtower[i].position=buildtower[i].myposition;
+	    buildtower[i].billboard.position=buildtower[i].myposition;
+	    buildtower[i].billboard.show=true;
+		buildtower[i].billboard.rotation=degtorad(-o33);
+		buildtower[i].billboard.scale=sc;
+		var kh=Math.max(1,Math.min(2.5,(buildtower[i].w/35)*Math.min(1,70/buildh[i])));
+		buildtower[i].billboard.width=50*kh;
+		if(buildtower[i].h>19.1){buildtower[i].billboard.height=buildh0;}
+		else{buildtower[i].billboard.height=buildh0*buildtower[i].h/50.0;}
+		*/
+	 }else{buildtower[i].billboard.show=false;showbuild[i]=0;}
+}
+}
+}
+/*if(tourelle==0){
+var ki=itime%3;
+for(var i=parseInt(0.001+ki*nbuildtower/3);i<parseInt(0.001+(ki+1)*nbuildtower/3);i++){
+   if(buildtower[i].billboard.show==true){
+		buildtower[i].billboard.rotation=degtorad(-o3);
+}}}*/
+}
+function addbuildtower2(){
+}
+function updatebuildtower2(){
+//if(tgetterrainheightbuild>tframe-20000 || okinit<2 || tframe<tloading){return;}
+//tgetterrainheightbuild=tframe;
+for(var i=0;i<Math.min(nbuildtower,nbuildmesh);i++){
+ /*buildmeshx[i]=buildtower[i].x;
+ buildmeshy[i]=buildtower[i].y;
+ buildmeshzsol[i]=buildtower[i].z;
+ buildmeshcolor[i]=buildtower[i].billboard.color;
+ */
+ var scx=buildmeshscalex[i],scy=buildmeshscaley[i],scz=buildmeshscalez[i];
+ var kh=Math.max(1,Math.min(2.5,(buildtower[i].w/35)*Math.min(1,70/buildtower[i].h)));
+ var ww=kh*0.6;
+ var sc=buildtower[i].h/70;
+ buildmeshscalex[i]=ww;buildmeshscaley[i]=ww;buildmeshscalez[i]=sc;
+ if(Math.abs(buildmeshscalex[i]-scx)+
+    Math.abs(buildmeshscaley[i]-scy)+
+	Math.abs(buildmeshscalez[i]-scz)>0.0001){buildmeshchanged[i]=1;}
+}
+//tgetterrainheightbuild=0;
+}
+var buildmaterial;
+function addbuildtower20(){
+buildmaterial= new myCesium.ImageMaterialProperty({
+		           image : building128png,
+				   color : buildcolor1,//new myCesium.Color(0.8,1.0,0.9,1.0),//buildcolor2,
+                   transparent : true
+			   });
+for(var i=0;i<nbuildtower;i++){
+   var xx=buildtower[i].x,yy=buildtower[i].y,zz=buildtower[i].z,hh=buildtower[i].h;
+   var ww=Math.max(35,buildtower[i].w);
+   var co1=cos1*ww*0.5/scale,si1=sin1*ww*0.5*klon/scale;
+   //ww=100;
+   buildtower[i].mywallpositions=
+        new myCesium.Cartesian3.fromDegreesArrayHeights([
+		    xx-si1,yy+co1,zz+hh,
+            xx+si1,yy-co1,zz+hh
+                                                        ]);
+   buildtower[i].mywall = myviewer.entities.add({
+    wall : {
+        positions : buildtower[i].mywallpositions,
+        minimumHeights : [zz,zz],
+		show : true,
+		/*vertexformat :  new myCesium.VertexFormat({
+                            position : true,
+                            st : true
+                            }),*/
+		//fill : true,
+        material : buildmaterial // : myCesium.Color.GREEN
+        //material : buildcolor2 // myCesium.Color.GREEN
+    }
+});
+}
+}
+function updatebuildtower20(){
+for(var i=0;i<nbuildtower;i++){
+if(buildtower[i]){
+  if(showbuild[i]==1){
+   buildtower[i].billboard.show=false;
+   var xx=buildtower[i].x,yy=buildtower[i].y,zz=buildtower[i].z,hh=buildtower[i].h*2;
+   var ww=Math.max(35,buildtower[i].w);//billboard.width;//buildtower[i].w;
+   var co1=cos1*ww*0.5/scale,si1=sin1*ww*0.5*klon/scale;
+   //ww=100;
+   buildtower[i].mywallpositions=
+        myCesium.Cartesian3.fromDegreesArrayHeights([
+		    xx-si1,yy+co1,zz+hh,
+            xx+si1,yy-co1,zz+hh
+                                                        ]);
+   buildtower[i].mywall.wall.positions=buildtower[i].mywallpositions;
+   buildtower[i].mywall.wall.minimumHeights= [zz,zz];
+   buildtower[i].mywall.wall.show=true;
+  }
+  else{buildtower[i].mywall.wall.show=false;}
+}
+}
+}
+
+var x1=0,y1=0,z1=0,x2=0,y2=0,z2=0;
+function rotavion(xx,yy,zz,r){
+if(tourelle==1){return 1;}
+ x1=xx*cos1+yy*sin1;
+ //'y1=0-x*sin1+y*cos1
+ //'z1=z
+ x2=x1*cos2+zz*sin2;
+ //'y2=y1
+ y2=-xx*sin1+yy*cos1;
+ z2=-x1*sin2+zz*cos2;
+if(x2<0.87*Math.abs(y2)/(windx/windy)-r){return 0;}
+if(x2<0.87*Math.abs(z2)-r){return 0;}
+return 1;
+}
+var boeing;
+function addboeing(){
+boeingx=x-0.1;boeingy=y;boeingz=z;
+boeing=myviewer.entities.add({
+  position : myCesium.Cartesian3.fromDegrees(boeingx,boeingy,boeingz),
+  billboard :{
+            image : boeing512png,
+            position : new myCesium.Cartesian3.fromDegrees(boeingx,boeingy,boeingz),
+            scale : 1.0, // default: 1.0
+            imageIndex : -1, // default: -1
+            show : true, // default
+            horizontalOrigin : myCesium.HorizontalOrigin.CENTER, // default
+            //verticalOrigin : myCesium.VerticalOrigin.BOTTOM, // default: CENTER
+            //color : myCesium.Color.LIME, // default: WHITE
+            //rotation : 45, // default: 0.0
+            alignedAxis : myCesium.Cartesian3.ZERO, // default
+            width : 130, // default: undefined
+            height : 100 // default: undefined
+     }
+ });
+boeing.myposition= new myCesium.Cartesian3.fromDegrees(boeingx,boeingy,boeingz);
+}
+function updateboeing(){
+   var dx=Math.abs((boeingx-x)*scale/klon);
+   var dy=Math.abs((boeingy-y)*scale);
+   var dxmax=25000;
+   if(dx<dxmax && dy<dxmax){
+        var sc=(1400/Math.sqrt(100+dx*dx+dy*dy))*2/cssscale;
+		var xxx=boeingx,yyy=boeingy;
+		var zzz=boeingz;
+		var o33=o3;if(tourelle==1){o33=0;}
+	    boeing.myposition=myCesium.Cartesian3.fromDegrees(xxx,yyy,zzz,myellipsoid,boeing.myposition);
+	    boeing.position=boeing.myposition;
+	    boeing.billboard.position=boeing.myposition;
+	    boeing.billboard.show=true;
+		boeing.billboard.rotation=degtorad(-o33);
+		if(boeingdo1>0){boeing.billboard.scale=sc;
+		                boeing.billboard.height=100;
+        }else{boeing.billboard.scale=-sc;
+		      boeing.billboard.height=-100;}
+	 }else{boeing.billboard.show=false;}
+}
+var cloudimage;
+var cloud=[],ncloud=40,cloudx=[],cloudy=[],cloudz=[],cloudsc=[],icloud=[],ncloud2=ncloud;
+function addcloud(){
+cloudimage=new Image();
+cloudimage.src=cloudpng;
+for(var i=0;i<ncloud;i++){
+  icloud[i]=i;
+  var dymax=28*360/40000;
+  cloudx[i]=x+(Math.random()-0.5)*2*dymax*klon;
+  cloudy[i]=y+(Math.random()-0.5)*2*dymax;
+  cloudz[i]=(z+zsol)/2+(Math.random()-0.2)*2*800;
+  var sc=0.14*(2+Math.random());//if(Math.random()<0.3){sc=-sc;}
+  cloudsc[i]=sc;
+  var alpha=1;
+  //var dist=(Math.abs(cloudx[i]-x)/klon+Math.abs(cloudy[i]-y))*40000/360;
+  cloud[i]=myviewer.entities.add({
+        position : new myCesium.Cartesian3.fromDegrees(cloudx[i],cloudy[i],cloudz[i]),
+        billboard :{
+		    //eyeOffset : new myCesium.Cartesian3(0,0,i*0.3),
+            //verticalOrigin : myCesium.VerticalOrigin.BOTTOM, // default: CENTER
+			scale : sc,
+			color : new myCesium.Color(1,1,1,alpha),
+            image : cloudimage//cloudpng
+        }
+    });
+    cloud[i].myposition= new myCesium.Cartesian3.fromDegrees(cloudx[i],cloudy[i],cloudz[i]);
+	}
+}
+var tseticloud=0,ticloud=[],dcloud=[];
+var cloudx2=[],cloudy2=[],cloudz2=[],cloudsc2=[];
+function seticloud(){
+for(var i=0;i<ncloud2;i++){
+    ticloud[i]=0;dcloud[i]=(cloudx[i]-x)*(cloudx[i]-x)+(cloudy[i]-y)*(cloudy[i]-y)*klon*klon;
+	cloudx2[i]=cloudx[i];cloudy2[i]=cloudy[i];cloudz2[i]=cloudz[i];cloudsc2[i]=cloudsc[i];
+	}
+for(var i=0;i<ncloud2;i++){
+  var d=-999,k=0;
+  for(var j=0;j<ncloud2;j++){if(ticloud[j]==0 && d<dcloud[j]){k=j;d=dcloud[j];}}
+  ticloud[k]=1;icloud[i]=k;
+}
+for(var i=0;i<ncloud2;i++){
+    var ii=icloud[i];
+	cloudx[i]=cloudx2[ii];cloudy[i]=cloudy2[ii];cloudz[i]=cloudz2[ii];cloudsc[i]=cloudsc2[ii];
+}
+}
+function updatecloud(){
+var dymax=28*360/40000,dxmax=dymax*klon;
+if(tframe>tseticloud){tseticloud=tframe+10000;seticloud();}
+var ncloud20=ncloud2;
+ncloud2=Math.min(ncloud,parseInt(ncloud*(90+wclouds)/190));
+if(ncloud20!=ncloud2){tseticloud=0;}
+for(var i=0;i<ncloud;i++){
+  if(i<ncloud2){
+   var test=0;
+   while(cloudx[i]>x+dxmax){cloudx[i]-=dxmax+dxmax;test=1;}
+   while(cloudx[i]<x-dxmax){cloudx[i]+=dxmax+dxmax;test=1;}
+   while(cloudy[i]>y+dymax){cloudy[i]-=dymax+dymax;test=1;}
+   while(cloudy[i]<y-dymax){cloudy[i]+=dymax+dymax;test=1;}
+   if(test==1){cloudz[i]=(z+zsol)/2+(Math.random()-0.2)*2*800;tseticloud=0;}
+   var dist=(Math.abs(cloudx[i]-x)/klon+Math.abs(cloudy[i]-y))*40000/360;
+   //cloud[i].billboard.eyeOffset= myCesium.Cartesian3(0,0,i*dist/10);
+   var d10000=50000,ki=1.0-i*0.0003/(d10000);
+   var xx=x+ki*Math.round((cloudx[i]-x)*d10000)/d10000;
+   var yy=y+ki*Math.round((cloudy[i]-y)*d10000)/d10000;
+   var zz=cloudz[i];
+   //var xx=cloudx[i],yy=cloudy[i],zz=cloudz[i];
+   cloud[i].myposition= myCesium.Cartesian3.fromDegrees(xx,yy,zz,myellipsoid,cloud[i].myposition);
+   cloud[i].position= cloud[i].myposition;
+   cloud[i].billboard.position= cloud[i].myposition;
+   cloud[i].billboard.rotation=degtorad(-o3);
+   cloud[i].show=true;
+   cloud[i].billboard.scale=cloudsc[i]*28/(0.75+dist);
+   var alpha=Math.max(0.03,Math.min(1.0,dist*dist/(35*35)))
+   cloud[i].billboard.color= myCesium.Color(1,1,1,alpha);
+   }else{
+    cloud[i].show=false;
+   }
+}
+}
+var sky,isky=1;
+function addsky(){
+  var dr=90000/scale;
+  var xx=x+klon*dr*cos1;
+  var yy=y+dr*sin1;
+  var zz=0;
+  sky=myviewer.entities.add({
+        position : new myCesium.Cartesian3.fromDegrees(xx,yy,zz),
+        billboard :{
+            image : skydomejpg ,
+                position : myCesium.Cartesian3.fromDegrees(xx,yy),
+                show : true, // default
+                //pixelOffset : new myCesium.Cartesian2(400, 400), // default: (0, 0)
+                //eyeOffset : new myCesium.Cartesian3(0.0, 0.0, 0.0), // default
+                //horizontalOrigin : myCesium.HorizontalOrigin.LEFT,//CENTER, // default
+                //verticalOrigin : myCesium.VerticalOrigin.BOTTOM, // default: CENTER
+                scale : 2.2, // default: 1.0
+                //imageIndex : 0, // default: -1
+                //color : myCesium.Color.LIME, // default: WHITE
+                //rotation : 45, // default: 0.0
+                //alignedAxis : myCesium.Cartesian3.ZERO, // default
+                width : windx*2, // default: undefined
+                height :windy*2 // default: undefined
+        }
+    });
+    sky.myposition= new myCesium.Cartesian3.fromDegrees(xx,yy,zz);
+}
+function updatesky(){
+if(tourelle==0){
+  if(o2<50){myviewer.scene.skyBox.show=true;}
+  else{myviewer.scene.skyBox.show=false;}
+  while(o1>180){o1-=360}
+  while(o1<-180){o1+=360}
+  var dr=90000/scale,dr2=-2*dr*o1/180;
+  var xx=x+klon*dr*cos1-klon*dr2*sin1;
+  var yy=y+dr*sin1+dr2*cos1;
+  //var zz=0;if(sin2>0){zz=dr*sin2*sin2;}
+  sky.myposition= myCesium.Cartesian3.fromDegrees(xx,yy,0.0,myellipsoid,sky.myposition);
+  sky.position= sky.myposition;
+  sky.billboard.position= sky.myposition;
+  sky.billboard.rotation=degtorad(-o3);
+}else{
+  if(o2+to2<50){myviewer.scene.skyBox.show=true;}
+  else{myviewer.scene.skyBox.show=false;}
+  var do1=o1+to1;
+  while(do1>180){do1-=360}
+  while(do1<-180){do1+=360}
+  var dr=90000/scale,dr2=-2*dr*(do1)/180;
+  var co1=Math.cos(degtorad(do1)),si1=Math.sin(degtorad(do1));
+  var xx=x+klon*dr*co1-klon*dr2*si1;
+  var yy=y+dr*si1+dr2*co1;
+  //var zz=0;if(sin2>0){zz=dr*sin2*sin2;}
+  sky.myposition= myCesium.Cartesian3.fromDegrees(xx,yy,0.0,myellipsoid,sky.myposition);
+  sky.position= sky.myposition; 
+  sky.billboard.position= sky.myposition;
+  sky.billboard.rotation=degtorad(0);
+}
+sky.billboard.width=windx*2;
+sky.billboard.height=windy*2;
+}
+var sun,isun=1;
+function addsun(){
+  var dr=80000/scale;
+  var xx=x+klon*dr*cos1;
+  var yy=y+dr*sin1;
+  var zz=0;
+  sun=myviewer.entities.add({
+        position : new myCesium.Cartesian3.fromDegrees(xx,yy,zz),
+        billboard :{
+            image : sunpng ,
+                position : myCesium.Cartesian3.fromDegrees(xx,yy),
+                show : true, // default
+                //pixelOffset : new myCesium.Cartesian2(400, 400), // default: (0, 0)
+                //eyeOffset : new myCesium.Cartesian3(0.0, 0.0, 0.0), // default
+                horizontalOrigin : myCesium.HorizontalOrigin.CENTER, // default
+                //verticalOrigin : myCesium.VerticalOrigin.BOTTOM, // default: CENTER
+                //scale : 2.2, // default: 1.0
+                //imageIndex : 0, // default: -1
+                //color : myCesium.Color.LIME, // default: WHITE
+                //rotation : 45, // default: 0.0
+                alignedAxis : myCesium.Cartesian3.ZERO, // default
+                width : windx*0.4, // default: undefined
+                height :windy*0.65 // default: undefined
+        }
+    });
+    sun.myposition= new myCesium.Cartesian3.fromDegrees(xx,yy,zz);
+	sun.camera= new myCesium.Camera(myviewer.scene);
+}
+var tupdatesun=0,sunx=0,suny=0,sunz=0,o1sun=0,o2sun=0;
+var month=0,hour=0,thour=0,hour2=0;
+function setsun(){
+		var date=new Date();
+	    month=date.getMonth()+1;
+		hour=date.getHours()+date.getMinutes()/60.0+ thour;
+		//hour=24;
+		while(hour>24){hour-=24;}
+		while(hour<0){hour+=24;};
+		var klat=Math.max(-50,Math.min(50,lat))/50;
+		var kmonth=(month-3)/3;
+		if(month>6){kmonth=(9-month)/3;}
+		kmonth=(1-klat*kmonth)/2;
+    	hour2=12+(hour-12)*2*(1+kmonth)/2;
+		var h6=6+3*kmonth-3,h18=18-3*kmonth+3;
+		if(hour2<h6){hour2=h6+(hour2-h6)/3;}
+		if(hour2>h18){hour2=h18+(hour2-h18)/3;}
+		sunx=1000*Math.sin((12-hour2)*3.14/24);
+		suny=-1000*Math.cos((12-hour2)*3.44/24);
+		sunz=800*Math.cos((12-hour2)*3.14/24)*Math.cos((12-hour2)*3.14/24)+40;
+		//o1sun=(12-hour2)*180/24;
+		o2sun=Math.max(5,diro1(1000,sunz));
+		var alpha=Math.min(1.0,Math.max(0.25,Math.abs(hour2-12)/6.2-0.35));
+		if(sun){sun.billboard.color=new myCesium.Color(1,1,1,alpha);}
+		alpha=Math.min(1.0,Math.max(0.25,0.25+(12-Math.abs(hour2-12))/5.5));
+		if(sky){sky.billboard.color=new myCesium.Color(1,1,1,alpha);}
+		//if(sun){setcamerasun();shadowmap.lightCamera=sun.camera;}
+var hour3=13+(hour-13)*6/13;//-12*x/180;
+while(hour3>24){hour3-=24;}
+while(hour3<0){hour3+=24;}
+//if(mydate.getHours()>hour3){mydate.setDate(mydate.getDate()+1);} 
+mydate.setHours(parseInt(hour3));
+mydate.setMinutes(parseInt((hour3-parseInt(hour3))*60));
+myclock=myCesium.JulianDate.fromDate(mydate);
+myviewer.clock.currentTime=myclock;		
+setTimeout("setsundir();",500);
+}
+function setsundir(){
+        //var sunpos1 = myviewer.scene.context.uniformState.sunPositionWC;
+		var sc=20000000;
+		var sundirection= myviewer.scene.context.uniformState.sunDirectionWC;
+		//sunpos2= myCesium.Cartesian3.divideByScalar(sunpos1, sc,sunpos2) 
+		//var sunpos=new myCesium.Cartographic.fromCartesian(sunpos2);
+		sunx=sundirection.x*1000/klon;//*sc;
+		suny=sundirection.y*1000;//*sc;
+		o1sun=diro1(sunx,suny);
+		o1sun=((o1sun-90)+90)*1.13;
+		if(y<0){o1sun=90-(o1sun-90);}
+var hour3=13+(hour-13)*6/13-12*x/180;
+while(hour3>24){hour3-=24;}
+while(hour3<0){hour3+=24;}
+//if(mydate.getHours()>hour3){mydate.setDate(mydate.getDate()+1);} 
+mydate.setHours(parseInt(hour3));
+mydate.setMinutes(parseInt((hour3-parseInt(hour3))*60));
+myclock=myCesium.JulianDate.fromDate(mydate);
+myviewer.clock.currentTime=myclock;		
+}
+var tshadow=0;
+function subshadow(){
+if(tshadow==0){if(confirm("set shadow on ?")){tshadow=1;shadowmap.enabled=true;}}
+else{if(confirm("set shadow off ?")){tshadow=0;shadowmap.enabled=false;}}
+}
+function setcamerasun(){
+  var dr=70000/scale;
+  var zz=sunz*30-3000;
+  var co2=1-Math.abs(zz)/60000;
+  var co1=Math.cos(degtorad(o1sun-90));
+  var si1=Math.sin(degtorad(o1sun-90));
+  var xx=x+klon*dr*co1*co2;
+  var yy=y+dr*si1*co2;
+  //var zz=0;if(sin2>0){zz=dr*sin2*sin2;}
+  sun.myposition= myCesium.Cartesian3.fromDegrees(xx,yy,zz,myellipsoid,sun.myposition);
+  sun.camera.position=sun.myposition;
+  sun.camera.direction = myCesium.Cartesian3.negate(myCesium.Cartesian3.UNIT_Z, new myCesium.Cartesian3());
+  sun.camera.up = myCesium.Cartesian3.clone(myCesium.Cartesian3.UNIT_Y);
+  sun.camera.frustum.fov = myCesium.Math.PI_OVER_TWO;
+  sun.camera.frustum.near = 1.0;
+  sun.camera.frustum.far = 50000.0;
+  sun.camera.setView({
+        destination : sun.myposition,
+        orientation: {
+            heading : degtorad(o1sun-90+180),
+            pitch : degtorad(o2sun-180),
+            roll : degtorad(0.0)
+        }
+  });
+}
+function updatesun(){
+if(tframe>tupdatesun+60000*5){tupdatesun=tframe;setsun();}
+if(tourelle==0){
+  var dr=70000/scale;
+  var zz=sunz*30-3000;
+  var co2=1-Math.abs(zz)/60000;
+  var co1=Math.cos(degtorad(o1sun-90));
+  var si1=Math.sin(degtorad(o1sun-90));
+  var xx=x+klon*dr*co1*co2;
+  var yy=y+dr*si1*co2;
+  //var zz=0;if(sin2>0){zz=dr*sin2*sin2;}
+  sun.myposition= myCesium.Cartesian3.fromDegrees(xx,yy,zz,myellipsoid,sun.myposition);
+  sun.position=sun.myposition;
+  sun.billboard.position=sun.myposition;
+  sun.billboard.rotation=degtorad(-o3);
+}else{
+  var dr=70000/scale;
+  var zz=sunz*30-3000;
+  var co2=1-Math.abs(zz)/60000;
+  var co1=Math.cos(degtorad(o1sun-90))
+  var si1=Math.sin(degtorad(o1sun-90));
+  var xx=x+klon*dr*co1*co2;
+  var yy=y+dr*si1*co2;
+  //var zz=0;if(sin2>0){zz=dr*sin2*sin2;}
+  sun.myposition= myCesium.Cartesian3.fromDegrees(xx,yy,zz,myellipsoid,sun.myposition);
+  sun.position=sun.myposition;
+  sun.billboard.position=sun.myposition;
+  sun.billboard.rotation=degtorad(0);
+}
+sun.billboard.width=windx*0.4;
+sun.billboard.height=windy*0.65;
+}
+
+var map,marker,maplatlng,tmap=0;
+function initgooglemap(){
+    map=new google.maps.Map(document.getElementById('mapdiv'), {
+    center: new google.maps.LatLng(lat,lng),
+    disableDefaultUI:true,
+	mapTypeId: google.maps.MapTypeId.HYBRID,
+	zoom: 14 });
+    marker = new google.maps.Marker({
+    map: map,
+    position: new google.maps.LatLng(lat,lng)
+  });
+  google.maps.event.addListener(map, 'click', function(event) {
+    maplatlng = event.latLng;
+    lat=maplatlng.lat();
+	lng=maplatlng.lng();
+	tmap=0;subflyto(lng,lat);
+  });
+}
+function updatemarker(){
+  marker.setMap(null);lng=x;lat=y;
+  marker=null;
+  marker = new google.maps.Marker({
+    map: map,
+    position: new google.maps.LatLng(lat,lng)
+  });  
+}
+function subcentermap(){
+scrollTo(0,4000);lng=x;lat=y;
+maplatlng=new google.maps.LatLng(lat,lng);
+map.setCenter(maplatlng);
+updatemarker();
+setTimeout("scrollTo(0,4000);",3000);
+}
+function hidemap(){return;
+var mapdiv=document.getElementById('mapdiv');
+mapdiv.setAttribute('style',"position:absolute;top:4022px;left:0px;width:0%;height:0%;");
+google.maps.event.trigger(map, 'resize');
+}
+function showmap(){return;
+var mapdiv=document.getElementById('mapdiv');
+mapdiv.setAttribute('style',"position:absolute;top:4022px;left:0px;width:100%;height:95%;");
+google.maps.event.trigger(map, 'resize');
+}
+function quitmsgmap(){
+document.getElementById('mapdiv').blur();
+scrollTo(0,0);tmap=0;//alert('ok');
+}
+var tvolume=0,tspeed=0,tgaz=0;
+function setvolume(){
+    var kvol=(1.7/vrunmax);kvol=Math.sqrt(kvol*Math.sqrt(kvol));
+    var volume=kvol*(0.09+(Math.max(0,vplane)*0.4047+vrun*0.4033)*0.9);
+	if(tgaz==1){if(vrun>vrunmax){volume+=0.27;}else{volume+=0.025;}}
+	if(volume>1){volume=1;};
+    var speed=kvol*(0.14+(Math.max(0,vplane)*0.7+vrun*0.1)*0.9);
+	if(tgaz==1){speed+=0.27;}
+	if(speed>1){speed=1;};
+	if(Math.abs(tvolume-volume)<0.005 && Math.abs(tspeed-speed)<0.005 && landing==0){return;}
+	tvolume=volume;tspeed=speed;
+	var volume0=0.45*volume,volume1=0.32*volume;
+	//var volume0=0.35*volume,volume1=0.85*volume;
+    var volboeing=Math.max(0.002,0.5*400*400/(400*400+distboeing*distboeing));
+    var speedboeing=0.95+0.4*400/(400+distboeing);
+if(twebaudio==1){
+  if(plane=="alphajet"){
+	setvol(myaudio,0.002);
+	if(volume*0.5<volboeing){
+	   setvol(myaudiojet,Math.max(volume*0.5,volboeing));
+	   setspeed(myaudiojet,Math.max(speed+0.54,speedboeing));}
+	else{
+	   setvol(myaudiojet,volume*0.5);
+	   setspeed(myaudiojet,speed+0.54);}   
+  }else if(plane=="f14"){
+	setvol(myaudio,0.002);
+	if(volume*0.5<volboeing){
+	   setvol(myaudiojet,Math.max(volume*0.5,volboeing));
+	   setspeed(myaudiojet,Math.max(speed+0.54,speedboeing));}
+	else{
+	   setvol(myaudiojet,volume*0.5);
+	   setspeed(myaudiojet,speed+0.54);}   
+  }else{
+	setvol(myaudio,volume*0.5);
+	setspeed(myaudio,speed+0.54);
+	setvol(myaudiojet,volboeing);
+	setspeed(myaudiojet,speedboeing);
+  }
+}  
+}
+var xmlhttp,httpstatus=0;
+function httpGet(url,callback) 
+{
+  xmlhttp=null;
+  xmlhttp = new XMLHttpRequest();
+  if ("withCredentials" in xmlhttp) {
+    // Check if the XMLHttpRequest object has a "withCredentials" property.
+    // "withCredentials" only exists on XMLHTTPRequest2 objects.
+    //alert("withCredentials");
+	xmlhttp.open("GET", url, true);
+  } else if (typeof XDomainRequest != "undefined") {
+    // Otherwise, check if XDomainRequest.
+    // XDomainRequest only exists in IE, and is IE's way of making CORS requests.
+    xmlhttp = new XDomainRequest();
+	//alert("XDomainRequest");
+    xmlhttp.open("GET", url);
+  } else {
+    // Otherwise, CORS is not supported by the browser.
+    xmlhttp = null;
+	alert("cors crossdomain not supported by browser");
+	return;
+  }
+	xmlhttp.onreadystatechange=function()
+    {
+		if(xmlhttp.readyState>=0){httpstatus=xmlhttp.status;
+		    if(httpstatus>400){msghttp="HTTP ERROR "+httpstatus;sethttp();}}
+		if(xmlhttp.readyState==4){httpstatus=xmlhttp.status;
+		    if(httpstatus>400){msghttp="HTTP ERROR "+httpstatus;
+			   //alert("http "+httpstatus);alert(xmlhttp.responseText);
+			   if(tloading>0.1){
+			      setTimeout("if(tloading>0.1 && httpstatus>400){tloading=0;};",18000);}}}
+        if(xmlhttp.readyState==4 && xmlhttp.status==200){msghttp="";
+		                                                 callback(xmlhttp.responseText);}
+    }	
+    //xmlhttp.open("GET", theUrl, false);
+    xmlhttp.send();    
+}
+var xmlhttp2,httpstatus2=0;
+function httpGet2(url,callback) 
+{
+  xmlhttp2=null;
+  xmlhttp2 = new XMLHttpRequest();
+  if ("withCredentials" in xmlhttp) {
+    // Check if the XMLHttpRequest object has a "withCredentials" property.
+    // "withCredentials" only exists on XMLHTTPRequest2 objects.
+    //alert("withCredentials");
+	xmlhttp2.open("GET", url, true);
+  } else if (typeof XDomainRequest != "undefined") {
+    // Otherwise, check if XDomainRequest.
+    // XDomainRequest only exists in IE, and is IE's way of making CORS requests.
+    xmlhttp2 = new XDomainRequest();
+	//alert("XDomainRequest");
+    xmlhttp2.open("GET", url);
+  } else {
+    // Otherwise, CORS is not supported by the browser.
+    xmlhttp2 = null;
+	alert("cors crossdomain not supported by browser");
+	return;
+  }
+	xmlhttp2.onreadystatechange=function()
+    {
+		if(xmlhttp2.readyState>=0){httpstatus2=xmlhttp2.status;
+		    if(httpstatus2>400){msghttp2="HTTP2 ERROR "+httpstatus2;sethttp();}}
+		if(xmlhttp2.readyState==4){httpstatus2=xmlhttp2.status;
+		    if(httpstatus2>400){msghttp2="HTTP2 ERROR "+httpstatus2;
+			   //alert("http2 "+httpstatus2);
+			   if(tloading2>0.1){
+			      setTimeout("if(tloading2>0.1 && httpstatus2>400){tloading2=0;};",8000);}}}
+        if(xmlhttp2.readyState==4 && xmlhttp2.status==200){msghttp2="";
+		                                                   callback(xmlhttp2.responseText);}
+    }	
+    //xmlhttp.open("GET", theUrl, false);
+    xmlhttp2.send();    
+}
+var wayjson,ways=[],nodejson,nodes=[],iport=0,nairport=0,airportname=[],airportnode=[];
+var airportinter=[],port0inter="",port1inter="",port2inter="",port3inter="";
+var ntower=0,towernode=[],towernodemid=[],airportnodemid=[];
+var nbridge=0,bridgenode=[],bridgenodemid=[],bridgenodemid2=[],bridgeid=[];
+function nodecallback(r){//alert(r);
+  nodejson=JSON.parse(r);
+  var msg="";
+  nodes=[];
+  if(nodejson.elements){nodes=nodejson.elements;}
+  msg+="len="+nodes.length;
+  //port0x=-199;port1x=-199;port2x=-199;port3x=-199;
+  //iport=0; 
+  var jnode=0;  
+  if(nodes.length>0 && iport<=3){
+  for(var i=0;i<nodes.length;i++){
+   jnode=i+1;
+   var node=(nodes[i]);
+   if(node.tags){
+      if(node.tags.name){var name=node.tags.name;
+    	msg+=" /"+node.tags.name;
+	    if(iport==0){port0x=node.lon;port0y=node.lat;port0name=name;port0inter="";}
+	    if(iport==1){port1x=node.lon;port1y=node.lat;port1name=name;port1inter="";}
+	    if(iport==2){port2x=node.lon;port2y=node.lat;port2name=name;port2inter="";}
+	    if(iport==3){port3x=node.lon;port3y=node.lat;port3name=name;port3inter="";}
+		iport+=1;if(iport>3){break;}
+      }}
+   }}
+  if(nodes.length>jnode && iport>3){
+   for(var i=nodes.length-1;i>=jnode;i-=1){
+   var node=(nodes[i]);
+   if(node.tags){
+      if(node.tags.name){var name=node.tags.name;
+	   var dx=Math.max(Math.abs(node.lon-lng)/klon,Math.abs(node.lat-lat));
+	   if(dx<Math.max(Math.abs(port0x-lng)/klon,Math.abs(port0y-lat))){
+        port3x=port2x;port3y=port2y;port3name=port2name;port3inter=port2inter;
+        port2x=port1x;port2y=port1y;port2name=port1name;port2inter=port1inter;
+        port1x=port0x;port1y=port0y;port1name=port0name;port1inter=port0inter;
+	    port0x=node.lon;port0y=node.lat;port0name=name;port0inter="";
+       }else if(dx<Math.max(Math.abs(port1x-lng)/klon,Math.abs(port1y-lat))){
+        port3x=port2x;port3y=port2y;port3name=port2name;port3inter=port2inter;
+        port2x=port1x;port2y=port1y;port2name=port1name;port2inter=port1inter;
+	    port1x=node.lon;port1y=node.lat;port1name=name;port1inter="";
+       }
+  }}}}
+  //alert("iport="+iport+" "+msg);
+  if(iport<=0){port0x=-199;}
+  if(iport<=1){port1x=-199;}
+  if(iport<=2){port2x=-199;}
+  if(iport<=3){port3x=-199;}
+  setTimeout("tloading=0;",300);
+}
+function waycallback(r){//alert(r);
+  wayjson=JSON.parse(r);
+  var msg="",test=0;
+  nairport=0;ntower=0;nbridge=0;
+  ways=[];airportname=[];airportnode=[];towernode=[];airportinter=[];towernodemid=[];
+  bridgenode=[];bridgenodemid=[];bridgenodemid2=[];bridgeid=[];airportnodemid=[];
+  if(wayjson.elements){ways=wayjson.elements;}
+  msg+="len="+ways.length;
+  if(ways.length>0){
+  for(var i=0;i<ways.length;i++){
+   var way=(ways[i]);
+   /*for(var j=0;j<way.nodes.length;j++){
+      //if(i<2){msg+="/"+way.nodes[j];};
+	  nnode+=1;
+	  }*/
+   if(way.tags && way.nodes){
+      if(way.tags.aeroway){
+	     if(way.tags.aeroway=="terminal"){
+		     if(ntower<14 && test<4){ntower+=1;towernode[ntower]=way.nodes[0];
+			            towernodemid[ntower]=way.nodes[parseInt(way.nodes.length*0.51)];
+	                    test+=1;msg+=" /tower /";}}
+         else if(way.tags.name){
+		     if(nairport<7){nairport+=1;airportname[nairport]=way.tags.name;
+	                    airportnode[nairport]=way.nodes[0];
+	                    airportnodemid[nairport]=way.nodes[parseInt(way.nodes.length*0.51)];
+						airportinter[nairport]="local";
+						if(way.tags.aerodrome){airportinter[nairport]=way.tags.aerodrome;}
+						test=0;msg+=" /"+way.tags.name;}}
+						}
+      else if(nbridge<100){nbridge+=1;bridgenode[nbridge]=way.nodes[0];
+	                    bridgenodemid[nbridge]=way.nodes[parseInt(way.nodes.length-1)];
+	                    bridgenodemid2[nbridge]=way.nodes[parseInt(way.nodes.length*0.51)];
+						bridgeid[nbridge]=way.id;
+						}
+	  }
+   //if(ways[i].nodes){nnode+=ways[i].nodes.length;}
+   }}
+  auxvar2=nbridge;
+  //alert("nairport="+nairport+" "+msg);
+  if(nairport>0 || ntower>0 || nbridge>0){setTimeout("getnodes3();",300);}
+  else{iport=0;setTimeout("getnodes();",300);}//tloading=0;}
+}
+var nodejson3,nodes3=[],latnodes=[],lonnodes=[];
+function nodecallback3(r){//alert(r);
+  nodejson3=JSON.parse(r);
+  var msg="";
+  nodes3=[];latnodes=[];lonnodes=[];
+  if(nodejson3.elements){nodes3=nodejson3.elements;}
+  msg+="len3="+nodes3.length;//auxvar3=nodes3.length;
+  for(var i=0;i<nodes3.length;i++){
+     /*if(i<5){
+	  msg+="/ nodeid3="+nodes3[i].id;
+	  msg+=" lat="+nodes3[i].lat;
+	  msg+=" lon="+nodes3[i].lon;
+	  }*/
+	 var inode=nodes3[i].id; 
+	 latnodes[inode]=nodes3[i].lat;
+     lonnodes[inode]=nodes3[i].lon;
+	 }
+  iport=0;
+  //port0x=-199;port1x=-199;port2x=-199;port3x=-199;  
+  for(var i=1;i<=nairport;i++){
+     var inode=airportnode[i],inodemid=airportnodemid[i];
+	 if(latnodes[inode]){
+	    msg+=" /"+airportname[i];
+	    if(iport==0){port0x=lonnodes[inode];port0y=latnodes[inode];port0name=airportname[i];port0inter=airportinter[i];}
+	    if(iport==1){port1x=lonnodes[inode];port1y=latnodes[inode];port1name=airportname[i];port1inter=airportinter[i];}
+	    if(iport==2){port2x=lonnodes[inode];port2y=latnodes[inode];port2name=airportname[i];port2inter=airportinter[i];}
+	    if(iport==3){port3x=lonnodes[inode];port3y=latnodes[inode];port3name=airportname[i];port3inter=airportinter[i];}
+	    if(latnodes[inodemid]){
+	     if(iport==0){port0x=(port0x+lonnodes[inodemid])/2;port0y=(port0y+latnodes[inodemid])/2;}
+	     if(iport==1){port1x=(port1x+lonnodes[inodemid])/2;port1y=(port1y+latnodes[inodemid])/2;}
+	     if(iport==2){port2x=(port2x+lonnodes[inodemid])/2;port2y=(port2y+latnodes[inodemid])/2;}
+	     if(iport==3){port3x=(port3x+lonnodes[inodemid])/2;port3y=(port3y+latnodes[inodemid])/2;}
+		}
+		iport+=1;if(iport>3){break;}
+	 }
+  }
+  //towerportx=-199;
+  var dist=25000;
+  if(ntower>=1){
+    for(var i=1;i<=ntower;i++){ 
+     var inode=towernode[i];
+	 if(latnodes[inode]){var xx=lonnodes[inode],yy=latnodes[inode];
+	        if(Math.max(Math.abs(xx-towerportx)/klon,Math.abs(yy-towerporty))*scale>4000){
+			   var dist2=Math.max(Math.abs(xx-x)/klon,Math.abs(yy-y));
+			   if(dist2<dist){
+			      dist=dist2;
+				  towerportx=xx;towerporty=yy;
+				  var inodemid=towernodemid[i];
+				  towerportwidth=1.0;
+				  if(latnodes[inodemid]){var xxx=lonnodes[inodemid],yyy=latnodes[inodemid];
+				     var dxx=Math.max(Math.abs(xxx-xx)/klon,Math.abs(yyy-yy))*40000.0/360;
+				     towerportwidth=Math.max(1.0,dxx/0.017);}
+				  }}}}
+  }  
+  //tower2portx=-199;
+  dist=25000;
+  if(ntower>=1){
+    for(var i=1;i<=ntower;i++){
+     var inode=towernode[i];
+	 if(latnodes[inode]){var xx=lonnodes[inode],yy=latnodes[inode];
+	        if(Math.max(Math.abs(xx-towerportx)/klon,Math.abs(yy-towerporty))*scale>4000){
+			   var dist2=Math.max(Math.abs(xx-x)/klon,Math.abs(yy-y));
+			   if(dist2<dist){
+			      dist=dist2;
+				  tower2portx=xx;tower2porty=yy;
+				  var inodemid=towernodemid[i];
+				  tower2portwidth=1.0;
+				  if(latnodes[inodemid]){var xxx=lonnodes[inodemid],yyy=latnodes[inodemid];
+				     var dxx=Math.max(Math.abs(xxx-xx)/klon,Math.abs(yyy-yy))*40000.0/360;
+				     tower2portwidth=Math.max(1.0,dxx/0.017);}
+				  }}}}
+  }  
+  if(nbridge>=1 && okinit>=1 && tgetterrainheightbridge<tframe-20000){
+    tgetterrainheightbridge=tframe;
+    //for(var j=0;j<nbridgemesh;j++){bridgemeshx[j]=-180.0;}
+	//var jbridgemesh=0;
+    for(var i=1;i<=nbridge;i++){
+     var inode=bridgenode[i];
+	 if(latnodes[inode]){var xx=lonnodes[inode],yy=latnodes[inode];
+       var inodemid=bridgenodemid[i];
+	   if(latnodes[inodemid]){var xxx=lonnodes[inodemid],yyy=latnodes[inodemid];
+	     //jbridgemesh+=1;
+		 //var ii=jbridgemesh-1;
+		 var dx=(xxx-xx)/klon,dy=yyy-yy;
+		 var bridgemeshscalexii=Math.sqrt(dx*dx*100+dy*dy*100)*klon/(20*0.230*360/40000);
+         var inodemid2=bridgenodemid2[i];
+		 if(latnodes[inodemid2]){var xxxx=lonnodes[inodemid2],yyyy=latnodes[inodemid2];
+		    var dx2=(xxxx-xx)/klon,dy2=yyyy-yy;
+		    var bridgemeshscalexii2=Math.sqrt(dx2*dx2*100+dy2*dy2*100)*klon/(20*0.230*360/40000);
+			if(bridgemeshscalexii<bridgemeshscalexii2){bridgemeshscalexii=bridgemeshscalexii2;
+			                      xxx=xxxx;yyy=yyyy;dx=dx2;dy=dy2;}
+			}
+		 if(bridgemeshscalexii>0.55){//0.55
+		    var bridgemeshxii=(xx+xxx)*0.5;
+		    var bridgemeshyii=(yy+yyy)*0.5;
+		    var bridgemesho1ii=-diro1(dx*10000,dy*10000)+4/bridgemeshscalexii;
+			var iid=bridgeid[i];
+            //bridgemeshscale[ii]=new myCesium.Cartesian3(bridgemeshscalex[ii],bridgemeshscaley[ii],bridgemeshscalez[ii]);
+			testaddbridgemesh(iid,bridgemeshxii,bridgemeshyii,bridgemesho1ii,bridgemeshscalexii);
+		 //}else{bridgemeshx[ii]=-180.0;
+		 //      jbridgemesh-=1;}
+		 }
+		 }}}
+	 auxvar2=ibridgemesh;
+	 var distmax=600*360.0/40000,nbridges=0;
+	 for(var i=0;i<nbridgemesh;i++){
+	    if(Math.abs(bridgemeshx[i]-x)>distmax*klon ||
+		   Math.abs(bridgemeshy[i]-y)>distmax){bridgemeshx[i]=-180;bridgemesh[i].show=false;}
+		else{nbridges+=1;}   
+	 }
+	 auxvar=nbridges;
+     updatebridge0();	 
+	 tgetterrainheightbridge=0;
+	 }
+  //alert(msg);
+  if(testbridgechanged==1){testbridgechanged=0;
+                           taskgetterrainheightbridge=1;}
+  if(iport<=399){setTimeout("getnodes();",300);}
+  else{setTimeout("tloading=0;",300);}
+}
+var testbridgechanged=0;
+function testaddbridgemesh(iid,xii,yii,o1ii,scalexii){
+if(xii<-179){return;}
+if(iid>1){
+ for(var i=0;i<nhidebridge;i++){if(iid==hidebridgeid[i]){return;}}
+ for(var i=0;i<nbridgemesh;i++){
+  if(iid==bridgemeshid[i]){
+	   if(scalexii<=bridgemeshscalex[i]){return;}
+	   bridgemeshx[i]=xii;
+	   bridgemeshy[i]=yii;
+	   bridgemesho1[i]=o1ii;
+	   bridgemeshscalex[i]=scalexii;
+	   bridgemeshid[i]=iid;
+	   testbridgechanged=1;
+	   //var sc=Math.max(1,scalexii/(scalexii*0.75+0.25));
+	   //bridgemeshscalez[i]=sc;
+	   return;
+  }
+}}
+for(var i=0;i<nbridgemesh;i++){
+  if(Math.abs(yii-bridgemeshy[i])<0.0006){
+    if(Math.abs(xii-bridgemeshx[i])<0.0006*klon){
+	   if(scalexii<=bridgemeshscalex[i]){return;}
+	   bridgemeshx[i]=xii;
+	   bridgemeshy[i]=yii;
+	   bridgemesho1[i]=o1ii;
+	   bridgemeshscalex[i]=scalexii;
+	   bridgemeshid[i]=iid;
+	   testbridgechanged=1;
+	   //var sc=Math.max(1,scalexii/(scalexii*0.75+0.25));
+	   //bridgemeshscalez[i]=sc;
+	   return;
+    }   
+  }
+}
+var dist=Math.max(Math.abs(xii-x)/klon,Math.abs(yii-y))/(1+scalexii);
+for(var i=0;i<nbridgemesh;i++){
+  ibridgemesh+=1;if(ibridgemesh>=nbridgemesh){ibridgemesh=0;}
+  if(dist<Math.max(Math.abs(bridgemeshx[ibridgemesh]-x)/klon,
+                   Math.abs(bridgemeshy[ibridgemesh]-y))/(1+bridgemeshscalex[ibridgemesh])){
+	 bridgemeshx[ibridgemesh]=xii;
+	 bridgemeshy[ibridgemesh]=yii;
+	 bridgemesho1[ibridgemesh]=o1ii;
+	 bridgemeshscalex[ibridgemesh]=scalexii;
+	 bridgemeshid[ibridgemesh]=iid;
+	 testbridgechanged=1;
+	 //var sc=Math.max(1,scalexii/(scalexii*0.75+0.25));
+     //bridgemeshscalez[ibridgemesh]=sc;
+	 return;
+  }
+}
+}
+var wayjson2,ways2=[],iibuild=0,buildi=[],buildhi=[],buildhh=[],buildnode=[],buildnodemid=[];
+var nbuild=490,ibuild=0,buildh=[],buildx=[],buildy=[],buildxmid=[],buildymid=[],buildz=[];
+var buildchanged=[],buildw=[],buildnode0=[];
+var buildi2=[],buildhi2=[],iicomm=0,buildcomm=[];
+for(var i=0;i<nbuild;i++){buildh[i]=-1;buildx[i]=0;buildy[i]=0;buildxmid[i]=0;buildymid[i]=0;
+                          buildz[i]=0;buildchanged[i]=0;buildw[i]=0;buildnode0[i]=0;}
+var nbuild0=30000,ibuild0=0,build0=[];
+for(var i=0;i<nbuild0;i++){build0[i]=new Object();
+   build0[i].node0=0;build0[i].h=0;build0[i].xx=0;build0[i].yy=0;
+   build0[i].xxmid=0;build0[i].yymid=0;}
+function testaddbuild0(node0){
+  var j=ibuild0+1;
+  for(var i=0;i<nbuild0;i++){
+    j-=1;if(j<0){j=nbuild0-1;}
+    if(build0[j].node0==node0){
+	 addbuild(build0[j].node0,build0[j].h,build0[j].xx,build0[j].yy,
+	                                      build0[j].xxmid,build0[j].yymid);
+	 return 1;
+	}
+  }
+  return 0;
+}
+function addbuild0(node0,h,xx,yy,xxmid,yymid){
+ibuild0+=1;if(ibuild0>=nbuild0){ibuild0=0;}
+var build0j=build0[ibuild0];
+build0j.node0=node0;build0j.h=h;build0j.xx=xx;build0j.yy=yy;
+build0j.xxmid=xxmid;build0j.yymid=yymid;
+}
+var nearbuild=[],nnearbuild=250,distbuild=[];
+for(var i=0;i<nnearbuild;i++){nearbuild[i]=new Object();
+    nearbuild[i].node0=0;nearbuild[i].h=0;nearbuild[i].x=0;nearbuild[i].y=0;
+	nearbuild[i].xmid=0;nearbuild[i].ymid=0;
+}
+function setnearbuild(){
+for(var i=0;i<nbuild;i++){
+    distbuild[i]=Math.max(Math.abs(buildx[i]-x)/klon,Math.abs(buildy[i]-y));}
+var test=0;//99999;
+for(var i=0;i<nnearbuild;i++){
+    nearbuild[i].node0=0;nearbuild[i].h=0;nearbuild[i].x=0;nearbuild[i].y=0;
+	nearbuild[i].xmid=0;nearbuild[i].ymid=0;
+	var dist=9999,ii=-1;
+	for(var j=0;j<nbuild;j++){
+	   if(distbuild[j]<dist && buildh[j]>0.1){dist=distbuild[j];ii=j}
+	   }
+	if(ii>=0){distbuild[ii]=99999;test+=1;//=Math.min(test,dist);
+      nearbuild[i].node0=buildnode0[ii];nearbuild[i].h=buildh[ii];
+	  nearbuild[i].x=buildx[ii];nearbuild[i].y=buildy[ii];
+	  nearbuild[i].xmid=buildxmid[ii];nearbuild[i].ymid=buildymid[ii];
+	}else{break;}
+}
+//alert(test);
+}
+function addbuild(node0,h,xx,yy,xxmid,yymid){
+addbuild0(node0,h,xx,yy,xxmid,yymid);
+var dy0=0.001*360/40000,dx0=dy0*klon;
+var dy=5*360/40000,dx=dy*klon;
+for(var i=0;i<nbuild;i++){
+  if(Math.abs(xx-buildx[i])<dx0){if(Math.abs(yy-buildy[i])<dy0){return;}}
+}
+var j=ibuild,test=0;
+for(var i=0;i<nbuild;i++){
+  j+=1;if(j>=nbuild){j=0;}
+  if(Math.abs(buildx[j]-x)>dx){test=1;break;}
+  if(Math.abs(buildy[j]-y)>dy){test=1;break;}
+}
+if(test==1){buildh[j]=h;buildx[j]=xx;buildy[j]=yy;buildxmid[j]=xxmid;buildymid[j]=yymid;
+            buildchanged[j]=1;buildnode0[j]=node0;
+			var dx=(xxmid-xx)/klon,dy=yymid-yy;
+			buildw[j]=Math.sqrt(dx*dx+dy*dy)*40000000/360;return;}
+j=ibuild;
+var dist=Math.max(Math.abs(xx-x)/klon,Math.abs(yy-y));
+for(var i=0;i<nbuild;i++){
+  j+=1;if(j>=nbuild){j=0;}
+  if(Math.max(Math.abs(buildx[j]-x)/klon,Math.abs(buildy[j]-y))>dist){test=1;break;}  
+}
+if(test==0){ibuild+=1;if(ibuild>=nbuild){ibuild=0;};j=ibuild;}
+buildh[j]=h;buildx[j]=xx;buildy[j]=yy;buildxmid[j]=xxmid;buildymid[j]=yymid;
+buildchanged[j]=1;buildnode0[j]=node0;
+var dx=(xxmid-xx)/klon,dy=yymid-yy;
+buildw[j]=Math.sqrt(dx*dx+dy*dy)*40000000/360;
+}
+function waycallback2(r){//alert(r);
+  wayjson2=JSON.parse(r);
+  var msg="",test=0,h=0,hbuild=0,test2=0,test3=0,tcomm=0;
+  iicomm=0;
+  iibuild=0;
+  ways2=[];buildi=[];buildhi=[];buildnode=[];buildnodemid=[];
+  buildi2=[];buildhi2=[];buildcomm=[];
+  if(wayjson2.elements){ways2=wayjson2.elements;}
+  msg+="len="+ways2.length;
+  if(ways2.length>0){
+  for(var i=0;i<ways2.length;i++){
+    var way=(ways2[i]);
+    if(way.tags && way.nodes){
+	  h=0;tcomm=0;
+      //if(way.tags.building=="commercial"){test3+=1;if(test3<100){tcomm=1;}}
+      if(way.tags.shop){if(way.tags.shop=="mall"){test3+=1;if(test3<100){tcomm=1;}}
+	                    if(way.tags.shop=="supermarket"){test3+=1;if(test3<100){tcomm=1;}}
+	                    if(way.tags.shop=="general"){test3+=1;if(test3<100){tcomm=1;}}
+	                    if(way.tags.shop=="department_store"){test3+=1;if(test3<100){tcomm=1;}}
+					   }
+      if(way.tags.height){h=way.tags.height*1;}
+      else if(way.tags["building:height"]){h=way.tags["building:height"]*1;}
+      else if(way.tags["building:levels"]){h=way.tags["building:levels"]*3;}
+      else if(way.tags.levels){h=way.tags.levels*3;}
+	  if(tcomm==1 && h<12){h=12;iicomm+=1;}
+	  if(h>40){test+=1;buildi[test]=i;buildhi[test]=h;
+	           //buildnode[test]=way.nodes[0];
+			   //buildnodemid[test]=way.nodes[parseInt(way.nodes.length*0.51)];
+			   }
+	  if(h>20 || tcomm==1){test2+=1;buildi2[test2]=i;buildhi2[test2]=h;buildcomm[test2]=tcomm;}
+  }}
+  tcomm=2;//alert("test3="+test3);
+  var i=test,hh=40,i50=Math.min(70,50+iicomm);
+  //iicomm=test3;
+  if(i>100){while(i>100){hh+=10;i=0;for(var j=1;j<=test;j++){if(buildhi[j]>hh){i+=1;}}}}
+  else if(i<i50){for(var j=1;j<=test2;j++){buildi[j]=buildi2[j];buildhi[j]=buildhi2[j];}
+       test=test2;tcomm=1;
+       while(i<i50 && hh>20){
+	      hh-=5;i=0;for(var j=1;j<=test;j++){if(buildhi[j]>hh || buildcomm[i]==tcomm){i+=1;}}}}
+  i=0;for(var j=1;j<=test;j++){if(buildhi[j]>hh || buildcomm[j]==tcomm){
+           var testadd=1;
+		   var node0=ways2[buildi[j]].nodes[0];
+		   for(var k=0;k<nbuild;k++){if(buildnode0[k]==node0){testadd=0;
+		       addbuild0(buildnode0[k],buildh[k],buildx[k],buildy[k],buildxmid[k],buildymid[k]);
+			   break;}}
+		   if(testadd==1){if(testaddbuild0(node0)==1){testadd=0;};}	   
+		   if(testadd==1){
+			 i+=1;
+             buildhh[i]=buildhi[j];
+			 buildnode[i]=node0;
+			 buildnodemid[i]=ways2[buildi[j]].nodes[parseInt(ways2[buildi[j]].nodes.length*0.51)];
+			 //addbuild(node0,hi,nodei.lat,nodei.lon,nodeimid.lat,nodeimid.lon);
+			 }
+  }
+  iibuild=i;hbuild=hh;
+  }
+}
+//alert(msg+" test="+test+" iibuild="+iibuild+" hbuild="+hbuild);
+if(iibuild>0){setTimeout("getnodes2();",300);}
+else{setTimeout("tloading2=0;",300);}
+}
+var nodejson2,nodes2=[],latnodes2=[],lonnodes2=[];
+function nodecallback2(r){//alert(r);
+  nodejson2=JSON.parse(r);
+  var msg="";
+  nodes2=[];
+  latnodes2=[];lonnodes2=[];
+  if(nodejson2.elements){nodes2=nodejson2.elements;}
+  msg+="len2="+nodes2.length;
+  for(var i=0;i<nodes2.length;i++){
+	 var inode=nodes2[i].id; 
+	 latnodes2[inode]=nodes2[i].lat;
+     lonnodes2[inode]=nodes2[i].lon;
+	 }
+//alert(msg);	 
+setTimeout("getnodes22();",300);
+}
+var nodejson22,nodes22=[];
+function nodecallback22(r){//alert(r);
+  nodejson22=JSON.parse(r);
+  var msg="";
+  nodes22=[];
+  if(nodejson22.elements){nodes22=nodejson22.elements;}
+  msg+="len22="+nodes22.length;
+  for(var i=0;i<nodes22.length;i++){
+	 var inode=nodes22[i].id; 
+	 latnodes2[inode]=nodes22[i].lat;
+     lonnodes2[inode]=nodes22[i].lon;
+	 }
+//alert(msg+" iibuild="+iibuild);
+for(var i=1;i<=iibuild;i++){
+  if(lonnodes2[buildnode[i]] && lonnodes2[buildnodemid[i]]){
+   var testadd=1;
+   var lonxx=lonnodes2[buildnode[i]],latyy=latnodes2[buildnode[i]];
+   if(testmonument(lonxx,latyy)==1){testadd=0;}
+   if(testadd==1){
+     addbuild(buildnode[i],buildhh[i],lonxx,latyy,
+                              lonnodes2[buildnodemid[i]],latnodes2[buildnodemid[i]]);}
+}}
+//alert("ok22");	 
+setTimeout("getterrainheightbuild();",300);
+}
+function testmonument(lonxx,latyy){
+   var dlat=0.200*360/40000,dlon=dlat*klon;
+   for(var k=0;k<nmonument;k++){
+      if(Math.abs(monumentx[k]-lonxx)<dlon){
+	    if(Math.abs(monumenty[k]-latyy)<dlat){return 1;}}}
+return 0;
+}
+var http="http:",overpass="",overpass2="",overpassurl=[],noverpassurl=3,ioverpassurl=0;
+overpassurl[0]="//overpass-api.de/api/";
+overpassurl[1]="//overpass.osm.rambler.ru/cgi/";
+overpassurl[2]="//api.openstreetmap.fr/oapi/";
+//overpassurl[3]="//overpass.osm.ch/api/"
+function getoverpassurl(){
+for(var i=0;i<noverpassurl;i++){
+   if(overpass!=overpassurl[ioverpassurl] && overpass2!=overpassurl[ioverpassurl]){
+      return overpassurl[ioverpassurl]}
+   ioverpassurl+=1;if(ioverpassurl>=noverpassurl){ioverpassurl=0;}
+}
+return overpassurl[ioverpassurl];
+}
+var tsethttp=0;
+function sethttp(){
+if(tframe<tsethttp){return;}
+tsethttp=tframe+2000;
+http="http:";
+if(document.location.href.indexOf("https")>=0){
+   http="https:";}
+//http="http:";
+if(http=="https:"){overpass="//overpass-api.de/api/";
+                   overpass2="//overpass.osm.rambler.ru/cgi/";
+				   return;}
+if(overpass==""){overpass=getoverpassurl();}//"//overpass-api.de/api/";
+if(overpass2==""){overpass2=getoverpassurl();}//"//overpass.osm.rambler.ru/cgi/";}
+if(httpstatus>400){setTimeout('overpass=getoverpassurl();httpstatus=0;',1000);}
+if(httpstatus2>400){setTimeout('overpass2=getoverpassurl();httpstatus2=0;',1000);}
+//alert(overpass+" "+httpstatus+"  "+overpass2+" "+httpstatus2);
+}
+sethttp();
+var tloading=0,tloading2=0;
+function getnodes(){
+//if(tframe<tloading){return;}
+tloading=tframe+60000;
+var dx=18*360/40000;
+if(iport>3){dx=Math.min(dx,Math.max(Math.abs(port0x-lng)/klon,Math.abs(port0y-lat)));
+            dx=Math.max(7*360/40000,dx);}
+var lat1=lat-dx,lon1=lng-dx*klon;
+var lat2=lat+dx,lon2=lng+dx*klon;
+var latlon="%28"+lat1+"%2C"+lon1+"%2C"+lat2+"%2C"+lon2+"%29";
+http="http:";
+if(document.location.href.indexOf("https")>=0){
+   http="https:";}
+//http="http:";
+//overpass2="//overpass.osm.rambler.ru/cgi/";
+//overpass="//overpass-api.de/api/";
+//overpass="//api.openstreetmap.fr/oapi/";
+//if(http=="https:"){overpass="//overpass-api.de/api/";}
+//var wayurl=http+overpass+"interpreter?data=[out:json];%28way[aeroway~'aerodrome|runway']"+latlon+";";
+//var wayurl=http+overpass+"interpreter?data=[out:json];%28way[aeroway~'aerodrome']"+latlon+";";
+var nodeurl=http+overpass+"interpreter?data=[out:json];%28node[aeroway~'aerodrome|runway']"+latlon+";";
+//var nodeurl=http+overpass+"interpreter?data=[out:json];%28node[aeroway~'aerodrome']"+latlon+";";
+nodeurl+="%29%3Bout%20qt%2099%3B";
+try{		
+httpGet(nodeurl,nodecallback);
+}catch (e){alert("error getnodes");tloading=0;}
+}
+function getways(){
+if(tframe<tloading){return;}
+tloading=tframe+70000;
+var dx=18*360/40000;
+lng=x;lat=y;
+var lat1=lat-dx,lon1=lng-dx*klon;
+var lat2=lat+dx,lon2=lng+dx*klon;
+var latlon="%28"+lat1+"%2C"+lon1+"%2C"+lat2+"%2C"+lon2+"%29";
+dx=2*360/40000;
+var dx1=dx+(z-zsol)*0.0015*360/40000;
+var lat11=lat-dx+dx1*sin1,lon11=lng-dx*klon+dx1*klon*cos1;
+var lat21=lat+dx+dx1*sin1,lon21=lng+dx*klon+dx1*klon*cos1;
+var latlon1="%28"+lat11+"%2C"+lon11+"%2C"+lat21+"%2C"+lon21+"%29";
+/*http="http:";
+if(document.location.href.indexOf("https")>=0){
+   http="https:";}
+//http="http:";
+//overpass2="//overpass.osm.rambler.ru/cgi/";
+overpass="//overpass-api.de/api/";
+//overpass="//api.openstreetmap.fr/oapi/";
+if(http=="https:"){overpass="//overpass-api.de/api/";}
+*/
+//var wayurl=http+overpass+"interpreter?data=[out:json];%28way[aeroway~'aerodrome|runway']"+latlon+";";
+var wayurl=http+overpass+"interpreter?data=[out:json];%28way[aeroway~'aerodrome|terminal']"+latlon+";";
+//var wayurl=http+overpass+"interpreter?data=[out:json];%28node[aeroway~'aerodrome']"+latlon+";";
+//wayurl+="way['bridge:structure']"+latlon1+";";
+//wayurl+="way['man_made'~'bridge'][highway~'motorway|trunk']"+latlon1+";";
+wayurl+="way['man_made'~'bridge']"+latlon1+";";
+wayurl+="way['bridge']"+latlon1+";";
+//wayurl+="way['bridge'][highway~'motorway|trunk|primary']"+latlon1+";";
+wayurl+="%29%3Bout%20qt%20399%3B";
+try{		
+httpGet(wayurl,waycallback);
+}catch (e){alert("error getways");tloading=0;}
+}
+function getnodes3(){
+var nodeurl3=http+overpass+"interpreter?data=[out:json];%28";
+for(var i=1;i<=nairport;i++){
+    nodeurl3+="node("+airportnode[i]+")";
+    nodeurl3+=";node("+airportnodemid[i]+")";
+	if(i<nairport || ntower>=1 || nbridge>=1){nodeurl3+=";";}
+	}
+for(var i=1;i<=ntower;i++){
+    nodeurl3+="node("+towernode[i]+")";
+    nodeurl3+=";node("+towernodemid[i]+")";
+	if(i<ntower || nbridge>=1){nodeurl3+=";";}
+	}
+for(var i=1;i<=nbridge;i++){
+    nodeurl3+="node("+bridgenode[i]+")";
+    nodeurl3+=";node("+bridgenodemid[i]+")";
+	if(nodeurl3.length>1900){break;}
+	if(i<nbridge){nodeurl3+=";";}
+	}
+var dx=2*360/40000;
+var dx1=dx+(z-zsol)*0.0015*360/40000;
+dx=1.0*360/40000;
+var lat11=lat-dx+dx1*sin1,lon11=lng-dx*klon+dx1*klon*cos1;
+var lat21=lat+dx+dx1*sin1,lon21=lng+dx*klon+dx1*klon*cos1;
+var latlon1="%28"+lat11+"%2C"+lon11+"%2C"+lat21+"%2C"+lon21+"%29";
+nodeurl3+=";node"+latlon1;
+nodeurl3+="%29%3Bout%20qt%20skel%2025999%3B";
+try{		
+httpGet(nodeurl3,nodecallback3);
+}catch (e){alert("error getnodes3");tloading=0;}
+}
+var xgetways2=-89,ygetways2=0,tbuilding=1;
+function testgetways2(){if(tbuilding==0){return;}
+if(tframe<tloading2){return;}
+var dx=3*360/40000,dx1=dx*(0.7+(z-zsol)/500);
+var dxx=(xgetways2-x-dx1*cos1*klon)/klon;
+var dyy=(ygetways2-y-dx1*sin1);
+if(dxx*dxx+dyy*dyy<dx*dx*1.2){return;}
+tloading2=tframe+79000;
+xgetways2=x+dx1*cos1*klon;
+ygetways2=y+dx1*sin1;
+var lat1=y-dx+dx1*sin1,lon1=x-dx*klon+dx1*cos1*klon;
+var lat2=y+dx+dx1*sin1,lon2=x+dx*klon+dx1*cos1*klon;
+var latlon2="%28"+lat1+"%2C"+lon1+"%2C"+lat2+"%2C"+lon2+"%29";
+//var keyway2="way['building:height']"+latlon2+";way['building']['height']"+latlon2+";way['building']['levels']"+latlon2+";way['building:levels']"+latlon2;
+//overpass2="//overpass.osm.rambler.ru/cgi/";
+//overpass2="//api.openstreetmap.fr/oapi/";
+var keyway2="way['building:height']"+latlon2+";way['building']['height']"+latlon2+";way['building']['levels']"+latlon2+";way['building:levels']"+latlon2;
+//keyway2+=";way[building=commercial]"+latlon2;
+keyway2+=";way[shop~'mall|supermarket|general|department_store']"+latlon2;
+var wayurl2=http+overpass2+"interpreter?data=[out:json];%28"+keyway2;
+wayurl2+="%29%3Bout%20qt%2079999%3B";
+try{		
+httpGet2(wayurl2,waycallback2);
+}catch (e){alert("error getways2");tloading=0;}
+}
+var iibuild2=0;
+function getnodes2(){
+tloading2=tframe+70000;
+var nodeurl2=http+overpass2+"interpreter?data=[out:json];%28";
+iibuild2=0;
+for(var i=1;i<=iibuild;i++){
+    iibuild2=i;
+	nodeurl2+="node("+buildnode[i]+")";
+    nodeurl2+=";node("+buildnodemid[i]+")";
+	if(nodeurl2.length>1900){break;}
+	if(i<iibuild){nodeurl2+=";";}
+	}
+nodeurl2+="%29%3Bout%20skel%20199%3B";
+try{		
+httpGet2(nodeurl2,nodecallback2);
+}catch (e){alert("error getnodes2");tloading2=0;}
+}
+function getnodes22(){
+if(iibuild2>=iibuild){
+  for(var i=1;i<=iibuild;i++){
+   if(lonnodes2[buildnode[i]] && lonnodes2[buildnodemid[i]]){
+    var lonxx=lonnodes2[buildnode[i]],latyy=latnodes2[buildnode[i]];
+	if(testmonument(lonxx,latyy)==0){
+      addbuild(buildnode[i],buildhh[i],lonxx,latyy,
+                        lonnodes2[buildnodemid[i]],latnodes2[buildnodemid[i]]);
+  }}}
+  setTimeout("getterrainheightbuild();",100);return;
+}
+tloading2=tframe+70000;
+var nodeurl22=http+overpass2+"interpreter?data=[out:json];%28";
+for(var i=iibuild2+1;i<=iibuild;i++){
+    nodeurl22+="node("+buildnode[i]+")";
+    nodeurl22+=";node("+buildnodemid[i]+")";
+	if(nodeurl22.length>1900){break;}
+	if(i<iibuild){nodeurl22+=";";}
+	}
+nodeurl22+="%29%3Bout%20skel%20199%3B";
+try{		
+httpGet2(nodeurl22,nodecallback22);
+}catch (e){alert("error getnodes22");tloading2=0;}
+}
+function formatname(text){
+var text1="",c="";
+var abc="abcdefghijklmnopqrstuvwxyzéèàçùABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 ,;:!?.-'";
+for(var i=0;i<text.length;i++){c=text.substr(i,1);
+    if(abc.indexOf(c)>=0){text1+=c;}else{text1+=" ";}}
+return text1.trim();
+}
+function speak(msg){
+var voicename="UK English Female";
+//var msg1=replaceall(msg," ","+");
+responsiveVoice.speak(formatname(msg),voicename);
+}
+function dirtext(dx,dy){
+var do1=diro1(dx,dy)
+switch (parseInt((do1+22.5)/45)){
+	case 0:
+		return "east";
+	case 1:
+		return "north east";
+	case 2:
+		return "north";
+	case 3:
+		return "north west";
+	case 4:
+		return "west";
+	case -1:
+	    return "south east";
+	case 7:
+		return "south east";
+	case -2:
+		return "south";
+	case 6:
+		return "south";
+	case -3:
+		return "south west";
+	case 5:
+		return "south west";
+	case -4:
+		return "west";
+	default:
+		return "direction";
+ }
+}
+function airporttext(){
+var portname2=formatname(portname);
+if(portname2!="" && Math.random()<0.75){return portname2;}
+var name="";if(Math.random()<0.4){name=" "+portname2;}
+switch(parseInt(Math.random()*4)){
+	case 0:
+		return "ground airport"+name;
+	case 1:
+		return "ground control"+name;
+	case 2:
+		return "airport control"+name;
+	case 3: 
+		return "ground airport control"+name;
+ }
+}
+function carriertext(){
+switch(parseInt(Math.random()*3)){
+	case 0:
+		return "carrier";
+	case 1:
+		return "carrier control";
+	case 2:
+        return "aircraft carrier";
+ }
+} 
+		
+function begintext(){
+switch(parseInt(Math.random()*4)){
+	case 0:
+		return "start";
+	case 1:
+		return "continue";
+	case 2:
+		return "begin";
+	case 3: 
+		return "engage";
+ }
+}
+function approachtext(){
+switch (parseInt(Math.random()*2)){
+	case 0:
+		return "approaching";
+	case 1:
+		return "your approach";
+ }
+}
+function directiontext(){
+switch (parseInt(Math.random()*2)){
+	case 0:
+		return "direction";
+	case 1:
+		return "azimut";
+ }
+}
+var radtodeg=180/Math.PI;
+function diro1(dx,dy){ 
+var do1;
+if (Math.abs(dx)>Math.max(0.00001,0.001*Math.abs(dy))){
+   if(dx>0){do1=Math.atan(dy/dx)*radtodeg;
+   }else{do1=180-Math.atan(dy/Math.abs(dx))*radtodeg;}
+   }
+else {if(dy>0){do1=90;}else{do1=-90;};}
+return do1;
+}
+var tairport=0;
+var radiotxt="",tradio=1,portname="",portname0="",portx=0,porty=0,portinter="";
+var do1airport=0,do1airport0=0,distairport=0,distairport0=0;
+function testradio(){
+if(tradio==0){return;}
+if(tframe<tairport){
+   if(tframe<(tairport-10000) || portname==portname0){return 0;}}
+tairport=tframe+17000;
+portx=-199;distairport=20000;portinter="";
+if(port0dist<distairport){portx=port0x;porty=port0y;portname=port0name;distairport=port0dist;portinter=port0inter;}
+if(port1dist<distairport){portx=port1x;porty=port1y;portname=port1name;distairport=port1dist;portinter=port1inter;}
+if(port2dist<distairport){portx=port2x;porty=port2y;portname=port2name;distairport=port2dist;portinter=port2inter;}
+if(port3dist<distairport){portx=port3x;porty=port3y;portname=port3name;distairport=port3dist;portinter=port3inter;}
+msgradio.innerHTML="";
+var test=0;
+if(portx<-191){return;}
+   do1airport=diro1((portx-x)/klon,porty-y);
+   if(portname!=portname0 || 
+      Math.abs(distairport-distairport0)>(500+0.2*distairport) ||
+	  Math.abs(do1airport-do1airport0)>35){
+		test=1;
+	  }
+  if(test==0){return;}
+  distairport0=distairport;
+  do1airport0=do1airport;
+  portname0=portname;
+  if(portname==""){return;}  
+  radiotxt=airporttext()+" to "+plane+" , "+begintext()+" "+approachtext()+" , "
+  radiotxt+=directiontext()+" "+dirtext((portx-x)*scale/klon,(porty-y)*scale);
+
+  //alert(radiotxt);
+msgradio.innerHTML=radiotxt;
+try{speak(radiotxt);}catch(e){};
+}
+function subradio(){
+if(tradio==1){if(confirm("set radio off ?")){tradio=0;}}
+else if(confirm("set radio on ?")){tradio=1;}
+}
+function subbuilding(){
+if(tbuilding==1){if(confirm("set buildings off ?")){tbuilding=0;
+   for(var i=0;i<nbuildtower;i++){buildtower[i].billboard.show=false;}}}
+else if(confirm("set buildings on ?")){tbuilding=1;}
+}
+//libertystatue
+var lat2=40.689249,lng2=-74.0444999;
+var worldx=lng2,worldy=lat2;
+var libertystatuex=worldx,libertystatuey=worldy,libertystatuez=-9999;
+//Eiffel Tower
+lat2=48.85837;lng2=2.2944810;
+worldx=lng2;worldy=lat2;
+var eiffeltowerx=worldx,eiffeltowery=worldy,eiffeltowerz=-9999;
+//Christ rio
+lat2=-22.951916;lng2=-43.210487;
+worldx=lng2;worldy=lat2;
+var christriox=worldx,christrioy=worldy,christrioz=-9999;
+//Dome of the Rock 
+lat2=31.778019;lng2=35.23540800;
+worldx=lng2;worldy=lat2;
+var domerockx=worldx,domerocky=worldy,domerockz=-9999;
+//The Great Pyramid at Giza 
+lat2=29.979234;lng2=31.13420199;
+worldx=lng2;worldy=lat2;
+var gizahx=worldx,gizahy=worldy,gizahz=-9999;
+//United States Capitol 
+lat2=38.889939;lng2=-77.00905;
+worldx=lng2;worldy=lat2;
+var capitolex=worldx,capitoley=worldy,capitolez=-9999;
+//taj mahal
+lat2=27.175015;lng2=78.042155;
+worldx=lng2;worldy=lat2;
+var tajmahalx=worldx,tajmahaly=worldy,tajmahalz=-9999;
+//hongkong Buddha
+lat2=22.253985;lng2=113.904984;
+worldx=lng2;worldy=lat2;
+var buddahx=worldx,buddahy=worldy,buddahz=-9999;
+var tinitterrainheightvars=1;
+function initterrainheightvars(){
+if(myviewer.terrainProvider.ready==false){return;}
+tinitterrainheightvars=0;
+getterrainheightvar("libertystatue",32.5,1.3);
+getterrainheightvar("eiffeltower",80,1.3);
+getterrainheightvar("christrio",37,1.8);
+getterrainheightvar("domerock",37.5,1.0);
+getterrainheightvar("gizah",150,1.0);//69,1.0);
+getterrainheightvar("capitole",150,1.0);
+getterrainheightvar("tajmahal",65,1.0);
+getterrainheightvar("buddah",55,1.0);
+}
+function getterrainheightvar(varname,dx,dy){
+var positions = [
+    new myCesium.Cartographic.fromDegrees(eval(varname+"x"),eval(varname+"y"))
+];
+var promise = myCesium.sampleTerrain(myviewer.terrainProvider, 13, positions);
+myCesium.when(promise, function(updatedPositions) {
+    eval(varname+"z="+evaln(positions[0].height));// and positions[1].height have been updated.
+	// updatedPositions is just a reference to positions.
+	addmonument(varname,dx,dy);
+});
+}
+var boeingx=0,boeingy=0,boeingz=0,boeingv=240+50,boeingo1=0,boeingzsol=0,boeingdo1=0;
+function resetboeing(){
+var r=10000,do1=Math.random()*360;
+var dist=distairportxx*1.5;
+if(dist<r){r=dist;do1=diro1((portx-x)/klon,porty-y)+(Math.random()-0.5)*60;}
+var co1=Math.cos(degtorad(do1)),si1=Math.sin(degtorad(do1));
+boeingx=x+co1*r*klon/scale;
+boeingy=y+si1*r/scale;
+boeingo1=do1+180+50*sign(Math.random()-0.5);
+while(boeingo1>180){boeingo1-=360;}
+while(boeingo1<-180){boeingo1+=360;}
+}
+var airportxx=0,airportyy=0,distairportxx=1,distboeing=999999;
+var distboeingport=999999,distboeingport0=999999;
+function moveboeing(){
+distboeing=999999;
+airportxx=(portx-x)*scale/klon;
+airportyy=(porty-y)*scale;
+distairportxx=100+Math.max(Math.abs(airportxx),Math.abs(airportyy));
+    var d720=22000;
+	if(portinter=="international"){d720=Math.max(10500,Math.min(22000,25000*distairportxx/4000));}
+    var xx=(boeingx-x)*scale/klon;
+    if(Math.abs(xx)>d720){resetboeing();return;}
+	var yy=(boeingy-y)*scale;
+    if(Math.abs(yy)>d720){resetboeing();return;}
+    distboeing=Math.max(Math.abs(xx),Math.abs(yy));
+    var xxx=(portx-boeingx)*scale/klon;
+    var yyy=(porty-boeingy)*scale;
+	distboeingport0=distboeingport;
+    distboeingport=Math.max(170,Math.sqrt(xxx*xxx+yyy*yyy));
+	var o11=diro1(xx,yy);
+	var do1=boeingo1-o11;
+	while(do1>180){do1-=360;}
+	while(do1<-180){do1+=360;}
+	while(boeingo1>180){boeingo1-=360;}
+	while(boeingo1<-180){boeingo1+=360;}
+	var test=0;
+	if(distboeingport<distboeingport0-0.0001 && distboeing>300 && 
+	      (Math.abs(do1)>20 || distboeing>1000)){
+	    var boeingo11=diro1(xxx,yyy);
+		if(Math.abs(do1)<160){test=1;
+		                     var do11=boeingo11-boeingo1;
+	                         while(do11>180){do11-=360;}
+	                         while(do11<-180){do11+=360;}
+							 boeingo1+=do11*Math.min(1,dtime*0.005);
+		                     do1=boeingo1-o11;
+	                         while(do1>180){do1-=360;}
+	                         while(do1<-180){do1+=360;}
+		                     if(distboeing<600){do1=boeingdo1;};
+							 }}
+	var co1=Math.cos(degtorad(boeingo1));
+    var si1=Math.sin(degtorad(boeingo1));
+    var cos11=Math.cos(degtorad(o11));
+    var sin11=Math.sin(degtorad(o11));
+	if(Math.abs(do1)>150 && test==0){do1=boeingdo1;co1*=2;si1*=2;cos11=0;sin11=0;}
+	boeingdo1=do1;
+	if(test==1){
+		 boeingx+=boeingv*dtime*0.00035*(co1*1.5)*klon/scale;
+	     boeingy+=boeingv*dtime*0.00035*(si1*1.5)/scale;
+		 }
+    else if(do1>0){
+	     if(do1<25){boeingo1+=dtime*0.012;}
+	     if(do1>150){boeingo1-=dtime*0.012;}
+		 boeingx+=boeingv*dtime*0.00035*(co1-sin11)*klon/scale;
+	     boeingy+=boeingv*dtime*0.00035*(si1+cos11)/scale;
+		 }
+	else{if(do1>-25){boeingo1-=dtime*0.012;}
+	     if(do1<-150){boeingo1+=dtime*0.012;}
+	     boeingx+=boeingv*dtime*0.00035*(co1+sin11)*klon/scale;
+         boeingy+=boeingv*dtime*0.00035*(si1-cos11)/scale;
+		 }
+	var zz=boeingzsol+(Math.abs(xx)+Math.abs(yy))*0.17-120;
+	//if(distairportxx>4000){zz=Math.max(zz,zsol+700);}
+	zz=Math.min(zz,boeingzsol+(Math.abs(xxx)+Math.abs(yyy))*0.17-120);
+	if(portinter!="international"){zz=Math.max(boeingzsol+1800,zz);}
+	boeingz+=(Math.max(boeingzsol+20,Math.min(boeingzsol+2500,zz))-boeingz)*Math.min(1,dtime*0.0003);
+	boeingz=Math.max(boeingzsol+20,Math.min(boeingzsol+3000,boeingz));
+}
+var humidity=50,temp=20,wind=3.6,wclouds=0;
+function weathercallback(r){//alert(r);
+  var weatherjson=JSON.parse(r);
+  var allclouds=weatherjson.clouds.all;//alert("clouds="+allclouds);
+  wclouds=allclouds;
+  wind=weatherjson.wind.speed*3.6;//kmh alert(wind);
+  //humidity=weatherjson.main.humidity;//alert(humidity);
+  //temp=parseInt((weatherjson.main.temp-273)*10)/10;//alert(temp);
+  if(sky){
+    var isky0=isky;
+    if(wclouds<20){isky=0;}
+	else if(wclouds<75){isky=1;}
+	else{isky=2;}
+	if(isky!=isky0){
+	      if(isky==0){sky.billboard.image= skydome3jpg;}
+	      if(isky==1){sky.billboard.image= skydomejpg;}
+	      if(isky==2){sky.billboard.image= skydome2jpg;}
+		  }
+	}	  
+  setTimeout("tloading=0;",500);
+}
+var latweather=-91,lngweather=0;
+function testgetweather(){
+if(Math.abs(lat-latweather)>0.5 || Math.abs(lng-lngweather)>klon*0.5){
+  if(tloading<0.1){latweather=lat;lngweather=lng;getweather();}
+}
+}
+function getweather(){
+if(http!="http:"){return;}
+if(tloading>0.1){return;}
+tloading=tframe+40000;
+var weatherurl="http://api.openweathermap.org/data/2.5/weather?lat="+lat+"&lon="+lng+"&APPID=4cd1de75fbc57d92794e74ec918593ca";
+try{		
+httpGet(weatherurl,weathercallback);
+}catch (e){alert("error getweather");tloading=0;}
+}
+
+initgooglemap();
+if (typeof Cesium !== "undefined") {
+    startup(Cesium);
+} else if (typeof require === "function") {
+    require(["Cesium"], startup);
+}
+</script>
+<script src="http://chungkn1400.github.io/json_osm_chung/json_osm_chung/stats.js"></script>
+</body>
+</html>
