@@ -3186,9 +3186,9 @@ function httpGet(url,callback)
 	xmlhttp.onreadystatechange=function()
     {
 		if(xmlhttp.readyState>=0){httpstatus=xmlhttp.status;
-		    if(httpstatus>400){msghttp="HTTP ERROR "+httpstatus;asksethttp=1;}}
+		    if(httpstatus>400){msghttp="http "+httpstatus;asksethttp=1;}}
 		if(xmlhttp.readyState==4){httpstatus=xmlhttp.status;
-		    if(httpstatus>400){msghttp="HTTP ERROR "+httpstatus;
+		    if(httpstatus>400){msghttp="http "+httpstatus;
 			   //alert("http "+httpstatus);alert(xmlhttp.responseText);
 			   if(tloading>0.1){
 			      setTimeout("if(tloading>0.1 && httpstatus>400){tloading=0;};",18000);}}}
@@ -3223,9 +3223,9 @@ function httpGet2(url,callback)
 	xmlhttp2.onreadystatechange=function()
     {
 		if(xmlhttp2.readyState>=0){httpstatus2=xmlhttp2.status;
-		    if(httpstatus2>400){msghttp2="HTTP2 ERROR "+httpstatus2;asksethttp=1;}}
+		    if(httpstatus2>400){msghttp2="http2 "+httpstatus2;asksethttp=1;}}
 		if(xmlhttp2.readyState==4){httpstatus2=xmlhttp2.status;
-		    if(httpstatus2>400){msghttp2="HTTP2 ERROR "+httpstatus2;
+		    if(httpstatus2>400){msghttp2="http2 "+httpstatus2;
 			   //alert("http2 "+httpstatus2);
 			   if(tloading2>0.1){
 			      setTimeout("if(tloading2>0.1 && httpstatus2>400){tloading2=0;};",8000);}}}
@@ -3328,7 +3328,7 @@ function waycallback(r){//alert(r);
   if(nairport>0 || ntower>0 || nbridge>0){setTimeout("getnodes3();",300);}
   else{iport=0;setTimeout("getnodes();",300);}//tloading=0;}
 }
-var mynnode=1000,myinode=0,mynodeid=[],mynodelat=[],mynodelon=[];
+var mynnode=1500,myinode=0,mynodeid=[],mynodelat=[],mynodelon=[];
 for(var i=0;i<=mynnode;i++){mynodeid[i]=0;mynodelat[i]=-89.1;mynodelon[i]=-179.1;}
 function addmynode(id,latx,lngx){
 for(var i=1;i<=mynnode;i++){
@@ -3816,6 +3816,15 @@ for(var i=0;i<noverpassurl;i++){
 }
 return overpassurl[ioverpassurl];
 }
+var ioverpassurl1=0,ioverpassurl2=1;
+function getoverpassurl1(){
+ioverpassurl1+=1;if(ioverpassurl1>=noverpassurl){ioverpassurl1=0;}
+return overpassurl[ioverpassurl1];
+}
+function getoverpassurl2(){
+ioverpassurl2+=1;if(ioverpassurl2>=noverpassurl){ioverpassurl2=0;}
+return overpassurl[ioverpassurl2];
+}
 var tsethttp=0,asksethttp=0;
 function sethttp(){
 if(tframe<tsethttp){return;}
@@ -3828,10 +3837,10 @@ if(document.location.href.indexOf("https")>=0){
 if(http=="https:"){overpass="//overpass-api.de/api/";
                    overpass2="//overpass.osm.rambler.ru/cgi/";
 				   return;}
-if(overpass==""){overpass=getoverpassurl();}//"//overpass-api.de/api/";
-if(overpass2==""){overpass2=getoverpassurl();}//"//overpass.osm.rambler.ru/cgi/";}
-if(httpstatus>400){overpass=getoverpassurl();httpstatus=0;}
-if(httpstatus2>400){overpass2=getoverpassurl();httpstatus2=0;}
+if(overpass==""){overpass=getoverpassurl1();}//"//overpass-api.de/api/";
+if(overpass2==""){overpass2=getoverpassurl2();}//"//overpass.osm.rambler.ru/cgi/";}
+if(httpstatus>400){overpass=getoverpassurl1();httpstatus=0;}
+if(httpstatus2>400){overpass2=getoverpassurl2();httpstatus2=0;}
 //alert(overpass+" "+httpstatus+"  "+overpass2+" "+httpstatus2);
 }
 sethttp();

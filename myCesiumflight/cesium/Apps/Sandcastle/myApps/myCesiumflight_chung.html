@@ -83,6 +83,13 @@ if(myurl.indexOf("localhost:8080")<0 && myurl.indexOf("file:")>=0){
           <option id="tajmahal">tajmahal</option>
      </select>
 </div>
+<div>
+	<select id="terrain" onChange="subcomboterrain();" onblur="" onfocus="">
+          <option id="stk">stk terrain</option>
+          <option id="ellipsoid">ellipsoid</option>
+          <option id="vrterrain">vr terrain</option>
+     </select>
+</div>
 	<div id="msgradio" style="width:220px;">msgradio</div>
 	<br />
 </div>
@@ -349,12 +356,28 @@ myviewer=viewer;
 myCesium=Cesium;
 //myviewer.Scene.contextOptions.webgl.alpha=true;
 //myviewer.Scene.creditContainer=document.getElementById("credit");
-var cesiumTerrainProviderMeshes = new Cesium.CesiumTerrainProvider({
+cesiumTerrainProviderMeshes = new Cesium.CesiumTerrainProvider({
     url : 'https://assets.agi.com/stk-terrain/world',
     requestWaterMask : true,
     requestVertexNormals : true
 });
-viewer.terrainProvider = cesiumTerrainProviderMeshes;
+// setup alternative terrain providers
+ellipsoidProvider = new Cesium.EllipsoidTerrainProvider({
+    requestWaterMask : true,
+    requestVertexNormals : true
+});
+
+vrTheWorldProvider = new Cesium.VRTheWorldTerrainProvider({
+    url : 'http://www.vr-theworld.com/vr-theworld/tiles1.0.0/73/',
+    requestWaterMask : true,
+    requestVertexNormals : true,
+    credit : 'Terrain data courtesy VT MÄK'
+});
+iterrain=0;loadstorage('iterrain','iterrain');
+document.getElementById('terrain').selectedIndex=iterrain;
+if(iterrain==0){myviewer.terrainProvider= cesiumTerrainProviderMeshes;}
+if(iterrain==1){myviewer.terrainProvider= ellipsoidProvider;}
+if(iterrain==2){myviewer.terrainProvider= vrTheWorldProvider;}
 viewer.scene.globe.enableLighting = false;
 viewer.scene.fog.enabled = false;
 
@@ -602,7 +625,8 @@ viewer.clock.onTick.addEventListener(function(clock) {
     	myCesium.TerrainProvider.heightmapTerrainQuality=terrainquality/10.0;}
 
 }
-var quit=0,crlf=String.fromCharCode(10),auxvar=null,auxvar2=null,auxvar3=null,auxvar4=null;
+var quit=0,crlf=String.fromCharCode(10);
+var auxvar=null,auxvar2=null,auxvar3=null,auxvar4=null,auxvar5=null;
 var tframe=0,tframe0=0,tfps=30,fps=10,dtime=1,tmsg=0,tskip=0,itime=0,avgfps=10;
 var cos1=1,sin1=0,cos2=1,sin2=0,cos3=1,sin3=0,v=120/2,klon=1,movexyz=0,tourelle=0,iview=2;
 var flaps=0;
@@ -633,6 +657,7 @@ if(auxvar){msg3+=" aux="+auxvar;}
 if(auxvar2){msg3+=" aux2="+auxvar2;}
 if(auxvar3){msg3+=" aux3="+auxvar3;}
 if(auxvar4){msg3+=" aux4="+auxvar4;}
+if(auxvar5){msg3+=" aux5="+auxvar5;}
 document.getElementById('msg2').innerHTML=msg2;
 document.getElementById('msg3').innerHTML=msg3;
 document.getElementById('msghttp').innerHTML=msghttp;
@@ -758,8 +783,7 @@ if(okinit>=1 && spotb){okinit=2;
 			  }
 }
 function subtest(){
-//getways2();return;
-thour+=3;if(thour>24){thour-=24;};setsun();return;
+//thour+=3;if(thour>24){thour-=24;};setsun();return;
 //addaircraft();return;
 alert(port0name+"/ "+port1name+" /"+port2name+" /"+port3name);
 }
@@ -1266,6 +1290,15 @@ myviewer.camera.setView({
 setklon();
 subfocus();
 }
+var iterrain=1;
+var cesiumTerrainProviderMeshes,ellipsoidProvider,vrTheWorldProvider;
+function subcomboterrain(){
+iterrain=document.getElementById('terrain').selectedIndex;
+if(iterrain==0){myviewer.terrainProvider= cesiumTerrainProviderMeshes;}
+if(iterrain==1){myviewer.terrainProvider= ellipsoidProvider;}
+if(iterrain==2){myviewer.terrainProvider= vrTheWorldProvider;}
+subfocus();
+}
 function subfocus(){
 //document.getElementById('msg').focus();
 myviewer.canvas.focus();
@@ -1462,9 +1495,97 @@ return mymesh;
 }
 var mybridgeredappearance,mybridgeorangeappearance,mybridgegreenappearance;
 var mybuildappearance,mybuildappearance2;
+var sp;
 function initmyappearance(){
+
 		mybridgeredappearance = new myCesium.MaterialAppearance({
 		   //translucent : false,
+		   //fragmentShaderSource : 
+/*'varying vec3 v_positionEC;'+
+'varying vec3 v_normalEC;'+
+/*'varying vec3 v_tangentEC;'+
+'varying vec3 v_binormalEC;'+
+'varying vec2 v_st;'+
+'void main(){'+
+'    vec3 positionToEyeEC = -v_positionEC;'+ 
+//'    mat3 tangentToEyeMatrix = czm_tangentToEyeSpaceMatrix(v_normalEC, v_tangentEC, v_binormalEC);'+
+''+
+'    vec3 normalEC = normalize(v_normalEC);'+
+//#ifdef FACE_FORWARD  
+//'    normalEC = faceforward(normalEC, vec3(0.0, 0.0, 1.0), -normalEC);'+
+//#endif  
+''+
+'    czm_materialInput materialInput;'+
+'    materialInput.normalEC = normalEC;'+
+//'    materialInput.tangentToEyeMatrix = tangentToEyeMatrix;'+
+//'    materialInput.positionToEyeEC = positionToEyeEC;'+
+'    materialInput.st = v_st;'+
+'    czm_material material = czm_getMaterial(materialInput);'+
+'    if(material.alpha<0.5){discard;};'+
+//#ifdef FLAT    
+//'    gl_FragColor = vec4(material.diffuse + material.emission, material.alpha);'+
+//#else  
+'    gl_FragColor = czm_phong(normalize(positionToEyeEC), material);'+
+//#endif 
+'}'
+		      ,
+		   /*fragmentshadersource
+varying vec3 v_positionEC;
+varying vec3 v_normalEC;
+varying vec3 v_tangentEC;
+varying vec3 v_binormalEC;
+varying vec2 v_st;
+
+void main()
+{
+    vec3 positionToEyeEC = -v_positionEC; 
+    mat3 tangentToEyeMatrix = czm_tangentToEyeSpaceMatrix(v_normalEC, v_tangentEC, v_binormalEC);
+
+    vec3 normalEC = normalize(v_normalEC);
+#ifdef FACE_FORWARD
+    normalEC = faceforward(normalEC, vec3(0.0, 0.0, 1.0), -normalEC);
+#endif
+
+    czm_materialInput materialInput;
+    materialInput.normalEC = normalEC;
+    materialInput.tangentToEyeMatrix = tangentToEyeMatrix;
+    materialInput.positionToEyeEC = positionToEyeEC;
+    materialInput.st = v_st;
+    czm_material material = czm_getMaterial(materialInput);
+    
+#ifdef FLAT    
+    gl_FragColor = vec4(material.diffuse + material.emission, material.alpha);
+#else
+    gl_FragColor = czm_phong(normalize(positionToEyeEC), material);
+#endif
+}
+*/
+		   /*vertexShaderSource:
+attribute vec3 position3DHigh;
+attribute vec3 position3DLow;
+attribute vec3 normal;
+attribute vec3 tangent;
+attribute vec3 binormal;
+attribute vec2 st;
+
+varying vec3 v_positionEC;
+varying vec3 v_normalEC;
+varying vec3 v_tangentEC;
+varying vec3 v_binormalEC;
+varying vec2 v_st;
+
+void main() 
+{
+    vec4 p = czm_computePosition();
+
+    v_positionEC = (czm_modelViewRelativeToEye * p).xyz;      // position in eye coordinates
+    v_normalEC = czm_normal * normal;                         // normal in eye coordinates
+    v_tangentEC = czm_normal * tangent;                       // tangent in eye coordinates
+    v_binormalEC = czm_normal * binormal;                     // binormal in eye coordinates
+    v_st = st;
+    
+    gl_Position = czm_modelViewProjectionRelativeToEye * p;
+}		   //,*/
 		   material : new myCesium.Material({
 		       fabric : {
                    type : 'Image',
@@ -1474,6 +1595,7 @@ function initmyappearance(){
 			   }
 			  })
 			});
+		//alert(mybridgeredappearance.getFragmentShaderSource());
 		mybridgeorangeappearance = new myCesium.MaterialAppearance({
 		   //translucent : false,
 		   material : new myCesium.Material({
@@ -3064,9 +3186,9 @@ function httpGet(url,callback)
 	xmlhttp.onreadystatechange=function()
     {
 		if(xmlhttp.readyState>=0){httpstatus=xmlhttp.status;
-		    if(httpstatus>400){msghttp="HTTP ERROR "+httpstatus;sethttp();}}
+		    if(httpstatus>400){msghttp="http "+httpstatus;asksethttp=1;}}
 		if(xmlhttp.readyState==4){httpstatus=xmlhttp.status;
-		    if(httpstatus>400){msghttp="HTTP ERROR "+httpstatus;
+		    if(httpstatus>400){msghttp="http "+httpstatus;
 			   //alert("http "+httpstatus);alert(xmlhttp.responseText);
 			   if(tloading>0.1){
 			      setTimeout("if(tloading>0.1 && httpstatus>400){tloading=0;};",18000);}}}
@@ -3101,9 +3223,9 @@ function httpGet2(url,callback)
 	xmlhttp2.onreadystatechange=function()
     {
 		if(xmlhttp2.readyState>=0){httpstatus2=xmlhttp2.status;
-		    if(httpstatus2>400){msghttp2="HTTP2 ERROR "+httpstatus2;sethttp();}}
+		    if(httpstatus2>400){msghttp2="http2 "+httpstatus2;asksethttp=1;}}
 		if(xmlhttp2.readyState==4){httpstatus2=xmlhttp2.status;
-		    if(httpstatus2>400){msghttp2="HTTP2 ERROR "+httpstatus2;
+		    if(httpstatus2>400){msghttp2="http2 "+httpstatus2;
 			   //alert("http2 "+httpstatus2);
 			   if(tloading2>0.1){
 			      setTimeout("if(tloading2>0.1 && httpstatus2>400){tloading2=0;};",8000);}}}
@@ -3142,7 +3264,7 @@ function nodecallback(r){//alert(r);
    }}
   if(nodes.length>jnode && iport>3){
    for(var i=nodes.length-1;i>=jnode;i-=1){
-   var node=(nodes[i]);
+   var node=(nodes[i]);// add nearest
    if(node.tags){
       if(node.tags.name){var name=node.tags.name;
 	   var dx=Math.max(Math.abs(node.lon-lng)/klon,Math.abs(node.lat-lat));
@@ -3206,6 +3328,30 @@ function waycallback(r){//alert(r);
   if(nairport>0 || ntower>0 || nbridge>0){setTimeout("getnodes3();",300);}
   else{iport=0;setTimeout("getnodes();",300);}//tloading=0;}
 }
+var mynnode=1500,myinode=0,mynodeid=[],mynodelat=[],mynodelon=[];
+for(var i=0;i<=mynnode;i++){mynodeid[i]=0;mynodelat[i]=-89.1;mynodelon[i]=-179.1;}
+function addmynode(id,latx,lngx){
+for(var i=1;i<=mynnode;i++){
+  if(mynodeid[i]==id){return;}
+}
+auxvar5=myinode;
+var dlat=20*360/40000,dlon=dlat*klon;
+for(var i=1;i<=mynnode;i++){
+  myinode+=1;if(myinode>=mynnode){myinode=1;}
+  if(Math.abs(mynodelat[myinode]-y)>dlat || Math.abs(mynodelon[myinode]-x)>dlon){
+     mynodeid[myinode]=id;mynodelat[myinode]=latx;mynodelon[myinode]=lngx;
+	 return;
+  }
+}
+}
+function getmyinode(id){
+  var j=myinode+1;
+  for(var i=0;i<mynnode;i++){
+    j-=1;if(j<1){j=mynnode;}
+	if(mynodeid[j]==id){return j;}
+  }
+  return 0;
+}
 var nodejson3,nodes3=[],latnodes=[],lonnodes=[];
 function nodecallback3(r){//alert(r);
   nodejson3=JSON.parse(r);
@@ -3223,24 +3369,43 @@ function nodecallback3(r){//alert(r);
 	 latnodes[inode]=nodes3[i].lat;
      lonnodes[inode]=nodes3[i].lon;
 	 }
+	auxvar5=myinode;
   iport=0;
   //port0x=-199;port1x=-199;port2x=-199;port3x=-199;  
   for(var i=1;i<=nairport;i++){
      var inode=airportnode[i],inodemid=airportnodemid[i];
 	 if(latnodes[inode]){
+	    addmynode(inode,latnodes[inode],lonnodes[inode]);
 	    msg+=" /"+airportname[i];
 	    if(iport==0){port0x=lonnodes[inode];port0y=latnodes[inode];port0name=airportname[i];port0inter=airportinter[i];}
 	    if(iport==1){port1x=lonnodes[inode];port1y=latnodes[inode];port1name=airportname[i];port1inter=airportinter[i];}
 	    if(iport==2){port2x=lonnodes[inode];port2y=latnodes[inode];port2name=airportname[i];port2inter=airportinter[i];}
 	    if(iport==3){port3x=lonnodes[inode];port3y=latnodes[inode];port3name=airportname[i];port3inter=airportinter[i];}
 	    if(latnodes[inodemid]){
+     	 addmynode(inodemid,latnodes[inodemid],lonnodes[inodemid]);
 	     if(iport==0){port0x=(port0x+lonnodes[inodemid])/2;port0y=(port0y+latnodes[inodemid])/2;}
 	     if(iport==1){port1x=(port1x+lonnodes[inodemid])/2;port1y=(port1y+latnodes[inodemid])/2;}
 	     if(iport==2){port2x=(port2x+lonnodes[inodemid])/2;port2y=(port2y+latnodes[inodemid])/2;}
 	     if(iport==3){port3x=(port3x+lonnodes[inodemid])/2;port3y=(port3y+latnodes[inodemid])/2;}
 		}
 		iport+=1;if(iport>3){break;}
-	 }
+	 }else{
+	 var jnode=getmyinode(inode);
+	 if(jnode>0){
+	    msg+=" /"+airportname[i];
+	    if(iport==0){port0x=mynodelon[jnode];port0y=mynodelat[jnode];port0name=airportname[i];port0inter=airportinter[i];}
+	    if(iport==1){port1x=mynodelon[jnode];port1y=mynodelat[jnode];port1name=airportname[i];port1inter=airportinter[i];}
+	    if(iport==2){port2x=mynodelon[jnode];port2y=mynodelat[jnode];port2name=airportname[i];port2inter=airportinter[i];}
+	    if(iport==3){port3x=mynodelon[jnode];port3y=mynodelat[jnode];port3name=airportname[i];port3inter=airportinter[i];}
+	    var jnodemid=getmyinode(inodemid);
+		if(jnodemid>0){
+	     if(iport==0){port0x=(port0x+mynodelon[jnodemid])/2;port0y=(port0y+mynodelat[jnodemid])/2;}
+	     if(iport==1){port1x=(port1x+mynodelon[jnodemid])/2;port1y=(port1y+mynodelat[jnodemid])/2;}
+	     if(iport==2){port2x=(port2x+mynodelon[jnodemid])/2;port2y=(port2y+mynodelat[jnodemid])/2;}
+	     if(iport==3){port3x=(port3x+mynodelon[jnodemid])/2;port3y=(port3y+mynodelat[jnodemid])/2;}
+		}
+		iport+=1;if(iport>3){break;}
+	 }}
   }
   //towerportx=-199;
   var dist=25000;
@@ -3248,6 +3413,7 @@ function nodecallback3(r){//alert(r);
     for(var i=1;i<=ntower;i++){ 
      var inode=towernode[i];
 	 if(latnodes[inode]){var xx=lonnodes[inode],yy=latnodes[inode];
+            addmynode(inode,latnodes[inode],lonnodes[inode]);
 	        if(Math.max(Math.abs(xx-towerportx)/klon,Math.abs(yy-towerporty))*scale>4000){
 			   var dist2=Math.max(Math.abs(xx-x)/klon,Math.abs(yy-y));
 			   if(dist2<dist){
@@ -3256,9 +3422,27 @@ function nodecallback3(r){//alert(r);
 				  var inodemid=towernodemid[i];
 				  towerportwidth=1.0;
 				  if(latnodes[inodemid]){var xxx=lonnodes[inodemid],yyy=latnodes[inodemid];
+	                 addmynode(inodemid,latnodes[inodemid],lonnodes[inodemid]);
 				     var dxx=Math.max(Math.abs(xxx-xx)/klon,Math.abs(yyy-yy))*40000.0/360;
 				     towerportwidth=Math.max(1.0,dxx/0.017);}
-				  }}}}
+				  }}
+	 }else{var jnode=getmyinode(inode);
+	   if(jnode>0){var xx=mynodelon[jnode],yy=mynodelat[jnode];
+	        if(Math.max(Math.abs(xx-towerportx)/klon,Math.abs(yy-towerporty))*scale>4000){
+			   var dist2=Math.max(Math.abs(xx-x)/klon,Math.abs(yy-y));
+			   if(dist2<dist){
+			      dist=dist2;
+				  towerportx=xx;towerporty=yy;
+				  var inodemid=towernodemid[i];
+				  towerportwidth=1.0;
+				  var jnodemid=getmyinode(inodemid);
+				  if(jnodemid>0){var xxx=mynodelon[jnodemid],yyy=mynodelat[jnodemid];
+				     var dxx=Math.max(Math.abs(xxx-xx)/klon,Math.abs(yyy-yy))*40000.0/360;
+				     towerportwidth=Math.max(1.0,dxx/0.017);}
+				  }}
+	   }
+	 }
+	}
   }  
   //tower2portx=-199;
   dist=25000;
@@ -3274,9 +3458,27 @@ function nodecallback3(r){//alert(r);
 				  var inodemid=towernodemid[i];
 				  tower2portwidth=1.0;
 				  if(latnodes[inodemid]){var xxx=lonnodes[inodemid],yyy=latnodes[inodemid];
+                 	 addmynode(inodemid,latnodes[inodemid],lonnodes[inodemid]);
 				     var dxx=Math.max(Math.abs(xxx-xx)/klon,Math.abs(yyy-yy))*40000.0/360;
 				     tower2portwidth=Math.max(1.0,dxx/0.017);}
-				  }}}}
+				  }}
+	 }else{var jnode=getmyinode(inode);
+	   if(jnode>0){var xx=mynodelon[jnode],yy=mynodelat[jnode];
+	        if(Math.max(Math.abs(xx-towerportx)/klon,Math.abs(yy-towerporty))*scale>4000){
+			   var dist2=Math.max(Math.abs(xx-x)/klon,Math.abs(yy-y));
+			   if(dist2<dist){
+			      dist=dist2;
+				  tower2portx=xx;tower2porty=yy;
+				  var inodemid=towernodemid[i];
+				  tower2portwidth=1.0;
+				  var jnodemid=getmyinode(inodemid);
+				  if(jnodemid>0){var xxx=mynodelon[jnodemid],yyy=mynodelat[jnodemid];
+				     var dxx=Math.max(Math.abs(xxx-xx)/klon,Math.abs(yyy-yy))*40000.0/360;
+				     tower2portwidth=Math.max(1.0,dxx/0.017);}
+				  }}
+		}
+	 }
+	}
   }  
   if(nbridge>=1 && okinit>=1 && tgetterrainheightbridge<tframe-20000){
     tgetterrainheightbridge=tframe;
@@ -3285,14 +3487,17 @@ function nodecallback3(r){//alert(r);
     for(var i=1;i<=nbridge;i++){
      var inode=bridgenode[i];
 	 if(latnodes[inode]){var xx=lonnodes[inode],yy=latnodes[inode];
+	   addmynode(inode,latnodes[inode],lonnodes[inode]);
        var inodemid=bridgenodemid[i];
 	   if(latnodes[inodemid]){var xxx=lonnodes[inodemid],yyy=latnodes[inodemid];
 	     //jbridgemesh+=1;
 		 //var ii=jbridgemesh-1;
+	     addmynode(inodemid,latnodes[inodemid],lonnodes[inodemid]);
 		 var dx=(xxx-xx)/klon,dy=yyy-yy;
 		 var bridgemeshscalexii=Math.sqrt(dx*dx*100+dy*dy*100)*klon/(20*0.230*360/40000);
          var inodemid2=bridgenodemid2[i];
 		 if(latnodes[inodemid2]){var xxxx=lonnodes[inodemid2],yyyy=latnodes[inodemid2];
+        	addmynode(inodemid2,latnodes[inodemid2],lonnodes[inodemid2]);
 		    var dx2=(xxxx-xx)/klon,dy2=yyyy-yy;
 		    var bridgemeshscalexii2=Math.sqrt(dx2*dx2*100+dy2*dy2*100)*klon/(20*0.230*360/40000);
 			if(bridgemeshscalexii<bridgemeshscalexii2){bridgemeshscalexii=bridgemeshscalexii2;
@@ -3308,7 +3513,37 @@ function nodecallback3(r){//alert(r);
 		 //}else{bridgemeshx[ii]=-180.0;
 		 //      jbridgemesh-=1;}
 		 }
-		 }}}
+		 }
+	   }else{var jnode=getmyinode(inode);
+	    if(jnode>0){var xx=mynodelon[jnode],yy=mynodelat[jnode];
+        var inodemid=bridgenodemid[i];
+		var jnodemid=getmyinode(inodemid);
+	    if(jnodemid>0){var xxx=mynodelon[jnodemid],yyy=mynodelat[jnodemid];
+	     //jbridgemesh+=1;
+		 //var ii=jbridgemesh-1;
+		 var dx=(xxx-xx)/klon,dy=yyy-yy;
+		 var bridgemeshscalexii=Math.sqrt(dx*dx*100+dy*dy*100)*klon/(20*0.230*360/40000);
+         var inodemid2=bridgenodemid2[i];
+		 var jnodemid2=getmyinode(inodemid2);
+		 if(jnodemid2>0){var xxxx=mynodelon[jnodemid2],yyyy=mynodelat[jnodemid2];
+		    var dx2=(xxxx-xx)/klon,dy2=yyyy-yy;
+		    var bridgemeshscalexii2=Math.sqrt(dx2*dx2*100+dy2*dy2*100)*klon/(20*0.230*360/40000);
+			if(bridgemeshscalexii<bridgemeshscalexii2){bridgemeshscalexii=bridgemeshscalexii2;
+			                      xxx=xxxx;yyy=yyyy;dx=dx2;dy=dy2;}
+			}
+		 if(bridgemeshscalexii>0.55){//0.55
+		    var bridgemeshxii=(xx+xxx)*0.5;
+		    var bridgemeshyii=(yy+yyy)*0.5;
+		    var bridgemesho1ii=-diro1(dx*10000,dy*10000)+4/bridgemeshscalexii;
+			var iid=bridgeid[i];
+            //bridgemeshscale[ii]=new myCesium.Cartesian3(bridgemeshscalex[ii],bridgemeshscaley[ii],bridgemeshscalez[ii]);
+			testaddbridgemesh(iid,bridgemeshxii,bridgemeshyii,bridgemesho1ii,bridgemeshscalexii);
+		 //}else{bridgemeshx[ii]=-180.0;
+		 //      jbridgemesh-=1;}
+		 }
+		 }}
+	   }
+	}
 	 auxvar2=ibridgemesh;
 	 var distmax=600*360.0/40000,nbridges=0;
 	 for(var i=0;i<nbridgemesh;i++){
@@ -3581,10 +3816,20 @@ for(var i=0;i<noverpassurl;i++){
 }
 return overpassurl[ioverpassurl];
 }
-var tsethttp=0;
+var ioverpassurl1=0,ioverpassurl2=1;
+function getoverpassurl1(){
+ioverpassurl1+=1;if(ioverpassurl1>=noverpassurl){ioverpassurl1=0;}
+return overpassurl[ioverpassurl1];
+}
+function getoverpassurl2(){
+ioverpassurl2+=1;if(ioverpassurl2>=noverpassurl){ioverpassurl2=0;}
+return overpassurl[ioverpassurl2];
+}
+var tsethttp=0,asksethttp=0;
 function sethttp(){
 if(tframe<tsethttp){return;}
-tsethttp=tframe+2000;
+tsethttp=tframe+8000;
+asksethttp=0;
 http="http:";
 if(document.location.href.indexOf("https")>=0){
    http="https:";}
@@ -3592,10 +3837,10 @@ if(document.location.href.indexOf("https")>=0){
 if(http=="https:"){overpass="//overpass-api.de/api/";
                    overpass2="//overpass.osm.rambler.ru/cgi/";
 				   return;}
-if(overpass==""){overpass=getoverpassurl();}//"//overpass-api.de/api/";
-if(overpass2==""){overpass2=getoverpassurl();}//"//overpass.osm.rambler.ru/cgi/";}
-if(httpstatus>400){setTimeout('overpass=getoverpassurl();httpstatus=0;',1000);}
-if(httpstatus2>400){setTimeout('overpass2=getoverpassurl();httpstatus2=0;',1000);}
+if(overpass==""){overpass=getoverpassurl1();}//"//overpass-api.de/api/";
+if(overpass2==""){overpass2=getoverpassurl2();}//"//overpass.osm.rambler.ru/cgi/";}
+if(httpstatus>400){overpass=getoverpassurl1();httpstatus=0;}
+if(httpstatus2>400){overpass2=getoverpassurl2();httpstatus2=0;}
 //alert(overpass+" "+httpstatus+"  "+overpass2+" "+httpstatus2);
 }
 sethttp();
@@ -3629,6 +3874,7 @@ httpGet(nodeurl,nodecallback);
 function getways(){
 if(tframe<tloading){return;}
 tloading=tframe+70000;
+if(asksethttp==1){sethttp();}
 var dx=18*360/40000;
 lng=x;lat=y;
 var lat1=lat-dx,lon1=lng-dx*klon;
@@ -3664,20 +3910,22 @@ httpGet(wayurl,waycallback);
 function getnodes3(){
 var nodeurl3=http+overpass+"interpreter?data=[out:json];%28";
 for(var i=1;i<=nairport;i++){
-    nodeurl3+="node("+airportnode[i]+")";
-    nodeurl3+=";node("+airportnodemid[i]+")";
-	if(i<nairport || ntower>=1 || nbridge>=1){nodeurl3+=";";}
+    if(getmyinode(airportnode[i])<1){nodeurl3+="node("+airportnode[i]+");";}
+    if(getmyinode(airportnodemid[i])<1){nodeurl3+="node("+airportnodemid[i]+");";}
+	//if(i<nairport || ntower>=1 || nbridge>=1){nodeurl3+=";";
 	}
 for(var i=1;i<=ntower;i++){
-    nodeurl3+="node("+towernode[i]+")";
-    nodeurl3+=";node("+towernodemid[i]+")";
-	if(i<ntower || nbridge>=1){nodeurl3+=";";}
+    if(getmyinode(towernode[i])<1){nodeurl3+="node("+towernode[i]+");";}
+    if(getmyinode(towernodemid[i])<1){nodeurl3+="node("+towernodemid[i]+");";}
+	//if(i<ntower || nbridge>=1){nodeurl3+=";";
 	}
 for(var i=1;i<=nbridge;i++){
-    nodeurl3+="node("+bridgenode[i]+")";
-    nodeurl3+=";node("+bridgenodemid[i]+")";
+    if(getmyinode(bridgenode[i])<1){nodeurl3+="node("+bridgenode[i]+");";}
+    if(getmyinode(bridgenodemid[i])<1){nodeurl3+="node("+bridgenodemid[i]+");";}
 	if(nodeurl3.length>1900){break;}
-	if(i<nbridge){nodeurl3+=";";}
+    if(getmyinode(bridgenodemid2[i])<1){nodeurl3+="node("+bridgenodemid2[i]+");";}
+	if(nodeurl3.length>1900){break;}
+	//if(i<nbridge){nodeurl3+=";";
 	}
 var dx=2*360/40000;
 var dx1=dx+(z-zsol)*0.0015*360/40000;
@@ -3685,7 +3933,7 @@ dx=1.0*360/40000;
 var lat11=lat-dx+dx1*sin1,lon11=lng-dx*klon+dx1*klon*cos1;
 var lat21=lat+dx+dx1*sin1,lon21=lng+dx*klon+dx1*klon*cos1;
 var latlon1="%28"+lat11+"%2C"+lon11+"%2C"+lat21+"%2C"+lon21+"%29";
-nodeurl3+=";node"+latlon1;
+nodeurl3+="node"+latlon1;
 nodeurl3+="%29%3Bout%20qt%20skel%2025999%3B";
 try{		
 httpGet(nodeurl3,nodecallback3);
