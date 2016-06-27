@@ -1682,7 +1682,7 @@ tgetterrainheightbuild=0;
 function updatebuildmesh0(){
 var distmax=18*360/40000;
 for(var i=0;i<nbuildmesh;i++){
- if(buildmeshx[i]<-179){buildmesh[i].show=false;}
+ if(buildmeshx[i]<-179 || tbuilding==0){buildmesh[i].show=false;}
  else if(buildmeshh[i]<=1){buildmesh[i].show=false;}
  else{
   var test=0,dx=(buildmeshx[i]-x)/klon,dy=buildmeshy[i]-y;
@@ -3904,7 +3904,7 @@ else if(confirm("set radio on ?")){tradio=1;}
 }
 function subbuilding(){
 if(tbuilding==1){if(confirm("set buildings off ?")){tbuilding=0;
-   //for(var i=0;i<nbuildtower;i++){buildtower[i].billboard.show=false;}
+   for(var i=0;i<nbuildmesh;i++){buildmesh[i].show=false;}
    }}
 else if(confirm("set buildings on ?")){tbuilding=1;}
 }
