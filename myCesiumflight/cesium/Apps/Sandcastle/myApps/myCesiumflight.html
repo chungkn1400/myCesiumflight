@@ -3261,7 +3261,7 @@ function nodecallback(r){//alert(r);
   try{nodejson=JSON.parse(r);}catch(e){}
   var msg="";
   nodes=[];
-  if(nodejson.elements){nodes=nodejson.elements;}
+  if(nodejson.elements){nodes=nodejson.elements;}else{overpass=getoverpassurl1();}
   msg+="len="+nodes.length;
   //port0x=-199;port1x=-199;port2x=-199;port3x=-199;
   //iport=0; 
@@ -3310,7 +3310,7 @@ function waycallback(r){//alert(r);
   nairport=0;ntower=0;nbridge=0;
   ways=[];airportname=[];airportnode=[];towernode=[];airportinter=[];towernodemid=[];
   bridgenode=[];bridgenodemid=[];bridgenodemid2=[];bridgeid=[];airportnodemid=[];
-  if(wayjson.elements){ways=wayjson.elements;}
+  if(wayjson.elements){ways=wayjson.elements;}else{overpass=getoverpassurl1();}
   msg+="len="+ways.length;
   if(ways.length>0){
   for(var i=0;i<ways.length;i++){
@@ -3375,7 +3375,7 @@ function nodecallback3(r){//alert(r);
   try{nodejson3=JSON.parse(r);}catch(e){}
   var msg="";
   nodes3=[];latnodes=[];lonnodes=[];
-  if(nodejson3.elements){nodes3=nodejson3.elements;}
+  if(nodejson3.elements){nodes3=nodejson3.elements;}else{overpass=getoverpassurl1();}
   msg+="len3="+nodes3.length;//auxvar3=nodes3.length;
   for(var i=0;i<nodes3.length;i++){
      /*if(i<5){
@@ -3713,13 +3713,13 @@ var dx=(xxmid-xx)/klon,dy=yymid-yy;
 buildw[j]=Math.sqrt(dx*dx+dy*dy)*40000000/360;
 }
 function waycallback2(r){//alert(r);
-  wayjson2=JSON.parse(r);
+  try{wayjson2=JSON.parse(r);}catch(e){}
   var msg="",test=0,h=0,hbuild=0,test2=0,test3=0,tcomm=0;
   iicomm=0;
   iibuild=0;
   ways2=[];buildi=[];buildhi=[];buildnode=[];buildnodemid=[];
   buildi2=[];buildhi2=[];buildcomm=[];
-  if(wayjson2.elements){ways2=wayjson2.elements;}
+  if(wayjson2.elements){ways2=wayjson2.elements;}else{overpass2=getoverpassurl2();}
   msg+="len="+ways2.length;
   if(ways2.length>0){
   for(var i=0;i<ways2.length;i++){
@@ -3746,11 +3746,11 @@ function waycallback2(r){//alert(r);
   tcomm=2;//alert("test3="+test3);
   var i=test,hh=40,i50=Math.min(90,70+iicomm);
   //iicomm=test3;
-  if(i>100){while(i>100){hh+=10;i=0;for(var j=1;j<=test;j++){if(buildhi[j]>hh){i+=1;}}}}
+  if(i>100){while(i>100){hh+=hh*0.1;i=0;for(var j=1;j<=test;j++){if(buildhi[j]>hh){i+=1;}}}}
   else if(i<i50){for(var j=1;j<=test2;j++){buildi[j]=buildi2[j];buildhi[j]=buildhi2[j];}
        test=test2;tcomm=1;
        while(i<i50 && hh>20){
-	      hh-=5;i=0;for(var j=1;j<=test;j++){if(buildhi[j]>hh || buildcomm[i]==tcomm){i+=1;}}}}
+	      hh-=hh*0.1;i=0;for(var j=1;j<=test;j++){if(buildhi[j]>hh || buildcomm[i]==tcomm){i+=1;}}}}
   i=0;for(var j=1;j<=test;j++){if(buildhi[j]>hh || buildcomm[j]==tcomm){
            var testadd=1;
 		   var node0=ways2[buildi[j]].nodes[0];
@@ -3775,11 +3775,11 @@ else{setTimeout("tloading2=0;",300);}
 }
 var nodejson2,nodes2=[],latnodes2=[],lonnodes2=[];
 function nodecallback2(r){//alert(r);
-  nodejson2=JSON.parse(r);
+  try{nodejson2=JSON.parse(r);}catch(e){}
   var msg="";
   nodes2=[];
   latnodes2=[];lonnodes2=[];
-  if(nodejson2.elements){nodes2=nodejson2.elements;}
+  if(nodejson2.elements){nodes2=nodejson2.elements;}else{overpass2=getoverpassurl2();}
   msg+="len2="+nodes2.length;
   for(var i=0;i<nodes2.length;i++){
 	 var inode=nodes2[i].id; 
@@ -3791,10 +3791,10 @@ setTimeout("getnodes22();",300);
 }
 var nodejson22,nodes22=[];
 function nodecallback22(r){//alert(r);
-  nodejson22=JSON.parse(r);
+  try{nodejson22=JSON.parse(r);}catch(e){}
   var msg="";
   nodes22=[];
-  if(nodejson22.elements){nodes22=nodejson22.elements;}
+  if(nodejson22.elements){nodes22=nodejson22.elements;}else{overpass2=getoverpassurl2();}
   msg+="len22="+nodes22.length;
   for(var i=0;i<nodes22.length;i++){
 	 var inode=nodes22[i].id; 
@@ -3991,10 +3991,10 @@ var nodeurl2=http+overpass2+"interpreter?data=[out:json];%28";
 iibuild2=0;
 for(var i=1;i<=iibuild;i++){
     iibuild2=i;
-	nodeurl2+="node("+buildnode[i]+")";
-    nodeurl2+=";node("+buildnodemid[i]+")";
+	nodeurl2+="node("+buildnode[i]+");";
+    nodeurl2+="node("+buildnodemid[i]+");";
 	if(nodeurl2.length>1900){break;}
-	if(i<iibuild){nodeurl2+=";";}
+	//if(i<iibuild){nodeurl2+=";";}
 	}
 nodeurl2+="%29%3Bout%20skel%20199%3B";
 try{		
@@ -4015,10 +4015,10 @@ if(iibuild2>=iibuild){
 tloading2=tframe+70000;
 var nodeurl22=http+overpass2+"interpreter?data=[out:json];%28";
 for(var i=iibuild2+1;i<=iibuild;i++){
-    nodeurl22+="node("+buildnode[i]+")";
-    nodeurl22+=";node("+buildnodemid[i]+")";
+    nodeurl22+="node("+buildnode[i]+");";
+    nodeurl22+="node("+buildnodemid[i]+");";
 	if(nodeurl22.length>1900){break;}
-	if(i<iibuild){nodeurl22+=";";}
+	//if(i<iibuild){nodeurl22+=";";}
 	}
 nodeurl22+="%29%3Bout%20skel%20199%3B";
 try{		
