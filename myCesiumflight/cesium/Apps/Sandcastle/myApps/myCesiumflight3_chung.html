@@ -29,9 +29,9 @@ if(myurl.indexOf("localhost:8080")<0 && myurl.indexOf("file:")>=0){
 </head>
 <body class="sandcastle-loading" data-sandcastle-bucket="bucket-requirejs.html" onunload="subunload();" >
 <!--style>
+    @import url(../Build/Cesium/Widgets/widgets.css);
 <-->
 <style>
-    @import url(../Build/Cesium/Widgets/widgets.css);
     @import url(../templates/bucket.css);
     #cesiumContainer {
           width: 98%;
@@ -81,6 +81,13 @@ if(myurl.indexOf("localhost:8080")<0 && myurl.indexOf("file:")>=0){
           <option id="le caire">le caire</option>
           <option id="washington">washington</option>
           <option id="tajmahal">tajmahal</option>
+     </select>
+</div>
+<div>
+	<select id="terrain" onChange="subcomboterrain();" onblur="" onfocus="">
+          <option id="stk">stk terrain</option>
+          <option id="ellipsoid">ellipsoid</option>
+          <option id="vrterrain">vr terrain</option>
      </select>
 </div>
 	<div id="msgradio" style="width:220px;">msgradio</div>
@@ -142,8 +149,10 @@ var apikey='&key=AIzaSyAH372ZH8QSQgRHsqdtqNxkLVpcp_XUUkE';
 <script src="http://chungkn1400.github.io/myCesiumflight/myCesiumflight/cesium/Apps/Sandcastle/myApps/building128png.js" ></script>
 <script src="http://chungkn1400.github.io/myCesiumflight/myCesiumflight/cesium/Apps/Sandcastle/myApps/models/ballonobjtxt.js" ></script>
 <script src="http://chungkn1400.github.io/myCesiumflight/myCesiumflight/cesium/Apps/Sandcastle/myApps/models/ballonjpg.js" ></script>
-<!--script src="http://localhost:8080/Apps/Sandcastle/gallery/models/ballonobjtxt.js" ></script>
-<script src="http://localhost:8080/Apps/Sandcastle/gallery/models/ballonjpg.js" ></script-->
+<script src="http://chungkn1400.github.io/myCesiumflight/myCesiumflight/cesium/Apps/Sandcastle/myApps/building128bluepng.js" ></script>
+<script src="http://chungkn1400.github.io/myCesiumflight/myCesiumflight/cesium/Apps/Sandcastle/myApps/building128blue2png.js" ></script>
+<!--script src="http://localhost:8080/Apps/Sandcastle/gallery/building128bluepng.js" ></script-->
+<!--script src="http://localhost:8080/Apps/Sandcastle/gallery/models/ballonjpg.js" ></script-->
 <script id="webaudio" >
 try{if(localStorage){};}catch(e){localStorage=null;alert("localStorage is not supported");};
 var twebaudio=1;
@@ -349,12 +358,28 @@ myviewer=viewer;
 myCesium=Cesium;
 //myviewer.Scene.contextOptions.webgl.alpha=true;
 //myviewer.Scene.creditContainer=document.getElementById("credit");
-var cesiumTerrainProviderMeshes = new Cesium.CesiumTerrainProvider({
+cesiumTerrainProviderMeshes = new Cesium.CesiumTerrainProvider({
     url : 'https://assets.agi.com/stk-terrain/world',
     requestWaterMask : true,
     requestVertexNormals : true
 });
-viewer.terrainProvider = cesiumTerrainProviderMeshes;
+// setup alternative terrain providers
+ellipsoidProvider = new Cesium.EllipsoidTerrainProvider({
+    requestWaterMask : true,
+    requestVertexNormals : true
+});
+
+vrTheWorldProvider = new Cesium.VRTheWorldTerrainProvider({
+    url : 'http://www.vr-theworld.com/vr-theworld/tiles1.0.0/73/',
+    requestWaterMask : true,
+    requestVertexNormals : true,
+    credit : 'Terrain data courtesy VT MÄK'
+});
+iterrain=0;loadstorage('iterrain','iterrain');
+document.getElementById('terrain').selectedIndex=iterrain;
+if(iterrain==0){myviewer.terrainProvider= cesiumTerrainProviderMeshes;}
+if(iterrain==1){myviewer.terrainProvider= ellipsoidProvider;}
+if(iterrain==2){myviewer.terrainProvider= vrTheWorldProvider;}
 viewer.scene.globe.enableLighting = false;
 viewer.scene.fog.enabled = false;
 
@@ -602,7 +627,8 @@ viewer.clock.onTick.addEventListener(function(clock) {
     	myCesium.TerrainProvider.heightmapTerrainQuality=terrainquality/10.0;}
 
 }
-var quit=0,crlf=String.fromCharCode(10),auxvar=null,auxvar2=null,auxvar3=null,auxvar4=null;
+var quit=0,crlf=String.fromCharCode(10);
+var auxvar=null,auxvar2=null,auxvar3=null,auxvar4=null,auxvar5=null,auxvar6=null;
 var tframe=0,tframe0=0,tfps=30,fps=10,dtime=1,tmsg=0,tskip=0,itime=0,avgfps=10;
 var cos1=1,sin1=0,cos2=1,sin2=0,cos3=1,sin3=0,v=120/2,klon=1,movexyz=0,tourelle=0,iview=2;
 var flaps=0;
@@ -633,6 +659,8 @@ if(auxvar){msg3+=" aux="+auxvar;}
 if(auxvar2){msg3+=" aux2="+auxvar2;}
 if(auxvar3){msg3+=" aux3="+auxvar3;}
 if(auxvar4){msg3+=" aux4="+auxvar4;}
+if(auxvar5){msg3+=" aux5="+auxvar5;}
+if(auxvar6){msg3+=" aux6="+auxvar6;}
 document.getElementById('msg2').innerHTML=msg2;
 document.getElementById('msg3').innerHTML=msg3;
 document.getElementById('msghttp').innerHTML=msghttp;
@@ -758,14 +786,13 @@ if(okinit>=1 && spotb){okinit=2;
 			  }
 }
 function subtest(){
-//getways2();return;
-thour+=3;if(thour>24){thour-=24;};setsun();return;
+//thour+=3;if(thour>24){thour-=24;};setsun();return;
 //addaircraft();return;
 alert(port0name+"/ "+port1name+" /"+port2name+" /"+port3name);
 }
 var wayx=-199,wayy=0,waytime=0,tupdatebridge=0,tnearbridge=0;
 function testgetways(){
-if(tframe>waytime+8000){
+if(tframe>waytime+8000 && Math.abs(sin3)<0.45){
  var dx=1.5*360/40000;
  var xx=x+cos1*dx*klon,yy=y+sin1*dx;
  var d800=Math.min(800,200+z-zsol);
@@ -1266,6 +1293,15 @@ myviewer.camera.setView({
 setklon();
 subfocus();
 }
+var iterrain=1;
+var cesiumTerrainProviderMeshes,ellipsoidProvider,vrTheWorldProvider;
+function subcomboterrain(){
+iterrain=document.getElementById('terrain').selectedIndex;
+if(iterrain==0){myviewer.terrainProvider= cesiumTerrainProviderMeshes;}
+if(iterrain==1){myviewer.terrainProvider= ellipsoidProvider;}
+if(iterrain==2){myviewer.terrainProvider= vrTheWorldProvider;}
+subfocus();
+}
 function subfocus(){
 //document.getElementById('msg').focus();
 myviewer.canvas.focus();
@@ -1461,10 +1497,98 @@ var mymesh=new myCesium.Primitive({
 return mymesh;
 }
 var mybridgeredappearance,mybridgeorangeappearance,mybridgegreenappearance;
-var mybuildappearance,mybuildappearance2;
+var mybuildappearance,mybuildappearance1,mybuildappearance2;
+var sp;
 function initmyappearance(){
+
 		mybridgeredappearance = new myCesium.MaterialAppearance({
 		   //translucent : false,
+		   //fragmentShaderSource : 
+/*'varying vec3 v_positionEC;'+
+'varying vec3 v_normalEC;'+
+/*'varying vec3 v_tangentEC;'+
+'varying vec3 v_binormalEC;'+
+'varying vec2 v_st;'+
+'void main(){'+
+'    vec3 positionToEyeEC = -v_positionEC;'+ 
+//'    mat3 tangentToEyeMatrix = czm_tangentToEyeSpaceMatrix(v_normalEC, v_tangentEC, v_binormalEC);'+
+''+
+'    vec3 normalEC = normalize(v_normalEC);'+
+//#ifdef FACE_FORWARD  
+//'    normalEC = faceforward(normalEC, vec3(0.0, 0.0, 1.0), -normalEC);'+
+//#endif  
+''+
+'    czm_materialInput materialInput;'+
+'    materialInput.normalEC = normalEC;'+
+//'    materialInput.tangentToEyeMatrix = tangentToEyeMatrix;'+
+//'    materialInput.positionToEyeEC = positionToEyeEC;'+
+'    materialInput.st = v_st;'+
+'    czm_material material = czm_getMaterial(materialInput);'+
+'    if(material.alpha<0.5){discard;};'+
+//#ifdef FLAT    
+//'    gl_FragColor = vec4(material.diffuse + material.emission, material.alpha);'+
+//#else  
+'    gl_FragColor = czm_phong(normalize(positionToEyeEC), material);'+
+//#endif 
+'}'
+		      ,
+		   /*fragmentshadersource
+varying vec3 v_positionEC;
+varying vec3 v_normalEC;
+varying vec3 v_tangentEC;
+varying vec3 v_binormalEC;
+varying vec2 v_st;
+
+void main()
+{
+    vec3 positionToEyeEC = -v_positionEC; 
+    mat3 tangentToEyeMatrix = czm_tangentToEyeSpaceMatrix(v_normalEC, v_tangentEC, v_binormalEC);
+
+    vec3 normalEC = normalize(v_normalEC);
+#ifdef FACE_FORWARD
+    normalEC = faceforward(normalEC, vec3(0.0, 0.0, 1.0), -normalEC);
+#endif
+
+    czm_materialInput materialInput;
+    materialInput.normalEC = normalEC;
+    materialInput.tangentToEyeMatrix = tangentToEyeMatrix;
+    materialInput.positionToEyeEC = positionToEyeEC;
+    materialInput.st = v_st;
+    czm_material material = czm_getMaterial(materialInput);
+    
+#ifdef FLAT    
+    gl_FragColor = vec4(material.diffuse + material.emission, material.alpha);
+#else
+    gl_FragColor = czm_phong(normalize(positionToEyeEC), material);
+#endif
+}
+*/
+		   /*vertexShaderSource:
+attribute vec3 position3DHigh;
+attribute vec3 position3DLow;
+attribute vec3 normal;
+attribute vec3 tangent;
+attribute vec3 binormal;
+attribute vec2 st;
+
+varying vec3 v_positionEC;
+varying vec3 v_normalEC;
+varying vec3 v_tangentEC;
+varying vec3 v_binormalEC;
+varying vec2 v_st;
+
+void main() 
+{
+    vec4 p = czm_computePosition();
+
+    v_positionEC = (czm_modelViewRelativeToEye * p).xyz;      // position in eye coordinates
+    v_normalEC = czm_normal * normal;                         // normal in eye coordinates
+    v_tangentEC = czm_normal * tangent;                       // tangent in eye coordinates
+    v_binormalEC = czm_normal * binormal;                     // binormal in eye coordinates
+    v_st = st;
+    
+    gl_Position = czm_modelViewProjectionRelativeToEye * p;
+}		   //,*/
 		   material : new myCesium.Material({
 		       fabric : {
                    type : 'Image',
@@ -1474,6 +1598,7 @@ function initmyappearance(){
 			   }
 			  })
 			});
+		//alert(mybridgeredappearance.getFragmentShaderSource());
 		mybridgeorangeappearance = new myCesium.MaterialAppearance({
 		   //translucent : false,
 		   material : new myCesium.Material({
@@ -1496,13 +1621,24 @@ function initmyappearance(){
 			   }
 			  })
 			});
+		mybuildappearance1 = new myCesium.MaterialAppearance({
+		   //translucent : false,
+		   material : new myCesium.Material({
+		       fabric : {
+                   type : 'Image',
+                   uniforms : {
+		              image : building128blue2png
+                   }
+			   }
+			  })
+			});
 		mybuildappearance2 = new myCesium.MaterialAppearance({
 		   //translucent : false,
 		   material : new myCesium.Material({
 		       fabric : {
                    type : 'Image',
                    uniforms : {
-		              image : building128png
+		              image : building128bluepng
                    }
 			   }
 			  })
@@ -1668,6 +1804,7 @@ for(var i=0;i<nbuildmesh;i++){
  buildmesh[i].color=buildmeshcolor[i];
  if(buildmeshcolor[i]==1){buildmesh[i].appearance=mybuildappearance;}
  else if(buildmeshcolor[i]==2){buildmesh[i].appearance=mybuildappearance2;}
+ else if(buildmeshcolor[i]==3){buildmesh[i].appearance=mybuildappearance1;}
  }
 }
 var tgetterrainheightbuild=0;
@@ -1704,9 +1841,10 @@ for(var i=0;i<nbuildmesh;i++){
    if(buildmeshchanged[i]==1){
       buildmeshchanged[i]=0;
 	  buildmeshscale[i]=new myCesium.Cartesian3(buildmeshscalex[i],buildmeshscaley[i],buildmeshscalez[i]);
-      buildmesh[i].color=buildmeshcolor[i];
+      buildmesh[i].color=buildmeshcolor[i]; 
       if(buildmeshcolor[i]==1){buildmesh[i].appearance=mybuildappearance;}
       else if(buildmeshcolor[i]==2){buildmesh[i].appearance=mybuildappearance2;}
+      else if(buildmeshcolor[i]==3){buildmesh[i].appearance=mybuildappearance1;}
 	  }
    myCesium.Matrix4.multiplyByScale(
 	         myCesium.Transforms.headingPitchRollToFixedFrame(position, heading, pitch, roll),
@@ -2481,10 +2619,13 @@ if(tloading2<tframe){
     if(Math.abs(buildmeshscalex[i]-scx)+
        Math.abs(buildmeshscaley[i]-scy)+
 	   Math.abs(buildmeshscalez[i]-scz)>0.0001){buildmeshchanged[i]=1;}
-	if(buildh[i]>19.1){buildmeshcolor[i]=1;}
+	if(buildh[i]>19.1){
+	   if(((parseInt(buildh[i]*0.2))%3)<1.1){buildmeshcolor[i]=1;}
+	   else{buildmeshcolor[i]=3;}}
 	else{buildmeshcolor[i]=2;}
     if(buildmeshcolor[i]==1){buildmesh[i].appearance=mybuildappearance;}
     else if(buildmeshcolor[i]==2){buildmesh[i].appearance=mybuildappearance2;}
+    else if(buildmeshcolor[i]==3){buildmesh[i].appearance=mybuildappearance1;}
  }}}
 }else{tupdatebuildmesh=1;}
 }
@@ -3064,12 +3205,12 @@ function httpGet(url,callback)
 	xmlhttp.onreadystatechange=function()
     {
 		if(xmlhttp.readyState>=0){httpstatus=xmlhttp.status;
-		    if(httpstatus>400){msghttp="HTTP ERROR "+httpstatus;sethttp();}}
+		    if(httpstatus>400){msghttp="http "+httpstatus;asksethttp=1;}}
 		if(xmlhttp.readyState==4){httpstatus=xmlhttp.status;
-		    if(httpstatus>400){msghttp="HTTP ERROR "+httpstatus;
+		    if(httpstatus>400){msghttp="http "+httpstatus;
 			   //alert("http "+httpstatus);alert(xmlhttp.responseText);
 			   if(tloading>0.1){
-			      setTimeout("if(tloading>0.1 && httpstatus>400){tloading=0;};",18000);}}}
+			      setTimeout("if(tloading>0.1 && httpstatus>400){tloading=0;};",8000);}}}
         if(xmlhttp.readyState==4 && xmlhttp.status==200){msghttp="";
 		                                                 callback(xmlhttp.responseText);}
     }	
@@ -3101,9 +3242,9 @@ function httpGet2(url,callback)
 	xmlhttp2.onreadystatechange=function()
     {
 		if(xmlhttp2.readyState>=0){httpstatus2=xmlhttp2.status;
-		    if(httpstatus2>400){msghttp2="HTTP2 ERROR "+httpstatus2;sethttp();}}
+		    if(httpstatus2>400){msghttp2="http2 "+httpstatus2;asksethttp=1;}}
 		if(xmlhttp2.readyState==4){httpstatus2=xmlhttp2.status;
-		    if(httpstatus2>400){msghttp2="HTTP2 ERROR "+httpstatus2;
+		    if(httpstatus2>400){msghttp2="http2 "+httpstatus2;
 			   //alert("http2 "+httpstatus2);
 			   if(tloading2>0.1){
 			      setTimeout("if(tloading2>0.1 && httpstatus2>400){tloading2=0;};",8000);}}}
@@ -3118,10 +3259,10 @@ var airportinter=[],port0inter="",port1inter="",port2inter="",port3inter="";
 var ntower=0,towernode=[],towernodemid=[],airportnodemid=[];
 var nbridge=0,bridgenode=[],bridgenodemid=[],bridgenodemid2=[],bridgeid=[];
 function nodecallback(r){//alert(r);
-  nodejson=JSON.parse(r);
+  try{nodejson=JSON.parse(r);}catch(e){}
   var msg="";
   nodes=[];
-  if(nodejson.elements){nodes=nodejson.elements;}
+  if(nodejson.elements){nodes=nodejson.elements;}else{overpass=getoverpassurl1();}
   msg+="len="+nodes.length;
   //port0x=-199;port1x=-199;port2x=-199;port3x=-199;
   //iport=0; 
@@ -3142,7 +3283,7 @@ function nodecallback(r){//alert(r);
    }}
   if(nodes.length>jnode && iport>3){
    for(var i=nodes.length-1;i>=jnode;i-=1){
-   var node=(nodes[i]);
+   var node=(nodes[i]);// add nearest
    if(node.tags){
       if(node.tags.name){var name=node.tags.name;
 	   var dx=Math.max(Math.abs(node.lon-lng)/klon,Math.abs(node.lat-lat));
@@ -3165,12 +3306,13 @@ function nodecallback(r){//alert(r);
   setTimeout("tloading=0;",300);
 }
 function waycallback(r){//alert(r);
-  wayjson=JSON.parse(r);
+  dtweb=timer()-dtweb;
+  try{wayjson=JSON.parse(r);}catch(e){}
   var msg="",test=0;
   nairport=0;ntower=0;nbridge=0;
   ways=[];airportname=[];airportnode=[];towernode=[];airportinter=[];towernodemid=[];
   bridgenode=[];bridgenodemid=[];bridgenodemid2=[];bridgeid=[];airportnodemid=[];
-  if(wayjson.elements){ways=wayjson.elements;}
+  if(wayjson.elements){ways=wayjson.elements;}else{overpass=getoverpassurl1();}
   msg+="len="+ways.length;
   if(ways.length>0){
   for(var i=0;i<ways.length;i++){
@@ -3206,12 +3348,36 @@ function waycallback(r){//alert(r);
   if(nairport>0 || ntower>0 || nbridge>0){setTimeout("getnodes3();",300);}
   else{iport=0;setTimeout("getnodes();",300);}//tloading=0;}
 }
+var mynnode=1500,myinode=0,mynodeid=[],mynodelat=[],mynodelon=[];
+for(var i=0;i<=mynnode;i++){mynodeid[i]=0;mynodelat[i]=-89.1;mynodelon[i]=-179.1;}
+function addmynode(id,latx,lngx){
+for(var i=1;i<=mynnode;i++){
+  if(mynodeid[i]==id){return;}
+}
+auxvar5=myinode;
+var dlat=20*360/40000,dlon=dlat*klon;
+for(var i=1;i<=mynnode;i++){
+  myinode+=1;if(myinode>=mynnode){myinode=1;}
+  if(Math.abs(mynodelat[myinode]-y)>dlat || Math.abs(mynodelon[myinode]-x)>dlon){
+     mynodeid[myinode]=id;mynodelat[myinode]=latx;mynodelon[myinode]=lngx;
+	 return;
+  }
+}
+}
+function getmyinode(id){
+  var j=myinode+1;
+  for(var i=0;i<mynnode;i++){
+    j-=1;if(j<1){j=mynnode;}
+	if(mynodeid[j]==id){return j;}
+  }
+  return 0;
+}
 var nodejson3,nodes3=[],latnodes=[],lonnodes=[];
 function nodecallback3(r){//alert(r);
-  nodejson3=JSON.parse(r);
+  try{nodejson3=JSON.parse(r);}catch(e){}
   var msg="";
   nodes3=[];latnodes=[];lonnodes=[];
-  if(nodejson3.elements){nodes3=nodejson3.elements;}
+  if(nodejson3.elements){nodes3=nodejson3.elements;}else{overpass=getoverpassurl1();}
   msg+="len3="+nodes3.length;//auxvar3=nodes3.length;
   for(var i=0;i<nodes3.length;i++){
      /*if(i<5){
@@ -3223,24 +3389,43 @@ function nodecallback3(r){//alert(r);
 	 latnodes[inode]=nodes3[i].lat;
      lonnodes[inode]=nodes3[i].lon;
 	 }
+	auxvar5=myinode;
   iport=0;
   //port0x=-199;port1x=-199;port2x=-199;port3x=-199;  
   for(var i=1;i<=nairport;i++){
      var inode=airportnode[i],inodemid=airportnodemid[i];
 	 if(latnodes[inode]){
+	    addmynode(inode,latnodes[inode],lonnodes[inode]);
 	    msg+=" /"+airportname[i];
 	    if(iport==0){port0x=lonnodes[inode];port0y=latnodes[inode];port0name=airportname[i];port0inter=airportinter[i];}
 	    if(iport==1){port1x=lonnodes[inode];port1y=latnodes[inode];port1name=airportname[i];port1inter=airportinter[i];}
 	    if(iport==2){port2x=lonnodes[inode];port2y=latnodes[inode];port2name=airportname[i];port2inter=airportinter[i];}
 	    if(iport==3){port3x=lonnodes[inode];port3y=latnodes[inode];port3name=airportname[i];port3inter=airportinter[i];}
 	    if(latnodes[inodemid]){
+     	 addmynode(inodemid,latnodes[inodemid],lonnodes[inodemid]);
 	     if(iport==0){port0x=(port0x+lonnodes[inodemid])/2;port0y=(port0y+latnodes[inodemid])/2;}
 	     if(iport==1){port1x=(port1x+lonnodes[inodemid])/2;port1y=(port1y+latnodes[inodemid])/2;}
 	     if(iport==2){port2x=(port2x+lonnodes[inodemid])/2;port2y=(port2y+latnodes[inodemid])/2;}
 	     if(iport==3){port3x=(port3x+lonnodes[inodemid])/2;port3y=(port3y+latnodes[inodemid])/2;}
 		}
 		iport+=1;if(iport>3){break;}
-	 }
+	 }else{
+	 var jnode=getmyinode(inode);
+	 if(jnode>0){
+	    msg+=" /"+airportname[i];
+	    if(iport==0){port0x=mynodelon[jnode];port0y=mynodelat[jnode];port0name=airportname[i];port0inter=airportinter[i];}
+	    if(iport==1){port1x=mynodelon[jnode];port1y=mynodelat[jnode];port1name=airportname[i];port1inter=airportinter[i];}
+	    if(iport==2){port2x=mynodelon[jnode];port2y=mynodelat[jnode];port2name=airportname[i];port2inter=airportinter[i];}
+	    if(iport==3){port3x=mynodelon[jnode];port3y=mynodelat[jnode];port3name=airportname[i];port3inter=airportinter[i];}
+	    var jnodemid=getmyinode(inodemid);
+		if(jnodemid>0){
+	     if(iport==0){port0x=(port0x+mynodelon[jnodemid])/2;port0y=(port0y+mynodelat[jnodemid])/2;}
+	     if(iport==1){port1x=(port1x+mynodelon[jnodemid])/2;port1y=(port1y+mynodelat[jnodemid])/2;}
+	     if(iport==2){port2x=(port2x+mynodelon[jnodemid])/2;port2y=(port2y+mynodelat[jnodemid])/2;}
+	     if(iport==3){port3x=(port3x+mynodelon[jnodemid])/2;port3y=(port3y+mynodelat[jnodemid])/2;}
+		}
+		iport+=1;if(iport>3){break;}
+	 }}
   }
   //towerportx=-199;
   var dist=25000;
@@ -3248,6 +3433,7 @@ function nodecallback3(r){//alert(r);
     for(var i=1;i<=ntower;i++){ 
      var inode=towernode[i];
 	 if(latnodes[inode]){var xx=lonnodes[inode],yy=latnodes[inode];
+            addmynode(inode,latnodes[inode],lonnodes[inode]);
 	        if(Math.max(Math.abs(xx-towerportx)/klon,Math.abs(yy-towerporty))*scale>4000){
 			   var dist2=Math.max(Math.abs(xx-x)/klon,Math.abs(yy-y));
 			   if(dist2<dist){
@@ -3256,9 +3442,27 @@ function nodecallback3(r){//alert(r);
 				  var inodemid=towernodemid[i];
 				  towerportwidth=1.0;
 				  if(latnodes[inodemid]){var xxx=lonnodes[inodemid],yyy=latnodes[inodemid];
+	                 addmynode(inodemid,latnodes[inodemid],lonnodes[inodemid]);
 				     var dxx=Math.max(Math.abs(xxx-xx)/klon,Math.abs(yyy-yy))*40000.0/360;
 				     towerportwidth=Math.max(1.0,dxx/0.017);}
-				  }}}}
+				  }}
+	 }else{var jnode=getmyinode(inode);
+	   if(jnode>0){var xx=mynodelon[jnode],yy=mynodelat[jnode];
+	        if(Math.max(Math.abs(xx-towerportx)/klon,Math.abs(yy-towerporty))*scale>4000){
+			   var dist2=Math.max(Math.abs(xx-x)/klon,Math.abs(yy-y));
+			   if(dist2<dist){
+			      dist=dist2;
+				  towerportx=xx;towerporty=yy;
+				  var inodemid=towernodemid[i];
+				  towerportwidth=1.0;
+				  var jnodemid=getmyinode(inodemid);
+				  if(jnodemid>0){var xxx=mynodelon[jnodemid],yyy=mynodelat[jnodemid];
+				     var dxx=Math.max(Math.abs(xxx-xx)/klon,Math.abs(yyy-yy))*40000.0/360;
+				     towerportwidth=Math.max(1.0,dxx/0.017);}
+				  }}
+	   }
+	 }
+	}
   }  
   //tower2portx=-199;
   dist=25000;
@@ -3274,9 +3478,27 @@ function nodecallback3(r){//alert(r);
 				  var inodemid=towernodemid[i];
 				  tower2portwidth=1.0;
 				  if(latnodes[inodemid]){var xxx=lonnodes[inodemid],yyy=latnodes[inodemid];
+                 	 addmynode(inodemid,latnodes[inodemid],lonnodes[inodemid]);
 				     var dxx=Math.max(Math.abs(xxx-xx)/klon,Math.abs(yyy-yy))*40000.0/360;
 				     tower2portwidth=Math.max(1.0,dxx/0.017);}
-				  }}}}
+				  }}
+	 }else{var jnode=getmyinode(inode);
+	   if(jnode>0){var xx=mynodelon[jnode],yy=mynodelat[jnode];
+	        if(Math.max(Math.abs(xx-towerportx)/klon,Math.abs(yy-towerporty))*scale>4000){
+			   var dist2=Math.max(Math.abs(xx-x)/klon,Math.abs(yy-y));
+			   if(dist2<dist){
+			      dist=dist2;
+				  tower2portx=xx;tower2porty=yy;
+				  var inodemid=towernodemid[i];
+				  tower2portwidth=1.0;
+				  var jnodemid=getmyinode(inodemid);
+				  if(jnodemid>0){var xxx=mynodelon[jnodemid],yyy=mynodelat[jnodemid];
+				     var dxx=Math.max(Math.abs(xxx-xx)/klon,Math.abs(yyy-yy))*40000.0/360;
+				     tower2portwidth=Math.max(1.0,dxx/0.017);}
+				  }}
+		}
+	 }
+	}
   }  
   if(nbridge>=1 && okinit>=1 && tgetterrainheightbridge<tframe-20000){
     tgetterrainheightbridge=tframe;
@@ -3285,14 +3507,17 @@ function nodecallback3(r){//alert(r);
     for(var i=1;i<=nbridge;i++){
      var inode=bridgenode[i];
 	 if(latnodes[inode]){var xx=lonnodes[inode],yy=latnodes[inode];
+	   addmynode(inode,latnodes[inode],lonnodes[inode]);
        var inodemid=bridgenodemid[i];
 	   if(latnodes[inodemid]){var xxx=lonnodes[inodemid],yyy=latnodes[inodemid];
 	     //jbridgemesh+=1;
 		 //var ii=jbridgemesh-1;
+	     addmynode(inodemid,latnodes[inodemid],lonnodes[inodemid]);
 		 var dx=(xxx-xx)/klon,dy=yyy-yy;
 		 var bridgemeshscalexii=Math.sqrt(dx*dx*100+dy*dy*100)*klon/(20*0.230*360/40000);
          var inodemid2=bridgenodemid2[i];
 		 if(latnodes[inodemid2]){var xxxx=lonnodes[inodemid2],yyyy=latnodes[inodemid2];
+        	addmynode(inodemid2,latnodes[inodemid2],lonnodes[inodemid2]);
 		    var dx2=(xxxx-xx)/klon,dy2=yyyy-yy;
 		    var bridgemeshscalexii2=Math.sqrt(dx2*dx2*100+dy2*dy2*100)*klon/(20*0.230*360/40000);
 			if(bridgemeshscalexii<bridgemeshscalexii2){bridgemeshscalexii=bridgemeshscalexii2;
@@ -3308,7 +3533,37 @@ function nodecallback3(r){//alert(r);
 		 //}else{bridgemeshx[ii]=-180.0;
 		 //      jbridgemesh-=1;}
 		 }
-		 }}}
+		 }
+	   }else{var jnode=getmyinode(inode);
+	    if(jnode>0){var xx=mynodelon[jnode],yy=mynodelat[jnode];
+        var inodemid=bridgenodemid[i];
+		var jnodemid=getmyinode(inodemid);
+	    if(jnodemid>0){var xxx=mynodelon[jnodemid],yyy=mynodelat[jnodemid];
+	     //jbridgemesh+=1;
+		 //var ii=jbridgemesh-1;
+		 var dx=(xxx-xx)/klon,dy=yyy-yy;
+		 var bridgemeshscalexii=Math.sqrt(dx*dx*100+dy*dy*100)*klon/(20*0.230*360/40000);
+         var inodemid2=bridgenodemid2[i];
+		 var jnodemid2=getmyinode(inodemid2);
+		 if(jnodemid2>0){var xxxx=mynodelon[jnodemid2],yyyy=mynodelat[jnodemid2];
+		    var dx2=(xxxx-xx)/klon,dy2=yyyy-yy;
+		    var bridgemeshscalexii2=Math.sqrt(dx2*dx2*100+dy2*dy2*100)*klon/(20*0.230*360/40000);
+			if(bridgemeshscalexii<bridgemeshscalexii2){bridgemeshscalexii=bridgemeshscalexii2;
+			                      xxx=xxxx;yyy=yyyy;dx=dx2;dy=dy2;}
+			}
+		 if(bridgemeshscalexii>0.55){//0.55
+		    var bridgemeshxii=(xx+xxx)*0.5;
+		    var bridgemeshyii=(yy+yyy)*0.5;
+		    var bridgemesho1ii=-diro1(dx*10000,dy*10000)+4/bridgemeshscalexii;
+			var iid=bridgeid[i];
+            //bridgemeshscale[ii]=new myCesium.Cartesian3(bridgemeshscalex[ii],bridgemeshscaley[ii],bridgemeshscalez[ii]);
+			testaddbridgemesh(iid,bridgemeshxii,bridgemeshyii,bridgemesho1ii,bridgemeshscalexii);
+		 //}else{bridgemeshx[ii]=-180.0;
+		 //      jbridgemesh-=1;}
+		 }
+		 }}
+	   }
+	}
 	 auxvar2=ibridgemesh;
 	 var distmax=600*360.0/40000,nbridges=0;
 	 for(var i=0;i<nbridgemesh;i++){
@@ -3460,13 +3715,14 @@ var dx=(xxmid-xx)/klon,dy=yymid-yy;
 buildw[j]=Math.sqrt(dx*dx+dy*dy)*40000000/360;
 }
 function waycallback2(r){//alert(r);
-  wayjson2=JSON.parse(r);
+  dtweb2=timer()-dtweb2;
+  try{wayjson2=JSON.parse(r);}catch(e){}
   var msg="",test=0,h=0,hbuild=0,test2=0,test3=0,tcomm=0;
   iicomm=0;
   iibuild=0;
   ways2=[];buildi=[];buildhi=[];buildnode=[];buildnodemid=[];
   buildi2=[];buildhi2=[];buildcomm=[];
-  if(wayjson2.elements){ways2=wayjson2.elements;}
+  if(wayjson2.elements){ways2=wayjson2.elements;}else{overpass2=getoverpassurl2();}
   msg+="len="+ways2.length;
   if(ways2.length>0){
   for(var i=0;i<ways2.length;i++){
@@ -3491,13 +3747,13 @@ function waycallback2(r){//alert(r);
 	  if(h>20 || tcomm==1){test2+=1;buildi2[test2]=i;buildhi2[test2]=h;buildcomm[test2]=tcomm;}
   }}
   tcomm=2;//alert("test3="+test3);
-  var i=test,hh=40,i50=Math.min(70,50+iicomm);
+  var i=test,hh=40,i50=Math.min(90,70+iicomm);
   //iicomm=test3;
-  if(i>100){while(i>100){hh+=10;i=0;for(var j=1;j<=test;j++){if(buildhi[j]>hh){i+=1;}}}}
+  if(i>100){while(i>100){hh+=hh*0.1;i=0;for(var j=1;j<=test;j++){if(buildhi[j]>hh){i+=1;}}}}
   else if(i<i50){for(var j=1;j<=test2;j++){buildi[j]=buildi2[j];buildhi[j]=buildhi2[j];}
        test=test2;tcomm=1;
        while(i<i50 && hh>20){
-	      hh-=5;i=0;for(var j=1;j<=test;j++){if(buildhi[j]>hh || buildcomm[i]==tcomm){i+=1;}}}}
+	      hh-=hh*0.1;i=0;for(var j=1;j<=test;j++){if(buildhi[j]>hh || buildcomm[i]==tcomm){i+=1;}}}}
   i=0;for(var j=1;j<=test;j++){if(buildhi[j]>hh || buildcomm[j]==tcomm){
            var testadd=1;
 		   var node0=ways2[buildi[j]].nodes[0];
@@ -3522,11 +3778,11 @@ else{setTimeout("tloading2=0;",300);}
 }
 var nodejson2,nodes2=[],latnodes2=[],lonnodes2=[];
 function nodecallback2(r){//alert(r);
-  nodejson2=JSON.parse(r);
+  try{nodejson2=JSON.parse(r);}catch(e){}
   var msg="";
   nodes2=[];
   latnodes2=[];lonnodes2=[];
-  if(nodejson2.elements){nodes2=nodejson2.elements;}
+  if(nodejson2.elements){nodes2=nodejson2.elements;}else{overpass2=getoverpassurl2();}
   msg+="len2="+nodes2.length;
   for(var i=0;i<nodes2.length;i++){
 	 var inode=nodes2[i].id; 
@@ -3538,10 +3794,10 @@ setTimeout("getnodes22();",300);
 }
 var nodejson22,nodes22=[];
 function nodecallback22(r){//alert(r);
-  nodejson22=JSON.parse(r);
+  try{nodejson22=JSON.parse(r);}catch(e){}
   var msg="";
   nodes22=[];
-  if(nodejson22.elements){nodes22=nodejson22.elements;}
+  if(nodejson22.elements){nodes22=nodejson22.elements;}else{overpass2=getoverpassurl2();}
   msg+="len22="+nodes22.length;
   for(var i=0;i<nodes22.length;i++){
 	 var inode=nodes22[i].id; 
@@ -3581,10 +3837,22 @@ for(var i=0;i<noverpassurl;i++){
 }
 return overpassurl[ioverpassurl];
 }
-var tsethttp=0;
+var ioverpassurl1=0,ioverpassurl2=1;
+function getoverpassurl1(){
+ioverpassurl1+=1;if(ioverpassurl1>=noverpassurl){ioverpassurl1=0;}
+msghttp="overpass="+ioverpassurl1;
+return overpassurl[ioverpassurl1];
+}
+function getoverpassurl2(){
+ioverpassurl2+=1;if(ioverpassurl2>=noverpassurl){ioverpassurl2=0;}
+msghttp2="overpass2="+ioverpassurl2;
+return overpassurl[ioverpassurl2];
+}
+var tsethttp=0,asksethttp=0;
 function sethttp(){
 if(tframe<tsethttp){return;}
-tsethttp=tframe+2000;
+tsethttp=tframe+8000;
+asksethttp=0;
 http="http:";
 if(document.location.href.indexOf("https")>=0){
    http="https:";}
@@ -3594,18 +3862,23 @@ if(http=="https:"){overpass="//overpass-api.de/api/";
 				   return;}
 if(overpass==""){overpass=getoverpassurl();}//"//overpass-api.de/api/";
 if(overpass2==""){overpass2=getoverpassurl();}//"//overpass.osm.rambler.ru/cgi/";}
-if(httpstatus>400){setTimeout('overpass=getoverpassurl();httpstatus=0;',1000);}
-if(httpstatus2>400){setTimeout('overpass2=getoverpassurl();httpstatus2=0;',1000);}
+if(httpstatus>400){overpass=getoverpassurl();httpstatus=0;
+msghttp="overpass="+ioverpassurl;
+}
+if(httpstatus2>400){overpass2=getoverpassurl();httpstatus2=0;
+msghttp2="overpass2="+ioverpassurl;
+}
 //alert(overpass+" "+httpstatus+"  "+overpass2+" "+httpstatus2);
 }
 sethttp();
-var tloading=0,tloading2=0;
+var tloading=0,tloading2=0,dtweb=0,kdxweb=1,dtweb2=0,kdxweb2=1;
 function getnodes(){
 //if(tframe<tloading){return;}
 tloading=tframe+60000;
 var dx=18*360/40000;
 if(iport>3){dx=Math.min(dx,Math.max(Math.abs(port0x-lng)/klon,Math.abs(port0y-lat)));
             dx=Math.max(7*360/40000,dx);}
+dx*=kdxweb;
 var lat1=lat-dx,lon1=lng-dx*klon;
 var lat2=lat+dx,lon2=lng+dx*klon;
 var latlon="%28"+lat1+"%2C"+lon1+"%2C"+lat2+"%2C"+lon2+"%29";
@@ -3629,12 +3902,15 @@ httpGet(nodeurl,nodecallback);
 function getways(){
 if(tframe<tloading){return;}
 tloading=tframe+70000;
-var dx=18*360/40000;
+if(asksethttp==1){sethttp();}
+if(dtweb>20000){kdxweb=Math.max(0.5,kdxweb*0.7);}
+if(dtweb<15000){kdxweb=Math.min(1.0,kdxweb*1.2);}
+var dx=kdxweb*18*360/40000;
 lng=x;lat=y;
 var lat1=lat-dx,lon1=lng-dx*klon;
 var lat2=lat+dx,lon2=lng+dx*klon;
 var latlon="%28"+lat1+"%2C"+lon1+"%2C"+lat2+"%2C"+lon2+"%29";
-dx=2*360/40000;
+dx=kdxweb*2*360/40000;
 var dx1=dx+(z-zsol)*0.0015*360/40000;
 var lat11=lat-dx+dx1*sin1,lon11=lng-dx*klon+dx1*klon*cos1;
 var lat21=lat+dx+dx1*sin1,lon21=lng+dx*klon+dx1*klon*cos1;
@@ -3657,6 +3933,7 @@ wayurl+="way['man_made'~'bridge']"+latlon1+";";
 wayurl+="way['bridge']"+latlon1+";";
 //wayurl+="way['bridge'][highway~'motorway|trunk|primary']"+latlon1+";";
 wayurl+="%29%3Bout%20qt%20399%3B";
+dtweb=timer();
 try{		
 httpGet(wayurl,waycallback);
 }catch (e){alert("error getways");tloading=0;}
@@ -3664,28 +3941,30 @@ httpGet(wayurl,waycallback);
 function getnodes3(){
 var nodeurl3=http+overpass+"interpreter?data=[out:json];%28";
 for(var i=1;i<=nairport;i++){
-    nodeurl3+="node("+airportnode[i]+")";
-    nodeurl3+=";node("+airportnodemid[i]+")";
-	if(i<nairport || ntower>=1 || nbridge>=1){nodeurl3+=";";}
+    if(getmyinode(airportnode[i])<1){nodeurl3+="node("+airportnode[i]+");";}
+    if(getmyinode(airportnodemid[i])<1){nodeurl3+="node("+airportnodemid[i]+");";}
+	//if(i<nairport || ntower>=1 || nbridge>=1){nodeurl3+=";";
 	}
 for(var i=1;i<=ntower;i++){
-    nodeurl3+="node("+towernode[i]+")";
-    nodeurl3+=";node("+towernodemid[i]+")";
-	if(i<ntower || nbridge>=1){nodeurl3+=";";}
+    if(getmyinode(towernode[i])<1){nodeurl3+="node("+towernode[i]+");";}
+    if(getmyinode(towernodemid[i])<1){nodeurl3+="node("+towernodemid[i]+");";}
+	//if(i<ntower || nbridge>=1){nodeurl3+=";";
 	}
 for(var i=1;i<=nbridge;i++){
-    nodeurl3+="node("+bridgenode[i]+")";
-    nodeurl3+=";node("+bridgenodemid[i]+")";
+    if(getmyinode(bridgenode[i])<1){nodeurl3+="node("+bridgenode[i]+");";}
+    if(getmyinode(bridgenodemid[i])<1){nodeurl3+="node("+bridgenodemid[i]+");";}
 	if(nodeurl3.length>1900){break;}
-	if(i<nbridge){nodeurl3+=";";}
+    if(getmyinode(bridgenodemid2[i])<1){nodeurl3+="node("+bridgenodemid2[i]+");";}
+	if(nodeurl3.length>1900){break;}
+	//if(i<nbridge){nodeurl3+=";";
 	}
-var dx=2*360/40000;
+var dx=kdxweb*2*360/40000;
 var dx1=dx+(z-zsol)*0.0015*360/40000;
 dx=1.0*360/40000;
 var lat11=lat-dx+dx1*sin1,lon11=lng-dx*klon+dx1*klon*cos1;
 var lat21=lat+dx+dx1*sin1,lon21=lng+dx*klon+dx1*klon*cos1;
 var latlon1="%28"+lat11+"%2C"+lon11+"%2C"+lat21+"%2C"+lon21+"%29";
-nodeurl3+=";node"+latlon1;
+nodeurl3+="node"+latlon1;
 nodeurl3+="%29%3Bout%20qt%20skel%2025999%3B";
 try{		
 httpGet(nodeurl3,nodecallback3);
@@ -3693,8 +3972,10 @@ httpGet(nodeurl3,nodecallback3);
 }
 var xgetways2=-89,ygetways2=0,tbuilding=1;
 function testgetways2(){if(tbuilding==0){return;}
-if(tframe<tloading2){return;}
-var dx=3*360/40000,dx1=dx*(0.7+(z-zsol)/500);
+if(tframe<tloading2 || Math.abs(sin3)>0.45){return;}
+if(dtweb2>20000){kdxweb2=Math.max(0.5,kdxweb2*0.7);}
+if(dtweb2<15000){kdxweb2=Math.min(1.0,kdxweb2*1.2);}
+var dx=kdxweb2*3*360/40000,dx1=dx*(0.7+(z-zsol)/500);
 var dxx=(xgetways2-x-dx1*cos1*klon)/klon;
 var dyy=(ygetways2-y-dx1*sin1);
 if(dxx*dxx+dyy*dyy<dx*dx*1.2){return;}
@@ -3712,6 +3993,7 @@ var keyway2="way['building:height']"+latlon2+";way['building']['height']"+latlon
 keyway2+=";way[shop~'mall|supermarket|general|department_store']"+latlon2;
 var wayurl2=http+overpass2+"interpreter?data=[out:json];%28"+keyway2;
 wayurl2+="%29%3Bout%20qt%2079999%3B";
+dtweb2=timer();
 try{		
 httpGet2(wayurl2,waycallback2);
 }catch (e){alert("error getways2");tloading=0;}
@@ -3723,10 +4005,10 @@ var nodeurl2=http+overpass2+"interpreter?data=[out:json];%28";
 iibuild2=0;
 for(var i=1;i<=iibuild;i++){
     iibuild2=i;
-	nodeurl2+="node("+buildnode[i]+")";
-    nodeurl2+=";node("+buildnodemid[i]+")";
+	nodeurl2+="node("+buildnode[i]+");";
+    nodeurl2+="node("+buildnodemid[i]+");";
 	if(nodeurl2.length>1900){break;}
-	if(i<iibuild){nodeurl2+=";";}
+	//if(i<iibuild){nodeurl2+=";";}
 	}
 nodeurl2+="%29%3Bout%20skel%20199%3B";
 try{		
@@ -3747,10 +4029,10 @@ if(iibuild2>=iibuild){
 tloading2=tframe+70000;
 var nodeurl22=http+overpass2+"interpreter?data=[out:json];%28";
 for(var i=iibuild2+1;i<=iibuild;i++){
-    nodeurl22+="node("+buildnode[i]+")";
-    nodeurl22+=";node("+buildnodemid[i]+")";
+    nodeurl22+="node("+buildnode[i]+");";
+    nodeurl22+="node("+buildnodemid[i]+");";
 	if(nodeurl22.length>1900){break;}
-	if(i<iibuild){nodeurl22+=";";}
+	//if(i<iibuild){nodeurl22+=";";}
 	}
 nodeurl22+="%29%3Bout%20skel%20199%3B";
 try{		
