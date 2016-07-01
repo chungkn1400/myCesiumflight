@@ -29,9 +29,9 @@ if(myurl.indexOf("localhost:8080")<0 && myurl.indexOf("file:")>=0){
 </head>
 <body class="sandcastle-loading" data-sandcastle-bucket="bucket-requirejs.html" onunload="subunload();" >
 <!--style>
+    @import url(../Build/Cesium/Widgets/widgets.css);
 <-->
 <style>
-    @import url(../Build/Cesium/Widgets/widgets.css);
     @import url(../templates/bucket.css);
     #cesiumContainer {
           width: 98%;
@@ -3210,7 +3210,7 @@ function httpGet(url,callback)
 		    if(httpstatus>400){msghttp="http "+httpstatus;
 			   //alert("http "+httpstatus);alert(xmlhttp.responseText);
 			   if(tloading>0.1){
-			      setTimeout("if(tloading>0.1 && httpstatus>400){tloading=0;};",18000);}}}
+			      setTimeout("if(tloading>0.1 && httpstatus>400){tloading=0;};",8000);}}}
         if(xmlhttp.readyState==4 && xmlhttp.status==200){msghttp="";
 		                                                 callback(xmlhttp.responseText);}
     }	
@@ -3860,10 +3860,14 @@ if(document.location.href.indexOf("https")>=0){
 if(http=="https:"){overpass="//overpass-api.de/api/";
                    overpass2="//overpass.osm.rambler.ru/cgi/";
 				   return;}
-if(overpass==""){overpass=getoverpassurl1();}//"//overpass-api.de/api/";
-if(overpass2==""){overpass2=getoverpassurl2();}//"//overpass.osm.rambler.ru/cgi/";}
-if(httpstatus>400){overpass=getoverpassurl1();httpstatus=0;}
-if(httpstatus2>400){overpass2=getoverpassurl2();httpstatus2=0;}
+if(overpass==""){overpass=getoverpassurl();}//"//overpass-api.de/api/";
+if(overpass2==""){overpass2=getoverpassurl();}//"//overpass.osm.rambler.ru/cgi/";}
+if(httpstatus>400){overpass=getoverpassurl();httpstatus=0;
+msghttp="overpass="+ioverpassurl;
+}
+if(httpstatus2>400){overpass2=getoverpassurl();httpstatus2=0;
+msghttp2="overpass2="+ioverpassurl;
+}
 //alert(overpass+" "+httpstatus+"  "+overpass2+" "+httpstatus2);
 }
 sethttp();
