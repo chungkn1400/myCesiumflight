@@ -628,7 +628,7 @@ viewer.clock.onTick.addEventListener(function(clock) {
 
 }
 var quit=0,crlf=String.fromCharCode(10);
-var auxvar=null,auxvar2=null,auxvar3=null,auxvar4=null,auxvar5=null;
+var auxvar=null,auxvar2=null,auxvar3=null,auxvar4=null,auxvar5=null,auxvar6=null;
 var tframe=0,tframe0=0,tfps=30,fps=10,dtime=1,tmsg=0,tskip=0,itime=0,avgfps=10;
 var cos1=1,sin1=0,cos2=1,sin2=0,cos3=1,sin3=0,v=120/2,klon=1,movexyz=0,tourelle=0,iview=2;
 var flaps=0;
@@ -660,6 +660,7 @@ if(auxvar2){msg3+=" aux2="+auxvar2;}
 if(auxvar3){msg3+=" aux3="+auxvar3;}
 if(auxvar4){msg3+=" aux4="+auxvar4;}
 if(auxvar5){msg3+=" aux5="+auxvar5;}
+if(auxvar6){msg3+=" aux6="+auxvar6;}
 document.getElementById('msg2').innerHTML=msg2;
 document.getElementById('msg3').innerHTML=msg3;
 document.getElementById('msghttp').innerHTML=msghttp;
@@ -791,7 +792,7 @@ alert(port0name+"/ "+port1name+" /"+port2name+" /"+port3name);
 }
 var wayx=-199,wayy=0,waytime=0,tupdatebridge=0,tnearbridge=0;
 function testgetways(){
-if(tframe>waytime+8000){
+if(tframe>waytime+8000 && Math.abs(sin3)<0.45){
  var dx=1.5*360/40000;
  var xx=x+cos1*dx*klon,yy=y+sin1*dx;
  var d800=Math.min(800,200+z-zsol);
@@ -3305,6 +3306,7 @@ function nodecallback(r){//alert(r);
   setTimeout("tloading=0;",300);
 }
 function waycallback(r){//alert(r);
+  dtweb=timer()-dtweb;
   try{wayjson=JSON.parse(r);}catch(e){}
   var msg="",test=0;
   nairport=0;ntower=0;nbridge=0;
@@ -3713,6 +3715,7 @@ var dx=(xxmid-xx)/klon,dy=yymid-yy;
 buildw[j]=Math.sqrt(dx*dx+dy*dy)*40000000/360;
 }
 function waycallback2(r){//alert(r);
+  dtweb2=timer()-dtweb2;
   try{wayjson2=JSON.parse(r);}catch(e){}
   var msg="",test=0,h=0,hbuild=0,test2=0,test3=0,tcomm=0;
   iicomm=0;
@@ -3864,13 +3867,14 @@ if(httpstatus2>400){overpass2=getoverpassurl2();httpstatus2=0;}
 //alert(overpass+" "+httpstatus+"  "+overpass2+" "+httpstatus2);
 }
 sethttp();
-var tloading=0,tloading2=0;
+var tloading=0,tloading2=0,dtweb=0,kdxweb=1,dtweb2=0,kdxweb2=1;
 function getnodes(){
 //if(tframe<tloading){return;}
 tloading=tframe+60000;
 var dx=18*360/40000;
 if(iport>3){dx=Math.min(dx,Math.max(Math.abs(port0x-lng)/klon,Math.abs(port0y-lat)));
             dx=Math.max(7*360/40000,dx);}
+dx*=kdxweb;
 var lat1=lat-dx,lon1=lng-dx*klon;
 var lat2=lat+dx,lon2=lng+dx*klon;
 var latlon="%28"+lat1+"%2C"+lon1+"%2C"+lat2+"%2C"+lon2+"%29";
@@ -3895,12 +3899,14 @@ function getways(){
 if(tframe<tloading){return;}
 tloading=tframe+70000;
 if(asksethttp==1){sethttp();}
-var dx=18*360/40000;
+if(dtweb>20000){kdxweb=Math.max(0.5,kdxweb*0.7);}
+if(dtweb<15000){kdxweb=Math.min(1.0,kdxweb*1.2);}
+var dx=kdxweb*18*360/40000;
 lng=x;lat=y;
 var lat1=lat-dx,lon1=lng-dx*klon;
 var lat2=lat+dx,lon2=lng+dx*klon;
 var latlon="%28"+lat1+"%2C"+lon1+"%2C"+lat2+"%2C"+lon2+"%29";
-dx=2*360/40000;
+dx=kdxweb*2*360/40000;
 var dx1=dx+(z-zsol)*0.0015*360/40000;
 var lat11=lat-dx+dx1*sin1,lon11=lng-dx*klon+dx1*klon*cos1;
 var lat21=lat+dx+dx1*sin1,lon21=lng+dx*klon+dx1*klon*cos1;
@@ -3923,6 +3929,7 @@ wayurl+="way['man_made'~'bridge']"+latlon1+";";
 wayurl+="way['bridge']"+latlon1+";";
 //wayurl+="way['bridge'][highway~'motorway|trunk|primary']"+latlon1+";";
 wayurl+="%29%3Bout%20qt%20399%3B";
+dtweb=timer();
 try{		
 httpGet(wayurl,waycallback);
 }catch (e){alert("error getways");tloading=0;}
@@ -3947,7 +3954,7 @@ for(var i=1;i<=nbridge;i++){
 	if(nodeurl3.length>1900){break;}
 	//if(i<nbridge){nodeurl3+=";";
 	}
-var dx=2*360/40000;
+var dx=kdxweb*2*360/40000;
 var dx1=dx+(z-zsol)*0.0015*360/40000;
 dx=1.0*360/40000;
 var lat11=lat-dx+dx1*sin1,lon11=lng-dx*klon+dx1*klon*cos1;
@@ -3961,8 +3968,10 @@ httpGet(nodeurl3,nodecallback3);
 }
 var xgetways2=-89,ygetways2=0,tbuilding=1;
 function testgetways2(){if(tbuilding==0){return;}
-if(tframe<tloading2){return;}
-var dx=3*360/40000,dx1=dx*(0.7+(z-zsol)/500);
+if(tframe<tloading2 || Math.abs(sin3)>0.45){return;}
+if(dtweb2>20000){kdxweb2=Math.max(0.5,kdxweb2*0.7);}
+if(dtweb2<15000){kdxweb2=Math.min(1.0,kdxweb2*1.2);}
+var dx=kdxweb2*3*360/40000,dx1=dx*(0.7+(z-zsol)/500);
 var dxx=(xgetways2-x-dx1*cos1*klon)/klon;
 var dyy=(ygetways2-y-dx1*sin1);
 if(dxx*dxx+dyy*dyy<dx*dx*1.2){return;}
@@ -3980,6 +3989,7 @@ var keyway2="way['building:height']"+latlon2+";way['building']['height']"+latlon
 keyway2+=";way[shop~'mall|supermarket|general|department_store']"+latlon2;
 var wayurl2=http+overpass2+"interpreter?data=[out:json];%28"+keyway2;
 wayurl2+="%29%3Bout%20qt%2079999%3B";
+dtweb2=timer();
 try{		
 httpGet2(wayurl2,waycallback2);
 }catch (e){alert("error getways2");tloading=0;}
