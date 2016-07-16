@@ -617,6 +617,7 @@ viewer.clock.onTick.addEventListener(function(clock) {
 	//addbuildtower2();
 	addbuildmesh();
 	loadstoragebuild();
+	loadstorage('tbridge','tbridge');
 	initvars();
 	setTimeout("okinit=1;",8000);
     setTimeout("setsun();",12000);
@@ -687,6 +688,7 @@ msg+="shift+Q => terrain quality"+crlf;
 msg+="shift+B => osm buildings on/off"+crlf;
 msg+="shift+T => change time of day"+crlf;
 msg+="shift+S => shadows on/off"+crlf;
+msg+="shift+P => osm bridges on/off"+crlf;
 alert(msg);
 resetkeys();
 }
@@ -694,6 +696,7 @@ if(keys[vk_escape]){quit=1;subquit();}
 if(keys[vk_9]){subtest();resetkeys();}
 if(keys[vk_s] && keys[vk_shift]){subshadow();resetkeys();}
 if(keys[vk_t] && keys[vk_shift]){thour+=3.125;if(thour>24){thour-=24;};setsun();resetkeys();}
+if(keys[vk_p] && keys[vk_shift]){subbridge();resetkeys();}
 if(keys[vk_b] && keys[vk_shift]){subbuilding();resetkeys();}
 if(keys[vk_q] && keys[vk_shift]){subterrainquality();resetkeys();}
 if(keys[vk_c] && iview==1){subcockpit();resetkeys();}
@@ -1072,6 +1075,7 @@ function subquit(){
   savestorage('aircrafto1',aircrafto1);
   savestorage('terrainquality',terrainquality);
   savestorage('tbuilding',tbuilding);
+  savestorage('tbridge',tbridge);
   savestorage('tshadow',tshadow);
   bridgesave="";for(var i=0;i<nbridgemesh;i++){
    bridgesave+=bridgemeshx[i]+"?"+bridgemeshy[i]+"?"+bridgemesho1[i]+"?"+bridgemeshscalex[i]+"?";}
@@ -1734,7 +1738,7 @@ tloading=0;
 function updatebridge0(){
 var distmax=18*360/40000;
 for(var i=0;i<nbridgemesh;i++){
- if(bridgemeshx[i]<-179){bridgemesh[i].show=false;}
+ if(bridgemeshx[i]<-179 || tbridge==0){bridgemesh[i].show=false;}
  else if(bridgemeshcolor[i]<=0){bridgemesh[i].show=false;}
  else{
   var test=0,dx=(bridgemeshx[i]-x)/klon,dy=bridgemeshy[i]-y;
@@ -4189,6 +4193,12 @@ if(tbuilding==1){if(confirm("set buildings off ?")){tbuilding=0;
    for(var i=0;i<nbuildmesh;i++){buildmesh[i].show=false;}
    }}
 else if(confirm("set buildings on ?")){tbuilding=1;}
+}
+var tbridge=0;
+function subbridge(){
+if(tbridge==1){if(confirm("set bridges off ?")){tbridge=0;
+   }}
+else if(confirm("set bridges on ?")){tbridge=1;}
 }
 //libertystatue
 var lat2=40.689249,lng2=-74.0444999;
