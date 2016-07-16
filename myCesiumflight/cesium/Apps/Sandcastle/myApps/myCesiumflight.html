@@ -780,10 +780,11 @@ if(okinit>=1 && spotb){okinit=2;
    auxvar4=parseInt(Math.max(-1000,(tloading-tframe)/1000));
    auxvar2=iicomm;
    myview();moveaircraft();
-   if(taskgetterrainheightbridge==1){getterrainheightbridge();}
-   testupdatebuildmesh();//before testgetways2()
+   if(tbridge==1 && taskgetterrainheightbridge==1){getterrainheightbridge();}
+   if(tbuilding==1){testupdatebuildmesh();}//before testgetways2()
    testgetways();testradio();
-   testgetweather();testgetways2();
+   testgetweather();
+   if(tbuilding==1){testgetways2();}
    if(tinitterrainheightvars==1){initterrainheightvars();}
           
 			  }
@@ -3933,8 +3934,8 @@ var wayurl=http+overpass+"interpreter?data=[out:json];%28way[aeroway~'aerodrome|
 //var wayurl=http+overpass+"interpreter?data=[out:json];%28node[aeroway~'aerodrome']"+latlon+";";
 //wayurl+="way['bridge:structure']"+latlon1+";";
 //wayurl+="way['man_made'~'bridge'][highway~'motorway|trunk']"+latlon1+";";
-wayurl+="way['man_made'~'bridge']"+latlon1+";";
-wayurl+="way['bridge']"+latlon1+";";
+if(tbridge==1){wayurl+="way['man_made'~'bridge']"+latlon1+";";
+wayurl+="way['bridge']"+latlon1+";";}
 //wayurl+="way['bridge'][highway~'motorway|trunk|primary']"+latlon1+";";
 wayurl+="%29%3Bout%20qt%20399%3B";
 dtweb=timer();
