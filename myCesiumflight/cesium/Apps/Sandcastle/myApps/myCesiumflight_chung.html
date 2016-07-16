@@ -800,6 +800,7 @@ if(tframe>waytime+8000 && Math.abs(sin3)<0.45){
  var dx=1.5*360/40000;
  var xx=x+cos1*dx*klon,yy=y+sin1*dx;
  var d800=Math.min(800,200+z-zsol);
+ if(tbridge==0){d800=2000;}
  if(Math.abs((wayx-xx)*scale/klon)>d800 || Math.abs((wayy-yy)*scale)>d800){
    updatebridge();tupdatebridge=tframe;tnearbridge=0;updatebuildmesh();
    wayx=xx;wayy=yy;waytime=tframe;
