@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <!-- myCesiumflight a program by NGUYEN.Chung (freeware 2016) -->
-<!--script>
+<script>
 var myurl=document.location.href;//autolaunch as localhost:8080 if in local mode
 //http://localhost:8080/  file:///D:/cesium/Apps/Sandcastle/gallery/Camera_.html
 if(myurl.indexOf("localhost:8080")<0 && myurl.indexOf("file:")>=0){
@@ -10,10 +10,10 @@ if(myurl.indexOf("localhost:8080")<0 && myurl.indexOf("file:")>=0){
    var i=myurl.indexOf(folder)+folder.length;
    document.location.href="http://localhost:8080/"+myurl.substr(i,999);
 }
-</script-->
+</script>
 <base href="https://cesiumjs.org/Cesium/Apps/Sandcastle/gallery/"
  >
-<script src="https://chungkn1400.github.io/myCesiumflight/myCesiumflight/cesium/Apps/Sandcastle/myApps/myCesiumheader.js"></script>
+<script src="http://chungkn1400.github.io/myCesiumflight/myCesiumflight/cesium/Apps/Sandcastle/myApps/myCesiumheader.js"></script>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
@@ -349,7 +349,7 @@ var viewer = new Cesium.Viewer('cesiumContainer',{
     sceneModePicker:false,
     timeline:false,
 	creditContainer: document.getElementById("credit"),
-    shadows : false,
+    shadows : true,
     terrainShadows : false,
     contextOptions:{ webgl : { alpha : false, depth : true, stencil : false, antialias : true, premultipliedAlpha : true, preserveDrawingBuffer : false, failIfMajorPerformanceCaveat : false }, allowTextureFilterAnisotropic : true } 
 							   }							   
@@ -383,7 +383,7 @@ if(iterrain==2){myviewer.terrainProvider= vrTheWorldProvider;}
 viewer.scene.globe.enableLighting = false;
 viewer.scene.fog.enabled = false;
 
-/*shadowmap = viewer.shadowMap;
+shadowmap = viewer.shadowMap;
 shadowmap.maxmimumDistance = 4000.0;
 shadowmap.size=1024;
 shadowmap.cascadesEnabled=false;
@@ -391,7 +391,6 @@ shadowmap.darkness=0.33;
 //shadowmap.isPointLight=true;
 tshadow=0;loadstorage('tshadow','tshadow');
 if(tshadow==1){shadowmap.enabled=true;}else{shadowmap.enabled=false;}
-*/
 mydate=new Date();
 myclock = new myCesium.JulianDate.fromDate(mydate);
 //mydate.setHours(17);mydate.setMinutes(45);
@@ -688,14 +687,14 @@ msg+="C => change cockpit"+crlf;
 msg+="shift+Q => terrain quality"+crlf;
 msg+="shift+B => osm buildings on/off"+crlf;
 msg+="shift+T => change time of day"+crlf;
-//msg+="shift+S => shadows on/off"+crlf;
+msg+="shift+S => shadows on/off"+crlf;
 msg+="shift+P => osm bridges on/off"+crlf;
 alert(msg);
 resetkeys();
 }
 if(keys[vk_escape]){quit=1;subquit();}
 if(keys[vk_9]){subtest();resetkeys();}
-//if(keys[vk_s] && keys[vk_shift]){subshadow();resetkeys();}
+if(keys[vk_s] && keys[vk_shift]){subshadow();resetkeys();}
 if(keys[vk_t] && keys[vk_shift]){thour+=3.125;if(thour>24){thour-=24;};setsun();resetkeys();}
 if(keys[vk_p] && keys[vk_shift]){subbridge();resetkeys();}
 if(keys[vk_b] && keys[vk_shift]){subbuilding();resetkeys();}
@@ -1079,7 +1078,7 @@ function subquit(){
   savestorage('terrainquality',terrainquality);
   savestorage('tbuilding',tbuilding);
   savestorage('tbridge',tbridge);
-  //savestorage('tshadow',tshadow);
+  savestorage('tshadow',tshadow);
   bridgesave="";for(var i=0;i<nbridgemesh;i++){
    bridgesave+=bridgemeshx[i]+"?"+bridgemeshy[i]+"?"+bridgemesho1[i]+"?"+bridgemeshscalex[i]+"?";}
   savestorage('bridgesave',bridgesave);
@@ -1117,12 +1116,6 @@ function initvars(){
   myposition=new myCesium.Cartesian3.fromDegrees(x,y,z,myellipsoid);
   myposition2=new myCesium.Cartesian3.fromDegrees(x,y,z,myellipsoid);
 }
-var myhpr=null;
-function myCesium_HeadingPitchRoll( heading, pitch, roll){ 
-if (myhpr==null){myhpr= new myCesium.HeadingPitchRoll( heading, pitch, roll);}
-else{myhpr= new myCesium.HeadingPitchRoll( heading, pitch, roll);}
-return myhpr;
-}	   
 function myview(){//return;
 //o1=-45;o2=30;o3=45;
     var camera=myviewer.camera;
@@ -1213,13 +1206,13 @@ else{myentity2.show=true;
 	   f14mesh.show=false;
 	   ballonmesh.show=false;
 	   //var mymatrix=new myCesium.Transforms.headingPitchRollToFixedFrame(position, heading, pitch, roll);//myCesium.Matrix3.fromRotationY(degtorad(30));
-       jetmesh.modelMatrix = myCesium.Transforms.headingPitchRollToFixedFrame(position, myCesium_HeadingPitchRoll(heading, pitch, roll));
+       jetmesh.modelMatrix = myCesium.Transforms.headingPitchRollToFixedFrame(position, heading, pitch, roll);
     }else if(plane=="f14"){
 	   myentity2.show=false;
 	   jetmesh.show=false;
 	   f14mesh.show=true;
 	   ballonmesh.show=false;
-       f14mesh.modelMatrix = myCesium.Transforms.headingPitchRollToFixedFrame(position, myCesium_HeadingPitchRoll(heading, pitch, roll));
+       f14mesh.modelMatrix = myCesium.Transforms.headingPitchRollToFixedFrame(position, heading, pitch, roll);
 	   /*var mymatrix=new  myCesium.Matrix4();//myCesium.Transforms.headingPitchRollToFixedFrame(position, heading, pitch, roll);//myCesium.Matrix3.fromRotationY(degtorad(30));
        var myscalematrix=new myCesium.Cartesian3(1.0, 2.0, 1.0);
 	   f14mesh.modelMatrix = myCesium.Matrix4.multiplyByScale(
@@ -1230,14 +1223,13 @@ else{myentity2.show=true;
 	   jetmesh.show=false;
 	   f14mesh.show=false;
 	   ballonmesh.show=true;
-       ballonmesh.modelMatrix = myCesium.Transforms.headingPitchRollToFixedFrame(position, myCesium_HeadingPitchRoll(heading, pitch, roll));
+       ballonmesh.modelMatrix = myCesium.Transforms.headingPitchRollToFixedFrame(position, heading, pitch, roll);
 	}else{
 	   myentity2.show=true;
 	   jetmesh.show=false;
 	   f14mesh.show=false;
 	   ballonmesh.show=false;
-	   var hpr = myCesium_HeadingPitchRoll( heading, pitch, roll);
-       var orientation = myCesium.Transforms.headingPitchRollQuaternion(position,hpr);
+       var orientation = myCesium.Transforms.headingPitchRollQuaternion(position, heading, pitch, roll);
 	   myentity2.orientation=orientation;
        myentity2.position=position;
 	   }
@@ -1494,8 +1486,8 @@ var mymesh=new myCesium.Primitive({
         asynchronous: false,
 		cull : false,
 		show : true,
-		//castShadows : true,
-		//receiveShadows : false,
+		castShadows : true,
+		receiveShadows : false,
 		appearance : new myCesium.MaterialAppearance({
 		   //translucent : false,
 		   material : new myCesium.Material({
@@ -1695,7 +1687,7 @@ var position = myCesium.Cartesian3.fromDegrees(x,y,z+10,myellipsoid,myposition);
 var heading = degtorad(aircrafto1);
 var pitch = degtorad(aircrafto2);
 var roll = degtorad(-aircrafto3);
-var mymatrix=new myCesium.Transforms.headingPitchRollToFixedFrame(position, myCesium_HeadingPitchRoll(heading, pitch, roll));//myCesium.Matrix3.fromRotationY(degtorad(30));
+var mymatrix=new myCesium.Transforms.headingPitchRollToFixedFrame(position, heading, pitch, roll);//myCesium.Matrix3.fromRotationY(degtorad(30));
 jetmesh.modelMatrix = mymatrix;
 f14mesh.modelMatrix = mymatrix;
 //carremesh.modelMatrix= mymatrix;
@@ -1705,7 +1697,7 @@ var scale=1.0;
 bridgegeometry=loadmygeometry(mybridgeobjtxt,scale);
 for(var i=0;i<nbridgemesh;i++){
   bridgemesh[i]=addmymesh(bridgegeometry, mybridgepng);
-  //bridgemesh[i].castShadows=false;
+  bridgemesh[i].castShadows=false;
   myviewer.scene.primitives.add(bridgemesh[i]);  
  }
 initmyappearance();
@@ -1726,9 +1718,9 @@ for(var i=0;i<nbridgemesh;i++){
  var heading = degtorad(bridgemesho1[i]);
  var pitch = degtorad(0.0);
  var roll = degtorad(0.0);
- bridgemeshmatrix[i]=new myCesium.Transforms.headingPitchRollToFixedFrame(position, myCesium_HeadingPitchRoll(heading, pitch, roll));//myCesium.Matrix3.fromRotationY(degtorad(30));
+ bridgemeshmatrix[i]=new myCesium.Transforms.headingPitchRollToFixedFrame(position, heading, pitch, roll);//myCesium.Matrix3.fromRotationY(degtorad(30));
  myCesium.Matrix4.multiplyByScale(
-	         myCesium.Transforms.headingPitchRollToFixedFrame(position, myCesium_HeadingPitchRoll(heading, pitch, roll)),
+	         myCesium.Transforms.headingPitchRollToFixedFrame(position, heading, pitch, roll),
 			 bridgemeshscale[i], bridgemeshmatrix[i]);
  bridgemesh[i].modelMatrix=bridgemeshmatrix[i];
  bridgemesh[i].show=false;
@@ -1770,7 +1762,7 @@ for(var i=0;i<nbridgemesh;i++){
    var roll = degtorad(0.0);
    bridgemeshscale[i]=new myCesium.Cartesian3(bridgemeshscalex[i],bridgemeshscaley[i],bridgemeshscalez[i]);
    myCesium.Matrix4.multiplyByScale(
-	         myCesium.Transforms.headingPitchRollToFixedFrame(position, myCesium_HeadingPitchRoll(heading, pitch, roll)),
+	         myCesium.Transforms.headingPitchRollToFixedFrame(position, heading, pitch, roll),
 			 bridgemeshscale[i], bridgemeshmatrix[i]);
    bridgemesh[i].modelMatrix=bridgemeshmatrix[i];
    bridgemesh[i].show=true;
@@ -1783,7 +1775,7 @@ var scale=1.0;
 buildgeometry=carregeometry;//loadmygeometry(mybuildobjtxt,scale);
 for(var i=0;i<nbuildmesh;i++){
   buildmesh[i]=addmymesh(buildgeometry, whitepng);
-  //buildmesh[i].castShadows=true;
+  buildmesh[i].castShadows=true;
   myviewer.scene.primitives.add(buildmesh[i]);  
  }
 for(var i=0;i<nbuildmesh;i++){
@@ -1807,9 +1799,9 @@ for(var i=0;i<nbuildmesh;i++){
  var heading = degtorad(buildmesho1[i]);
  var pitch = degtorad(0.0);
  var roll = degtorad(0.0);
- buildmeshmatrix[i]=new myCesium.Transforms.headingPitchRollToFixedFrame(position, myCesium_HeadingPitchRoll(heading, pitch, roll));//myCesium.Matrix3.fromRotationY(degtorad(30));
+ buildmeshmatrix[i]=new myCesium.Transforms.headingPitchRollToFixedFrame(position, heading, pitch, roll);//myCesium.Matrix3.fromRotationY(degtorad(30));
  myCesium.Matrix4.multiplyByScale(
-	         myCesium.Transforms.headingPitchRollToFixedFrame(position, myCesium_HeadingPitchRoll(heading, pitch, roll)),
+	         myCesium.Transforms.headingPitchRollToFixedFrame(position, heading, pitch, roll),
 			 buildmeshscale[i], buildmeshmatrix[i]);
  buildmesh[i].modelMatrix=buildmeshmatrix[i];
  buildmesh[i].show=false;
@@ -1861,7 +1853,7 @@ for(var i=0;i<nbuildmesh;i++){
       else if(buildmeshcolor[i]==3){buildmesh[i].appearance=mybuildappearance1;}
 	  }
    myCesium.Matrix4.multiplyByScale(
-	         myCesium.Transforms.headingPitchRollToFixedFrame(position,myCesium_HeadingPitchRoll(heading, pitch, roll)),
+	         myCesium.Transforms.headingPitchRollToFixedFrame(position, heading, pitch, roll),
 			 buildmeshscale[i], buildmeshmatrix[i]);
    buildmesh[i].modelMatrix=buildmeshmatrix[i];
    buildmesh[i].show=true;
@@ -1883,8 +1875,7 @@ function createModel(url, height) {
     var heading = degtorad(aircrafto1);
     var pitch = degtorad(aircrafto2);
     var roll = degtorad(-aircrafto3);
-	var hpr = myCesium_HeadingPitchRoll( heading, pitch, roll);
-    var orientation = myCesium.Transforms.headingPitchRollQuaternion(position, hpr);
+    var orientation = myCesium.Transforms.headingPitchRollQuaternion(position, heading, pitch, roll);
 
     var entity = myviewer.entities.add({
         name : url,
@@ -1896,14 +1887,13 @@ function createModel(url, height) {
             maximumScale : 200000
         }
     });
-	//entity.model.castShadows = true;
-	//entity.model.receiveShadows = false;
+	entity.model.castShadows = true;
+	entity.model.receiveShadows = false;
     //myviewer.trackedEntity = entity;
 	myentity=entity;
 
     var position2 = myCesium.Cartesian3.fromDegrees(x,y,z,myellipsoid,myposition2);
-	var hpr = myCesium_HeadingPitchRoll( heading, pitch, roll);
-    orientation = myCesium.Transforms.headingPitchRollQuaternion(position2, hpr);
+    orientation = myCesium.Transforms.headingPitchRollQuaternion(position2, heading, pitch, roll);
     var entity2 = myviewer.entities.add({
         name : url,
         position : position2,
@@ -1914,8 +1904,8 @@ function createModel(url, height) {
             maximumScale : 200000
         }
     });
-	//entity2.model.castShadows = true;
-	//entity2.model.receiveShadows = false;
+	entity2.model.castShadows = true;
+	entity2.model.receiveShadows = false;
     //myviewer.trackedEntity = entity2;
 	myentity2=entity2;
 }
@@ -1952,8 +1942,7 @@ aircrafto1=0;
     var heading = degtorad(-aircrafto1);
     var pitch = degtorad(aircrafto2);
     var roll = degtorad(-aircrafto3);
-	var hpr =  myCesium_HeadingPitchRoll(heading,pitch,roll);
-    var orientation = myCesium.Transforms.headingPitchRollQuaternion(position, hpr);
+    var orientation = myCesium.Transforms.headingPitchRollQuaternion(position, heading, pitch, roll);
 myentity.orientation=orientation;
 myentity.position=position;
 }
@@ -3047,11 +3036,11 @@ mydate.setMinutes(parseInt((hour3-parseInt(hour3))*60));
 myclock=myCesium.JulianDate.fromDate(mydate);
 myviewer.clock.currentTime=myclock;		
 }
-/*var tshadow=0;
+var tshadow=0;
 function subshadow(){
 if(tshadow==0){if(confirm("set shadow on ?")){tshadow=1;shadowmap.enabled=true;}}
 else{if(confirm("set shadow off ?")){tshadow=0;shadowmap.enabled=false;}}
-}*/
+}
 function setcamerasun(){
   var dr=70000/scale;
   var zz=sunz*30-3000;
