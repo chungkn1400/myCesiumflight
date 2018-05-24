@@ -85,7 +85,7 @@ if(myurl.indexOf("localhost:8080")<0 && myurl.indexOf("file:")>=0){
 </div>
 <div>
 	<select id="terrain" onChange="subcomboterrain();" onblur="" onfocus="">
-          <option id="stk">cesium terrain</option>
+          <option id="stk">stk terrain</option>
           <option id="ellipsoid">ellipsoid</option>
           <option id="vrterrain">vr terrain</option>
      </select>
@@ -337,11 +337,9 @@ function startup(Cesium) {
     'use strict';
 //Sandcastle_Begin
 //var viewer = new Cesium.CesiumWidget('cesiumContainer');//,{
-Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI3ZmY3MTE2ZC01MWQ4LTQ4ZDctYmJhMS02NWE3ZDU5MmQ1OTciLCJpZCI6MTE0MSwiaWF0IjoxNTI3MTEyNjY5fQ.YZK--nPNu3ebtJFJ1eDVWy94xUap5MlXGU2bOtiYu8M';
 var viewer = new Cesium.Viewer('cesiumContainer',{
     //scene3DOnly:true,
 	animation:false,
-    targetFrameRate:60,
     baseLayerPicker:false,
     //CesiumWidget
 	geocoder:false,
@@ -360,12 +358,11 @@ myviewer=viewer;
 myCesium=Cesium;
 //myviewer.Scene.contextOptions.webgl.alpha=true;
 //myviewer.Scene.creditContainer=document.getElementById("credit");
-cesiumTerrainProviderMeshes = new Cesium.createWorldTerrain();
-/*cesiumTerrainProviderMeshes = new Cesium.CesiumTerrainProvider({
+cesiumTerrainProviderMeshes = new Cesium.CesiumTerrainProvider({
     url : 'https://assets.agi.com/stk-terrain/world',
     requestWaterMask : true,
     requestVertexNormals : true
-});*/
+});
 // setup alternative terrain providers
 ellipsoidProvider = new Cesium.EllipsoidTerrainProvider({
     requestWaterMask : true,
