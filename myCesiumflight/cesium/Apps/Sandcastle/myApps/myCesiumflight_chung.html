@@ -340,7 +340,8 @@ function startup(Cesium) {
 Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI3ZmY3MTE2ZC01MWQ4LTQ4ZDctYmJhMS02NWE3ZDU5MmQ1OTciLCJpZCI6MTE0MSwiaWF0IjoxNTI3MTEyNjY5fQ.YZK--nPNu3ebtJFJ1eDVWy94xUap5MlXGU2bOtiYu8M';
 var viewer = new Cesium.Viewer('cesiumContainer',{
     //scene3DOnly:true,
-	animation:false,
+	//animation:false,
+    shouldAnimate : true,
     targetFrameRate:60,
     baseLayerPicker:false,
     //CesiumWidget
