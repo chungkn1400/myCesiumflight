@@ -3224,7 +3224,7 @@ function httpGet(url,callback)
 	return;
   }
 	xmlhttp.onreadystatechange=function()
-    {   //alert("http "+httpstatus);
+    {
 		if(xmlhttp.readyState>=0){httpstatus=xmlhttp.status;
 		    if(httpstatus>400){msghttp="http "+httpstatus;asksethttp=1;}}
 		if(xmlhttp.readyState==4){httpstatus=xmlhttp.status;
@@ -3847,10 +3847,8 @@ return 0;
 }
 var http="http:",overpass="",overpass2="",overpassurl=[],noverpassurl=3,ioverpassurl=0;
 overpassurl[0]="//overpass-api.de/api/";
-overpassurl[1]="//overpass-api.de/api/";
-overpassurl[2]="//overpass-api.de/api/";
-//overpassurl[1]="//overpass.osm.rambler.ru/cgi/";
-//overpassurl[2]="//api.openstreetmap.fr/oapi/";
+overpassurl[1]="//overpass.osm.rambler.ru/cgi/";
+overpassurl[2]="//api.openstreetmap.fr/oapi/";
 //overpassurl[3]="//overpass.osm.ch/api/"
 function getoverpassurl(){
 for(var i=0;i<noverpassurl;i++){
@@ -3858,7 +3856,6 @@ for(var i=0;i<noverpassurl;i++){
       return overpassurl[ioverpassurl]}
    ioverpassurl+=1;if(ioverpassurl>=noverpassurl){ioverpassurl=0;}
 }
-//ioverpassurl=0;
 return overpassurl[ioverpassurl];
 }
 var ioverpassurl1=0,ioverpassurl2=1;
@@ -3896,7 +3893,7 @@ msghttp2="overpass2="+ioverpassurl;
 }
 sethttp();
 var tloading=0,tloading2=0,dtweb=0,kdxweb=1,dtweb2=0,kdxweb2=1;
-function getnodes(){//alert("ok");
+function getnodes(){
 //if(tframe<tloading){return;}
 tloading=tframe+60000;
 var dx=18*360/40000;
@@ -3906,7 +3903,7 @@ dx*=kdxweb;
 var lat1=lat-dx,lon1=lng-dx*klon;
 var lat2=lat+dx,lon2=lng+dx*klon;
 var latlon="%28"+lat1+"%2C"+lon1+"%2C"+lat2+"%2C"+lon2+"%29";
-http="https:";
+http="http:";
 if(document.location.href.indexOf("https")>=0){
    http="https:";}
 //http="http:";
@@ -3916,10 +3913,10 @@ if(document.location.href.indexOf("https")>=0){
 //if(http=="https:"){overpass="//overpass-api.de/api/";}
 //var wayurl=http+overpass+"interpreter?data=[out:json];%28way[aeroway~'aerodrome|runway']"+latlon+";";
 //var wayurl=http+overpass+"interpreter?data=[out:json];%28way[aeroway~'aerodrome']"+latlon+";";
-var nodeurl=http+overpass+"interpreter?data=[out:json];%28node[aeroway~'aerodrome|runway']"+latlon;
+var nodeurl=http+overpass+"interpreter?data=[out:json];%28node[aeroway~'aerodrome|runway']"+latlon+";";
 //var nodeurl=http+overpass+"interpreter?data=[out:json];%28node[aeroway~'aerodrome']"+latlon+";";
-nodeurl+=";%29%3Bout%20qt%2099%3B";
-try{//alert("nodeurl");		
+nodeurl+="%29%3Bout%20qt%2099%3B";
+try{		
 httpGet(nodeurl,nodecallback);
 }catch (e){alert("error getnodes");tloading=0;}
 }
@@ -3958,7 +3955,7 @@ wayurl+="way['bridge']"+latlon1+";";}
 //wayurl+="way['bridge'][highway~'motorway|trunk|primary']"+latlon1+";";
 wayurl+="%29%3Bout%20qt%20399%3B";
 dtweb=timer();
-try{//alert("wayurl");		
+try{		
 httpGet(wayurl,waycallback);
 }catch (e){alert("error getways");tloading=0;}
 }
@@ -3989,8 +3986,8 @@ var lat11=lat-dx+dx1*sin1,lon11=lng-dx*klon+dx1*klon*cos1;
 var lat21=lat+dx+dx1*sin1,lon21=lng+dx*klon+dx1*klon*cos1;
 var latlon1="%28"+lat11+"%2C"+lon11+"%2C"+lat21+"%2C"+lon21+"%29";
 nodeurl3+="node"+latlon1;
-nodeurl3+=";%29%3Bout%20qt%20skel%2025999%3B";
-try{//alert("nodeurl3");		
+nodeurl3+="%29%3Bout%20qt%20skel%2025999%3B";
+try{		
 httpGet(nodeurl3,nodecallback3);
 }catch (e){alert("error getnodes3");tloading=0;}
 }
@@ -4016,9 +4013,9 @@ var keyway2="way['building:height']"+latlon2+";way['building']['height']"+latlon
 //keyway2+=";way[building=commercial]"+latlon2;
 keyway2+=";way[shop~'mall|supermarket|general|department_store']"+latlon2;
 var wayurl2=http+overpass2+"interpreter?data=[out:json];%28"+keyway2;
-wayurl2+=";%29%3Bout%20qt%2079999%3B";
+wayurl2+="%29%3Bout%20qt%2079999%3B";
 dtweb2=timer();
-try{//alert(wayurl2);		
+try{		
 httpGet2(wayurl2,waycallback2);
 }catch (e){alert("error getways2");tloading=0;}
 }
@@ -4035,7 +4032,7 @@ for(var i=1;i<=iibuild;i++){
 	//if(i<iibuild){nodeurl2+=";";}
 	}
 nodeurl2+="%29%3Bout%20skel%20199%3B";
-try{//alert(nodeurl2);		
+try{		
 httpGet2(nodeurl2,nodecallback2);
 }catch (e){alert("error getnodes2");tloading2=0;}
 }
@@ -4059,7 +4056,7 @@ for(var i=iibuild2+1;i<=iibuild;i++){
 	//if(i<iibuild){nodeurl22+=";";}
 	}
 nodeurl22+="%29%3Bout%20skel%20199%3B";
-try{//alert("nodeurl22");		
+try{		
 httpGet2(nodeurl22,nodecallback22);
 }catch (e){alert("error getnodes22");tloading2=0;}
 }
