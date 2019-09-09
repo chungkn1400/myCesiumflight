@@ -1353,7 +1353,7 @@ geolocation = "paris france";
 geolocation=window.prompt("flyto : enter address or location");
 //alert("geolocation="+geolocation);
 if (geolocation){
-  var geocoder = new google.maps.Geocoder();
+  /*var geocoder = new google.maps.Geocoder();
   geocoder.geocode( { 'address': geolocation}, function(results, status) {
     if (status == google.maps.GeocoderStatus.OK) {
       var latlng=results[0].geometry.location;
@@ -1367,9 +1367,59 @@ if (geolocation){
     } else {
       alert('Geolocation not found ! ' + status);
     }
-  });
+  });*/
+if(tframe<tloading2){alert("i am busy, try later");return;}  
+tloading2=tframe+30000;
+var geourl="https://nominatim.openstreetmap.org/search?format=json&q="+geolocation+"&limit=1";
+try{//alert("geourl");		
+httpGet(geourl,geocallback);
+}catch (e){alert("error geolocation");tloading2=0;}
 }
+/*Var hostname="nominatim.openstreetmap.org"
+Var path="/search?format=json&q="+resp+"&limit=1"
+Var webidata=httppost(hostname,path)
+If webidata<10 Then guinotice("not found !","geocoding"):Return 0
+text=""
+For i=0 To min2(webidata,1000)
+	If recvdata(i)=0 Then Exit For
+	text+=Chr(recvdata(i))
+Next
+j=InStr(text,"""lat"":")
+If j<1 Then Return 0
+text=Mid(text,j+6)
+j=InStr(text,"""")
+text=Mid(text,j+1)
+j=InStr(text,"""")
+If j<1 Then Return 0 
+Var lat1=Val(Left(text,j-1))
+j=InStr(text,"""lon"":")
+If j<1 Then Return 0
+text=Mid(text,j+6)
+j=InStr(text,"""")
+text=Mid(text,j+1)
+j=InStr(text,"""")
+If j<1 Then Return 0
+Var lng1=Val(Left(text,j-1))
+*/
 subfocus();
+}
+var geojson;
+function geocallback(r){//alert(r);
+  tloading2=0;
+  try{geojson=JSON.parse(r);}catch(e){};
+  //alert(geojson[0]);
+  if(geojson[0]){
+   var geolat=geojson[0].lat;
+   var geolng=geojson[0].lon;
+   //alert(geolat+" "+geolng);
+	  lat=parseFloat(geolat);
+	  lng=parseFloat(geolng);
+	  flytolat=lat;flytolng=lng;flytoname=formatname(geolocation);
+	  icombo=0;
+	  document.getElementById('combo')[icombo].text=flytoname;
+	  document.getElementById('combo').selectedIndex=icombo;
+	  subflyto(lng,lat);
+   }
 }
 var myentity,myentity2,scale=40000.0*1000/360;
 var aircraftx=0,aircrafty=0,aircraftz=0,aircrafto1=0,aircrafto2=0,aircrafto3=0;
