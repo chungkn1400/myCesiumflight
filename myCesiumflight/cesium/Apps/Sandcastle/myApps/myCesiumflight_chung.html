@@ -126,6 +126,8 @@ var apikey='&key=AIzaSyAH372ZH8QSQgRHsqdtqNxkLVpcp_XUUkE';
 <script src="http://chungkn1400.github.io/myCesiumflight/myCesiumflight/cesium/Apps/Sandcastle/myApps/whitepng.js" ></script>
 <script src="http://chungkn1400.github.io/mywebglflight/mywebglflight/alphajetobjtxt.js"></script>
 <script src="http://chungkn1400.github.io/mywebglflight/mywebglflight/alphajetjpg.js"></script>
+<script src="http://chungkn1400.github.io/mywebglflight/mywebglflight/c150objtxt.js"></script>
+<script src="http://chungkn1400.github.io/mywebglflight/mywebglflight/c150jpg.js"></script>
 <script src="http://chungkn1400.github.io/mywebglflight/mywebglflight/jet4mp3.js"></script>
 <script src="http://chungkn1400.github.io/myCesiumflight/myCesiumflight/cesium/Apps/Sandcastle/myApps/models/f14objtxt.js" ></script>
 <script src="http://chungkn1400.github.io/myCesiumflight/myCesiumflight/cesium/Apps/Sandcastle/myApps/models/f14jpg.js" ></script>
@@ -1191,8 +1193,8 @@ if(iview!=1 || tourelle==1){
 		 }
 else{cockpit.style.top='0px';updatecompas();updateradar();}
 updatebouss();
-if(iview==0){myentity2.show=false;jetmesh.show=false;f14mesh.show=false;ballonmesh.show=false;}
-else if(iview==1){myentity2.show=false;jetmesh.show=false;f14mesh.show=false;ballonmesh.show=false;}
+if(iview==0){myentity2.show=false;jetmesh.show=false;f14mesh.show=false;ballonmesh.show=false;c150mesh.show=false;}
+else if(iview==1){myentity2.show=false;jetmesh.show=false;f14mesh.show=false;ballonmesh.show=false;c150mesh.show=false;}
 else{myentity2.show=true;
     var dr=51/scale,o11=o1-sin3*3;
 	var co1=Math.cos(degtorad(o11));
@@ -1216,6 +1218,7 @@ else{myentity2.show=true;
 	   jetmesh.show=true;
 	   f14mesh.show=false;
 	   ballonmesh.show=false;
+	   c150mesh.show=false;
 	   //var mymatrix=new myCesium.Transforms.headingPitchRollToFixedFrame(position, heading, pitch, roll);//myCesium.Matrix3.fromRotationY(degtorad(30));
        jetmesh.modelMatrix = myCesium.Transforms.headingPitchRollToFixedFrame(position, myCesium_HeadingPitchRoll(heading, pitch, roll));
     }else if(plane=="f14"){
@@ -1223,6 +1226,7 @@ else{myentity2.show=true;
 	   jetmesh.show=false;
 	   f14mesh.show=true;
 	   ballonmesh.show=false;
+	   c150mesh.show=false;
        f14mesh.modelMatrix = myCesium.Transforms.headingPitchRollToFixedFrame(position, myCesium_HeadingPitchRoll(heading, pitch, roll));
 	   /*var mymatrix=new  myCesium.Matrix4();//myCesium.Transforms.headingPitchRollToFixedFrame(position, heading, pitch, roll);//myCesium.Matrix3.fromRotationY(degtorad(30));
        var myscalematrix=new myCesium.Cartesian3(1.0, 2.0, 1.0);
@@ -1234,12 +1238,24 @@ else{myentity2.show=true;
 	   jetmesh.show=false;
 	   f14mesh.show=false;
 	   ballonmesh.show=true;
+	   c150mesh.show=false;
        ballonmesh.modelMatrix = myCesium.Transforms.headingPitchRollToFixedFrame(position, myCesium_HeadingPitchRoll(heading, pitch, roll));
+    }else if(plane=="c150"){
+	   myentity2.show=false;
+	   jetmesh.show=false;
+	   f14mesh.show=false;
+	   ballonmesh.show=false;
+	   c150mesh.show=true;
+       var heading2 = degtorad(aircraft2o1+180.0);
+       var pitch2 = degtorad(-aircraft2o2);
+       var roll2 = degtorad(aircraft2o3+90.0);
+       c150mesh.modelMatrix = myCesium.Transforms.headingPitchRollToFixedFrame(position, myCesium_HeadingPitchRoll(heading2, pitch2, roll2));
 	}else{
 	   myentity2.show=true;
 	   jetmesh.show=false;
 	   f14mesh.show=false;
 	   ballonmesh.show=false;
+	   c150mesh.show=false;
 	   var hpr = myCesium_HeadingPitchRoll( heading, pitch, roll);
        var orientation = myCesium.Transforms.headingPitchRollQuaternion(position,hpr);
 	   myentity2.orientation=orientation;
@@ -1712,7 +1728,7 @@ void main()
 			  })
 			});
 }
-var jetgeometry,jetmesh,f14geometry,f14mesh,ballongeometry,ballonmesh;
+var jetgeometry,jetmesh,f14geometry,f14mesh,ballongeometry,ballonmesh,C150geometry,c150mesh;
 var bridgegeometry,bridgemesh=[];
 var nbridgemesh=90,ibridgemesh=0,bridgemeshid=[];
 var bridgemeshx=[],bridgemeshy=[],bridgemeshz=[],bridgemeshdz=[],bridgemesho1=[];
@@ -1739,6 +1755,10 @@ scale=0.16;
 ballongeometry=loadmygeometry(ballonobjtxt,scale);//addmygeometry(positions,textcoords);
 ballonmesh=addmymesh(ballongeometry,ballonjpg);
 myviewer.scene.primitives.add(ballonmesh);
+scale=0.09;
+c150geometry=loadmygeometry(c150objtxt,scale);//addmygeometry(positions,textcoords);
+c150mesh=addmymesh(c150geometry,c150jpg);
+myviewer.scene.primitives.add(c150mesh);
 scale=1;
 carregeometry=addmygeometry(carrepositions,carretextcoords);
 buildgeometry=addmygeometry(buildpositions,buildtextcoords);
@@ -1752,6 +1772,7 @@ var roll = degtorad(-aircrafto3);
 var mymatrix=new myCesium.Transforms.headingPitchRollToFixedFrame(position, myCesium_HeadingPitchRoll(heading, pitch, roll));//myCesium.Matrix3.fromRotationY(degtorad(30));
 jetmesh.modelMatrix = mymatrix;
 f14mesh.modelMatrix = mymatrix;
+c150mesh.modelMatrix = mymatrix;
 //carremesh.modelMatrix= mymatrix;
 }
 function addbridgemesh(){
