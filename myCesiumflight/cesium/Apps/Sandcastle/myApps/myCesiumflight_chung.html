@@ -712,9 +712,9 @@ if(keys[vk_r] && keys[vk_shift]==0){if(tradar==0){tradar=1;}else{tradar=0;};rese
 if(keys[vk_k]){subplane();resetkeys();}
 if(keys[vk_v]){iview+=1;if(iview>2){iview=0;};resetkeys();}
 if(keys[vk_m] || (keys[vk_space] && tmap==1)){
-          if(tmap==0){tmap=1;showmap();subcentermap();}//map.setCenter(new google.maps.LatLng(latx,lngx));updatemarker();}
-          else{tmap=0;}
-          if(tmap!=1){hidemap();}
+          //if(tmap==0){tmap=1;showmap();subcentermap();}//map.setCenter(new google.maps.LatLng(latx,lngx));updatemarker();}
+          //else{tmap=0;}
+          //if(tmap!=1){hidemap();}
 		  var msgmap="lat="+parseInt(lat*10000)/10000+"  lng="+parseInt(lng*10000)/10000;
 		  msgmap+="  z="+parseInt(z)+"  clouds="+wclouds+"  wind="+parseInt(wind*10)/10+" km/h";
 		  msgmap+="  hour="+parseInt(hour*10)/10;
@@ -1094,7 +1094,8 @@ function subquit(){
    buildsave+=nearbuild[i].node0+"?"+nearbuild[i].h+"?"+nearbuild[i].x+"?"+nearbuild[i].y+"?"+
               nearbuild[i].xmid+"?"+nearbuild[i].ymid+"?";}
   savestorage('buildsave',buildsave);
-  sleep(300);//alert("bye !");
+  sleep(300);alert("bye !");
+  sleep(3000);
   document.location.href="http://chungswebsite.blogspot.fr/search/label/myCesiumflight";
   //document.location.href="http://chung.blogvie.com/links/";
 }
@@ -2481,17 +2482,28 @@ function updatespotv(){
             spotv.innerHTML=parseInt(v*2)+" ";			
 }
 var monument=[],monumentname=[],monumentx=[],monumenty=[],monumentz=[],nmonument=0;
-var monumentdx=[];
+var monumentdx=[],monumentimg=[];
+var billboards,tinitbillboards=0;
 function addmonument(varname,dx,dy){
+if(tinitbillboards==0){
+   tinitbillboards=1;
+   billboards = myviewer.scene.primitives.add(new myCesium.BillboardCollection());
+   };
 var i=nmonument;nmonument+=1;
 monumentname[i]=varname;
 monumentdx[i]=dx*dy/1.3;
 var xx=eval(varname+"x"),yy=eval(varname+"y"),zz=eval(varname+"z");
 if(varname=="gizah"){zz-=40;}
 monumentx[i]=xx;monumenty[i]=yy;monumentz[i]=zz;
-monument[i]=myviewer.entities.add({
+//monumentimg[i] = document.createElement('img');
+//monumentimg[i].src = eiffeltowerpng;
+//alert(eval(varname+"png"));
+/*monument[i]=myviewer.entities.add({
   position : new myCesium.Cartesian3.fromDegrees(xx,yy,zz),
-  billboard :{
+  billboard
+ });*/
+monument[i]=new Object();
+monument[i].billboard = billboards.add({//{
             image : eval(varname+"png"),
             //heightReference: myCesium.HeightReference.CLAMP_TO_GROUND,
             position : new myCesium.Cartesian3.fromDegrees(xx,yy,zz),
@@ -2501,17 +2513,18 @@ monument[i]=myviewer.entities.add({
             horizontalOrigin : myCesium.HorizontalOrigin.CENTER, // default
             verticalOrigin : myCesium.VerticalOrigin.BOTTOM, // default: CENTER
             //color : myCesium.Color.LIME, // default: WHITE
-            //rotation : 45, // default: 0.0
-            alignedAxis : myCesium.Cartesian3.ZERO, // default
+            rotation : degtorad(0),//45, // default: 0.0
+            alignedAxis : myCesium.Cartesian3.ZERO,//(1,0,0),//UNIT_Z,//ZERO, // default
             width : dx, // default: undefined
             height : dx*dy*1.3 // default: undefined
-     }
- });
+     });
+//alert(monument[i].billboard);	 
 monument[i].myposition= new myCesium.Cartesian3.fromDegrees(xx,yy,zz);
 }
 function updatemonument(){
+if(tinitbillboards==0){return;}
 for(var i=0;i<nmonument;i++){
-  if(monument[i]){
+  if(monument[i].billboard){
    var dx=Math.abs((monumentx[i]-x)*scale/klon);
    var dy=Math.abs((monumenty[i]-y)*scale);
    var dxmax=monumentdx[i]*25000/80;
@@ -2523,15 +2536,20 @@ for(var i=0;i<nmonument;i++){
 		var xxx=xx+s60*sin3*sin1*cos2*klon/scale,yyy=yy-s60*sin3*cos1*cos2/scale;
 		//xxx+=50*sin3*sin3*cos1*sin2*klon/scale;yyy+=50*sin3*sin3*sin1*sin2/scale;
 		var zzz=zz-sin2*sin3*sin3*s60;
-		var o33=o3;if(tourelle==1){o33=0;}
+		//xxx=x;yyy=y+50/scale;zzz=z;
+		var o33=-o3;
+		if(tourelle==1){o33=0;}
 	    monument[i].myposition=myCesium.Cartesian3.fromDegrees(xxx,yyy,zzz);
 	    monument[i].position=monument[i].myposition;
 	    monument[i].billboard.position=monument[i].myposition;
-	    monument[i].billboard.show=true;
-		monument[i].billboard.rotation=degtorad(-o33);
+		monument[i].billboard.rotation=degtorad(o33);
 		monument[i].billboard.scale=sc;//}
+		//monument[i].billboard.alignedAxis=myCesium.Cartesian3(1,0,0);
+	    monument[i].billboard.show=true;
+		//if(monumentname[i]=="eiffeltower"){auxvar3=o33;};
 	 }else{monument[i].billboard.show=false;}
    }}
+   //if(tinitbillboards==1){billboards.update();}
 }
 var airporttower,airporttowerx=0,airporttowery=0,airporttowerzsol=0,airporttowerdx=0;
 var towerportx=0,towerporty=0,towerportwidth=1;
@@ -4462,12 +4480,13 @@ httpGet(weatherurl,weathercallback);
 }catch (e){alert("error getweather");tloading=0;}
 }
 
-initgooglemap();
+//initgooglemap();
 if (typeof Cesium !== "undefined") {
     startup(Cesium);
 } else if (typeof require === "function") {
     require(["Cesium"], startup);
 }
+//alert(eiffeltowerpng);
 </script>
 <script src="http://chungkn1400.github.io/json_osm_chung/json_osm_chung/stats.js"></script>
 </body>
