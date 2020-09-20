@@ -1,0 +1,489 @@
+// A demo of interactive 3D Tiles styling
+// Styling language Documentation: https://github.com/CesiumGS/3d-tiles/tree/master/specification/Styling
+// Building data asset openstreetmap
+// to load with sandcastle interactive demo showcase
+var viewer = new Cesium.Viewer("cesiumContainer", {
+  terrainProvider: Cesium.createWorldTerrain(),
+});
+
+viewer.scene.globe.depthTestAgainstTerrain = true;
+
+var flags = {
+    looking : false,
+    moveForward : false,
+    moveBackward : false,
+    vk_shift : false,
+    moveUp : false,
+    moveDown : false,
+    moveLeft : false,
+    moveRight : false
+};
+
+addcombo();
+// HTML overlay for showing feature name
+var nameOverlay = document.createElement("div");
+viewer.container.appendChild(nameOverlay);
+nameOverlay.className = "backdrop";
+nameOverlay.style.display = "block";
+nameOverlay.style.position = "absolute";
+nameOverlay.style.bottom = "0";
+nameOverlay.style.left = "0";
+nameOverlay.style["pointer-events"] = "none";
+nameOverlay.style.padding = "4px";
+nameOverlay.style.backgroundColor = "black";
+
+nameOverlay.textContent = "name";
+function setauxvar(aux){nameOverlay.textContent="click here "+String(aux);}
+setauxvar("ok");
+
+function getFlagForKeyCode(keyCode) {
+    switch (keyCode) {
+	case 0x25:
+	    return 'lookleft';
+	case 0x27:
+	    return 'lookright';
+	case 0x28:
+        return 'lookdown';
+	case 0x26:
+	    return 'lookup';		
+    case 0x20:
+        return 'moveForward';
+    case 0x10:
+        return 'vk_shift';
+    case 'N'.charCodeAt(0):
+        return 'moveForward';
+    case 'B'.charCodeAt(0):
+        return 'moveBackward';
+    case 'W'.charCodeAt(0):
+        return 'moveForward';
+    case 'S'.charCodeAt(0):
+        return 'moveBackward';
+    case 'Q'.charCodeAt(0):
+        return 'moveUp';
+    case 'E'.charCodeAt(0):
+        return 'moveDown';
+    case 'D'.charCodeAt(0):
+        return 'moveRight';
+    case 'A'.charCodeAt(0):
+        return 'moveLeft';
+    default:
+        return undefined;
+    }
+}
+
+document.addEventListener('keydown', function(e) {
+    var flagName = getFlagForKeyCode(e.keyCode);
+    if (typeof flagName !== 'undefined') {
+        flags[flagName] = true;
+    }
+}, false);
+
+document.addEventListener('keyup', function(e) {
+    var flagName = getFlagForKeyCode(e.keyCode);
+    if (typeof flagName !== 'undefined') {
+        flags[flagName] = false;
+    }
+}, false);
+
+
+// Set the initial camera view to look at Manhattan
+var initialPosition = Cesium.Cartesian3.fromDegrees(
+  -74.01881302800248,
+  40.69114333714821,
+  753
+);
+var initialOrientation = new Cesium.HeadingPitchRoll.fromDegrees(
+  21.27879878293835,
+  -21.34390550872461,
+  0.0716951918898415
+);
+viewer.scene.camera.setView({
+  destination: initialPosition,
+  orientation: initialOrientation,
+  endTransform: Cesium.Matrix4.IDENTITY,
+});
+
+// Load the NYC buildings tileset.
+//var tileset = new Cesium.Cesium3DTileset({
+//  url: Cesium.IonResource.fromAssetId(75343),
+//});
+var tileset = viewer.scene.primitives.add(
+  new Cesium.Cesium3DTileset({
+    url: Cesium.IonResource.fromAssetId(96188),
+  })
+);
+viewer.scene.primitives.add(tileset);
+
+// Color buildings based on their height.
+function subcolor() {
+  tileset.style = new Cesium.Cesium3DTileStyle({
+    color: {
+       conditions: [
+        //["('${height}'!==''?Number(${height}):0)>90", "rgb(99, 9, 8)"],
+        ["Number(${height})>140", "rgb(99, 99, 8)"],
+        ["Number(${height})>80", "rgb(9, 99, 98)"],
+        ["${building}==='commercial'", "rgb(97, 99, 188)"],
+        ["${building}==='public'", "rgb(190, 190, 188)"],
+        ["true", "rgb(97, 189, 188)"],
+      ],
+    },
+  });
+}
+subcolor();
+function subheight(dh) {
+  tileset.style = new Cesium.Cesium3DTileStyle({
+    //show: "Number(${height}) > "+String(dh),
+    show: "('${height}'!==''?Number(${height}):0)>"+String(dh),
+    color: {
+       conditions: [
+        //["('${height}'!==''?Number(${height}):0)>90", "rgb(99, 9, 8)"],
+        ["${building}==='commercial'", "rgb(97, 99, 188)"],
+        ["${building}==='public'", "rgb(190, 190, 188)"],
+        ["${building}==='hospital'", "rgb(190, 90, 88)"],
+        ["Number(${height})>140", "rgb(99, 99, 8)"],
+        ["Number(${height})>80", "rgb(9, 99, 98)"],
+        ["true", "rgb(97, 189, 188)"],
+      ],
+    },
+
+  });
+}
+subheight(9);
+/*function colorByHeight() {
+  tileset.style = new Cesium.Cesium3DTileStyle({
+    color: {
+      conditions: [
+        ["${Height} >= 300", "rgba(45, 0, 75, 0.5)"],
+        ["${Height} >= 200", "rgb(102, 71, 151)"],
+        ["${Height} >= 100", "rgb(170, 162, 204)"],
+        ["${Height} >= 50", "rgb(224, 226, 238)"],
+        ["${Height} >= 25", "rgb(252, 230, 200)"],
+        ["${Height} >= 10", "rgb(248, 176, 87)"],
+        ["${Height} >= 5", "rgb(198, 106, 11)"],
+        ["true", "rgb(127, 59, 8)"],
+      ],
+    },
+  });
+}
+
+// Color buildings by their latitude coordinate.
+function colorByLatitude() {
+  tileset.style = new Cesium.Cesium3DTileStyle({
+    defines: {
+      latitudeRadians: "radians(${Latitude})",
+    },
+    color: {
+      conditions: [
+        ["${latitudeRadians} >= 0.7125", "color('purple')"],
+        ["${latitudeRadians} >= 0.712", "color('red')"],
+        ["${latitudeRadians} >= 0.7115", "color('orange')"],
+        ["${latitudeRadians} >= 0.711", "color('yellow')"],
+        ["${latitudeRadians} >= 0.7105", "color('lime')"],
+        ["${latitudeRadians} >= 0.710", "color('cyan')"],
+        ["true", "color('blue')"],
+      ],
+    },
+  });
+}
+
+// Color buildings by distance from a landmark.
+function colorByDistance() {
+  tileset.style = new Cesium.Cesium3DTileStyle({
+    defines: {
+      distance:
+        "distance(vec2(radians(${Longitude}), radians(${Latitude})), vec2(-1.291777521, 0.7105706624))",
+    },
+    color: {
+      conditions: [
+        ["${distance} > 0.0012", "color('gray')"],
+        [
+          "${distance} > 0.0008",
+          "mix(color('yellow'), color('red'), (${distance} - 0.008) / 0.0004)",
+        ],
+        [
+          "${distance} > 0.0004",
+          "mix(color('green'), color('yellow'), (${distance} - 0.0004) / 0.0004)",
+        ],
+        ["${distance} < 0.00001", "color('white')"],
+        [
+          "true",
+          "mix(color('blue'), color('green'), ${distance} / 0.0004)",
+        ],
+      ],
+    },
+  });
+}
+
+// Color buildings with a '3' in their BIN property.
+function colorByStringRegex() {
+  tileset.style = new Cesium.Cesium3DTileStyle({
+    color:
+      "(regExp('3').test(String(${BIN}))) ? color('cyan', 0.9) : color('purple', 0.1)",
+  });
+}
+
+// Show only buildings greater than 200 meters in height.
+function hideByHeight() {
+  tileset.style = new Cesium.Cesium3DTileStyle({
+    show: "${Height} > 200",
+  });
+}
+
+Sandcastle.addToolbarMenu([
+  {
+    text: "Color By Height",
+    onselect: function () {
+      colorByHeight();
+    },
+  },
+  {
+    text: "Color By Latitude",
+    onselect: function () {
+      colorByLatitude();
+    },
+  },
+  {
+    text: "Color By Distance",
+    onselect: function () {
+      colorByDistance();
+    },
+  },
+  {
+    text: "Color By Name Regex",
+    onselect: function () {
+      colorByStringRegex();
+    },
+  },
+  {
+    text: "Hide By Height",
+    onselect: function () {
+      hideByHeight();
+    },
+  },
+]);
+
+colorByHeight();
+*/
+
+var camera = viewer.scene.camera;
+var o1=0.0,o2=0.0,o3=0.0,x=0.0,y=0.0,z=0.0,trun=1,timer=0,timer0=0,dtimer=0,timer2=0;
+var oo1=0,oo2=0,oo3=0,o30=0.0,hmin=9,altz=0,altz0=0;
+var ellipsoid = viewer.scene.globe.ellipsoid;
+
+function subrun(){
+  if(trun){trun=0;}else{trun=1;}
+}
+function cameralookRight(do1){o1+=do1*2;oo1=1;}
+function cameralookUp(do2){o2-=do2*1.3;oo2=1;}
+function myloop(){
+    var lookFactor = 0.35;
+    if (flags.lookright) {
+         cameralookRight(lookFactor);o30=30;}
+    if (flags.lookleft) {
+        cameralookRight(-lookFactor);o30=-30;}
+    if (flags.lookup) {
+         cameralookUp(lookFactor);}
+    if (flags.lookdown) {
+        cameralookUp(-lookFactor);}
+     if (flags.vk_shift) {
+         subrun();    }
+    
+    // Change movement speed based on the distance of the camera to the surface of the ellipsoid.
+    var cameraHeight = ellipsoid.cartesianToCartographic(camera.position).height;
+    var moveRate = 1.5 + (cameraHeight / 100.0)*3000.0/(3000.0+cameraHeight);
+    altz=cameraHeight;
+
+    if (trun) {
+        camera.moveForward(moveRate);
+    }
+    if (flags.moveForward) {
+        camera.moveForward(moveRate);
+    }
+    if (flags.moveBackward) {
+        camera.moveBackward(moveRate);
+    }
+    if (flags.moveUp) {
+        camera.moveUp(moveRate);
+    }
+    if (flags.moveDown) {
+        camera.moveDown(moveRate);
+    }
+    if (flags.moveLeft) {
+        camera.moveLeft(moveRate);
+    }
+    if (flags.moveRight) {
+        camera.moveRight(moveRate);
+    }
+o30+=(0.0-o30)*0.05;
+o3+=(o30-o3)*0.05;
+if (o3<-0.51 || o3>0.51){oo3=1;}
+if (oo1||oo2||oo3) {
+oo1=0;oo2=0;oo3=0;  
+if(o2>180){o2=0;o1+=180;o3+=180;}
+if(o2<-180){o2=0;o1+=180;o3-=180;}
+if(o1>360){o1-=360;}
+if(o1<-360){o1+=360;}
+initialOrientation = Cesium.HeadingPitchRoll.fromDegrees(
+  o1,o2,o3
+);
+
+
+viewer.scene.camera.setView({
+  //destination: initialPosition,
+  orientation: initialOrientation,
+  endTransform: Cesium.Matrix4.IDENTITY,
+});
+}
+if((altz<altz0-900) || (altz>altz0+900)){
+   //initialPosition=camera.position;
+   oo2=1;
+   if(altz>altz0+8000){o2=-80;}
+   altz0=altz;
+}
+
+}
+
+o1= 29.27879878293835;
+o2=-14.34390550872461;
+o3=0.0;
+
+initialPosition = Cesium.Cartesian3.fromDegrees(
+  -74.01881302800248,
+  40.69114333714821,
+  753
+);
+initialOrientation = Cesium.HeadingPitchRoll.fromDegrees(
+  o1,o2,o3
+);
+
+viewer.scene.camera.setView({
+  destination: initialPosition,
+  orientation: initialOrientation,
+  endTransform: Cesium.Matrix4.IDENTITY,
+});
+
+function addcombo(){
+Sandcastle.addToolbarMenu([
+  {text: "initial",onselect: function(){subcombo(0);},},
+  {text: "deauville marina",onselect: function(){subcombo(1);},},
+  {text: "deauville plage",onselect: function(){subcombo(2);},},
+  {text: "trouville",onselect: function(){subcombo(3);},},
+  {text: "nancy",onselect: function(){subcombo(4);},},
+  {text: "crickvenica",onselect: function(){subcombo(5);},},
+  {text: "paris tolbiac",onselect: function(){subcombo(6);},},
+  {text: "paris defense",onselect: function(){subcombo(7);},},
+  {text: "ivry lycee",onselect: function(){subcombo(8);},},
+  {text: "orsay",onselect: function(){subcombo(9);},},
+  {text: "le barcares",onselect: function(){subcombo(10);},},
+  {text: "jerusalem",onselect: function(){subcombo(11);},},
+  {text: "marseille",onselect: function(){subcombo(12);},},
+  {text: "nice",onselect: function(){subcombo(13);},},
+  {text: "arcachon",onselect: function(){subcombo(14);},},
+  {text: "grenoble",onselect: function(){subcombo(15);},},
+  {text: "san francisco",onselect: function(){subcombo(16);},},
+  {text: "new york",onselect: function(){subcombo(17);},},
+  {text: "atlanta",onselect: function(){subcombo(18);},},
+  {text: "rio",onselect: function(){subcombo(19);},},
+  {text: "hong kong",onselect: function(){subcombo(20);},},
+  {text: "athenes",onselect: function(){subcombo(21);},},
+  {text: "perth",onselect: function(){subcombo(22);},},
+  {text: "le caire",onselect: function(){subcombo(23);},},
+  {text: "washington",onselect: function(){subcombo(24);},},
+  {text: "tajmahal",onselect: function(){subcombo(25);},},
+]);
+}
+
+function subcombo(i){
+var combotext="";
+var lng=-74.01881302800248;
+var lat=40.69114333714821;
+o1= 0;//29.27879878293835;
+o2=-14.34390550872461;
+o3=0.0;
+//if (combotext==="initial"){lat=48.826125  ;lng=2.357055   ;o1=120;}
+//if (combotext==="flyto"){lat=flytolat  ;lng=flytolng   ;o1=10;}
+if (i===1 || combotext==="deauville marinas"){lat=49.36198047661674   ;lng=0.07262960190958628   ;o1=120;}
+if (i===2 || combotext==="deauville plage"){lat=49.35600551121942   ;lng=0.06075459446313726   ;o1=110;}
+if (i===3 || combotext==="trouville plage"){lat=49.36663106706898   ;lng=0.07818353983048315   ;o1=130;}
+if (i===4 || combotext==="nancy"){lat=48.69306979368741   ;lng=6.182922715725031   ;o1=70;}
+if (i===5 || combotext==="crickvenica"){lat=45.1734569955986   ;lng=14.689314428610118   ;o1=-110;}
+if (i===6 || combotext==="paris tolbiac"){lat=48.826125291730506   ;lng=2.3570559500472212   ;o1=0;}
+if (i===7 || combotext==="paris defense"){lat=48.891977155490395   ;lng=2.237673523003608   ;o1=160;}
+if (i===8 || combotext==="ivry romain roland"){lat=48.80346335679542   ;lng=2.3934673532940915   ;o1=-50;}
+if (i===9 || combotext==="orsay"){lat=48.706787   ;lng=2.180894999999964   ;o1=-30;}
+if (i===10 || combotext==="le barcares"){lat=42.78764305091493   ;lng=3.0338932951133533   ;o1=175;} 
+if (i===11 || combotext==="jerusalem"){lat=31.776636707589287   ;lng=35.2337121963501   ;o1=36.3920;}
+if (i===12 || combotext==="marseille"){lat=43.2803905;lng=5.405139   ;o1=36.3920;}
+if (i===13 || combotext==="nice"){lat=43.7031905;lng=7.252817  ;o1=36.3920;}
+if (i===14 || combotext==="arcachon"){lat=44.6514284;lng=-1.171656  ;o1=36.3920;}
+if (i===15 || combotext==="grenoble"){lat=45.1841656;lng=5.7155425 ;o1=36.3920;}
+if (i===16 || combotext==="san francisco"){lat=37.7577;lng=-122.4376 ;o1=36.3920;}
+if (i===17 || combotext==="new york"){lat=40.7033121;lng=-73.97968 ;o1=36.3920;}
+if (i===18 || combotext==="atlanta"){lat=33.7677129;lng=-84.42060 ;o1=36.3920;}
+if (i===19 || combotext==="rio"){lat=-22.8650853;lng=-43.13109 ;o1=36.3920;}
+if (i===20 || combotext==="hong kong"){lat=22.3700556;lng=114.153758 ;o1=36.3920;}
+if (i===21 || combotext==="athenes"){lat=37.9908372;lng=23.7383394 ;o1=36.3920;}
+if (i===22 || combotext==="perth"){lat=-31.9546529;lng=115.852662 ;o1=36.3920;}
+if (i===23 || combotext==="le caire"){lat=30.04441959;lng=31.23571160;o1=36.3920;}
+if (i===24 || combotext==="washington"){lat=38.8850399;lng=-77.08054296;o1=36.3920;}
+if (i===25 || combotext==="tajmahal"){lat=27.17015;lng=78.002155;o1=36.3920;}
+//document.getElementById('combo').blur();
+var x=lng,y=lat,z=753;
+if(o1==0){o1= 29.27879878293835;}else{o1=-o1+90;}
+initialPosition = Cesium.Cartesian3.fromDegrees(
+  x,y,z
+);
+initialOrientation = Cesium.HeadingPitchRoll.fromDegrees(
+  o1,o2,o3
+);
+
+viewer.scene.camera.setView({
+  destination: initialPosition,
+  orientation: initialOrientation,
+  endTransform: Cesium.Matrix4.IDENTITY,
+});
+viewer.scene.camera.setView({
+  //destination: initialPosition,
+  orientation: initialOrientation,
+  endTransform: Cesium.Matrix4.IDENTITY,
+});
+viewer.scene.camera.setView({
+  destination: initialPosition,
+  orientation: initialOrientation,
+  endTransform: Cesium.Matrix4.IDENTITY,
+});
+//alert("ok");
+subfocus();
+}
+function subfocus(){
+viewer.canvas.focus();
+nameOverlay.focus();
+}
+
+function mydir(){
+  if(o1>180){o1-=360;}
+  if(o1<-180){o1+=360;}
+  if(o1>(90+45+22)){return " E ";}
+  if(o1>(90+45-22)){return " N.E ";}
+  if(o1>(90-22)){return " N ";}
+  if(o1>(45-22)){return " N.W ";}
+  if(o1>(-22)){return " W ";}
+  if(o1>(-45-22)){return " S.W ";}
+  if(o1>(-90-22)){return " S ";}
+  if(o1>(-90-45-22)){return " S.E ";}
+  return " E ";
+}
+
+viewer.clock.onTick.addEventListener(function(clock) {
+myloop();
+timer0=timer;
+timer=(new Date().getTime());
+dtimer+=(timer-timer0-dtimer)*0.03;
+if(dtimer>5000){dtimer=500;}
+setauxvar(mydir()+String(altz));
+if(timer>(timer2+1500)){
+  timer2=timer;
+  if((dtimer>400)&&(hmin<120)){hmin=hmin+10;subheight(hmin);}
+  if((dtimer<200)&&(hmin>-1)){hmin=hmin-10;subheight(hmin);}
+}
+});
