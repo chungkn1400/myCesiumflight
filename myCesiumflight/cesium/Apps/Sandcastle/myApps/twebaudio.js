@@ -106,5 +106,7 @@ function closewebaudio(){
   myaudiopneu.buffer=null;
 }
 }catch(e){twebaudio=0;};
-//if(twebaudio==1){alert(tpneu);soundpneu();}
+if(twebaudio==1){
+	//alert(tpneu);soundpneu();
+	};
 
