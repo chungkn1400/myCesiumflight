@@ -1,5 +1,5 @@
 //twebaudio
-var twebaudio=1;
+var twebaudio=1,tframe=0;
 try{
 var audioctx = new (window.AudioContext || window.webkitAudioContext)();
 var songlength;
